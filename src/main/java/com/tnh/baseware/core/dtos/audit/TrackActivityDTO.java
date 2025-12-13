@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.hateoas.RepresentationModel;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -24,5 +24,5 @@ public class TrackActivityDTO extends RepresentationModel<TrackActivityDTO> impl
     String status;
     String ipAddress;
     String deviceInfo;
-    LocalDateTime actionDate;
+    Instant actionDate;
 }

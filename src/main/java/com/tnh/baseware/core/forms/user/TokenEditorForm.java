@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -27,5 +27,5 @@ public class TokenEditorForm {
     String browser;
     Boolean revoked;
     Boolean expired;
-    LocalDateTime expiration;
+    Instant expiration;
 }

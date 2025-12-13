@@ -10,8 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +27,7 @@ public class LoginAttemptService {
 
         if (newFailAttempts >= securityProperties.getLogin().getMaxAttempts() && !user.getLocked()) {
             user.setLocked(true);
-            user.setLockTime(LocalDateTime.now());
+            user.setLockTime(Instant.now());
         }
         userRepository.save(user);
     }
@@ -47,10 +46,7 @@ public class LoginAttemptService {
             return;
         }
 
-        var lockTimeInMillis = user.getLockTime()
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli();
+        var lockTimeInMillis = user.getLockTime().toEpochMilli();
 
         var currentTimeInMillis = System.currentTimeMillis();
         var lockDurationMillis = securityProperties.getLogin().getLockTimeDuration();

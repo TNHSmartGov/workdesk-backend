@@ -1,9 +1,6 @@
 package com.tnh.baseware.core.utils;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 import lombok.AccessLevel;
@@ -17,49 +14,43 @@ public class DateTimeUtils {
     // Múi giờ Việt Nam (UTC+7)
     public static final ZoneId VIETNAM_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
-    public static LocalDateTime toLocalDateTime(String dateTimeString, String pattern) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-        return LocalDateTime.parse(dateTimeString, formatter);
+    public static Instant toInstant(String dateTimeString, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault());
+        return Instant.from(formatter.parse(dateTimeString));
     }
 
-    // Chuyển đổi string thành LocalDateTime với múi giờ +7
-    public static LocalDateTime toLocalDateTimeWithVietnamZone(String dateTimeString, String pattern) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+    // Chuyển đổi string thành Instant với múi giờ +7
+    public static Instant toInstantWithVietnamZone(String dateTimeString, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern).withZone(VIETNAM_ZONE);
         if (pattern.contains("H") || pattern.contains("h")) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateTimeString, formatter.withZone(VIETNAM_ZONE));
-            return zonedDateTime.toLocalDateTime();
+            return ZonedDateTime.parse(dateTimeString, formatter).toInstant();
         } else {
-            LocalDate localDate = LocalDate.parse(dateTimeString, formatter);
-            return localDate.atStartOfDay(VIETNAM_ZONE).toLocalDateTime();
+            LocalDate localDate = LocalDate.parse(dateTimeString, DateTimeFormatter.ofPattern(pattern));
+            return localDate.atStartOfDay(VIETNAM_ZONE).toInstant();
         }
     }
 
-    // Chuyển đổi string date thành LocalDateTime với giờ 00:00:00 và múi giờ +7
-    public static LocalDateTime dateStringToLocalDateTime(String dateString, String pattern) {
+    // Chuyển đổi string date thành Instant với giờ 00:00:00
+    public static Instant dateStringToInstant(String dateString, String pattern) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         LocalDate localDate = LocalDate.parse(dateString, formatter);
-        return localDate.atStartOfDay();
+        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
     }
 
-    // Lấy thời gian hiện tại theo múi giờ Việt Nam
-    public static LocalDateTime nowInVietnam() {
-        return ZonedDateTime.now(VIETNAM_ZONE).toLocalDateTime();
+    // Lấy thời gian hiện tại
+    public static Instant now() {
+        return Instant.now();
     }
 
-    public static String format(LocalDateTime dateTime, String pattern) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-        return dateTime.format(formatter);
+    public static String format(Instant instant, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault());
+        return formatter.format(instant);
     }
 
-    // Format LocalDateTime với múi giờ Việt Nam
-    public static String formatWithVietnamZone(LocalDateTime dateTime, String pattern) {
-        ZonedDateTime zonedDateTime = dateTime.atZone(VIETNAM_ZONE);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-        return zonedDateTime.format(formatter);
-    }
-
-    public static LocalDateTime now() {
-        return LocalDateTime.now();
+    // Format Instant với múi giờ Việt Nam
+    public static String formatWithVietnamZone(Instant instant, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern).withZone(VIETNAM_ZONE);
+        return formatter.format(instant);
     }
 
     public static LocalDate toLocalDate(String dateString, String pattern) {
@@ -68,22 +59,22 @@ public class DateTimeUtils {
     }
 
     public static void main(String[] args) {
-        // Ví dụ chuyển đổi string date thành LocalDateTime
+        // Ví dụ chuyển đổi string date thành Instant
         String dateStr = "2025-12-21";
-        LocalDateTime dateTime1 = dateStringToLocalDateTime(dateStr, "yyyy-MM-dd");
-        System.out.println("Date string to LocalDateTime: " + dateTime1);
+        Instant dateTime1 = dateStringToInstant(dateStr, "yyyy-MM-dd");
+        System.out.println("Date string to Instant: " + dateTime1);
 
         // Ví dụ với string datetime
         String dateTimeStr = "2025-12-21 14:30:00";
-        LocalDateTime dateTime2 = toLocalDateTime(dateTimeStr, "yyyy-MM-dd HH:mm:ss");
-        System.out.println("DateTime string to LocalDateTime: " + dateTime2);
+        Instant dateTime2 = toInstant(dateTimeStr, "yyyy-MM-dd HH:mm:ss");
+        System.out.println("DateTime string to Instant: " + dateTime2);
 
-        // Thời gian hiện tại theo múi giờ Việt Nam
-        LocalDateTime vietnamNow = nowInVietnam();
-        System.out.println("Vietnam time now: " + vietnamNow);
+        // Thời gian hiện tại
+        Instant now = now();
+        System.out.println("Instant now: " + now);
 
         // Format với múi giờ Việt Nam
-        String formattedTime = formatWithVietnamZone(vietnamNow, "yyyy-MM-dd HH:mm:ss");
+        String formattedTime = formatWithVietnamZone(now, "yyyy-MM-dd HH:mm:ss");
         System.out.println("Formatted Vietnam time: " + formattedTime);
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -78,8 +78,8 @@ public class User extends Auditable<String> implements Serializable {
     @Builder.Default
     Boolean locked = Boolean.FALSE;
 
-    LocalDateTime lockTime;
-    LocalDateTime accountExpiryDate;
+    Instant lockTime;
+    Instant accountExpiryDate;
     String address;
     @Column(nullable = false)
     @Builder.Default

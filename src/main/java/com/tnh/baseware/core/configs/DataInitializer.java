@@ -15,7 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -87,7 +88,7 @@ public class DataInitializer implements CommandLineRunner {
                             .ial(u.getIal())
                             .enabled(u.isEnabled())
                             .locked(false)
-                            .accountExpiryDate(LocalDateTime.now().plusYears(1))
+                            .accountExpiryDate(Instant.now().plus(365, ChronoUnit.DAYS))
                             .failedLoginAttempts(0)
                             .roles(Set.of(roles.getFirst()))
                             .superAdmin(false)

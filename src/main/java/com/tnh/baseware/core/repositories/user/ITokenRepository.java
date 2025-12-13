@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,5 +28,5 @@ public interface ITokenRepository extends IGenericRepository<Token, UUID> {
     @Transactional
     @Modifying
     @Query("DELETE FROM Token t WHERE t.expired = true OR t.revoked = true OR t.expiration < :now")
-    int deleteByExpiredTrueOrExpirationBefore(@Param("now") LocalDateTime now);
+    int deleteByExpiredTrueOrExpirationBefore(@Param("now") Instant now);
 }

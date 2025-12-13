@@ -28,9 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.KeyGenerator;
 import java.text.ParseException;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 
@@ -129,7 +127,7 @@ public class JwtTokenService {
                     .revoked(false)
                     .expired(false)
                     .user(userDetails.getUser())
-                    .expiration(LocalDateTime.now().plus(Duration.ofMillis(expiration)))
+                    .expiration(Instant.now().plusMillis(expiration))
                     .build();
             tokenRepository.save(token);
             return signedJWT.serialize().describeConstable();

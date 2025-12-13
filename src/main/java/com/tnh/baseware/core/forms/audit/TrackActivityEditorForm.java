@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -24,5 +24,5 @@ public class TrackActivityEditorForm {
     String deviceInfo;
     String requestPayload;
     String responsePayload;
-    LocalDateTime actionDate;
+    Instant actionDate;
 }

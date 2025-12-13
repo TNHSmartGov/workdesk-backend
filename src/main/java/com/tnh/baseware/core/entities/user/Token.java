@@ -7,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -59,7 +59,7 @@ public class Token extends Auditable<String> implements Serializable {
     Boolean expired = Boolean.FALSE;
 
     @Column(nullable = false)
-    LocalDateTime expiration;
+    Instant expiration;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

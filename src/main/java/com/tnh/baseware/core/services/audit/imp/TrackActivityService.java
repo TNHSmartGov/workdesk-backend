@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -55,7 +55,7 @@ public class TrackActivityService extends
                 .ipAddress(ip)
                 .deviceInfo(device)
                 .username(username)
-                .actionDate(LocalDateTime.now())
+                .actionDate(Instant.now())
                 .responsePayload(messageService.getMessage("track.activity.login"))
                 .build();
 
@@ -72,7 +72,7 @@ public class TrackActivityService extends
                 .ipAddress(ip)
                 .deviceInfo(device)
                 .username(username)
-                .actionDate(LocalDateTime.now())
+                .actionDate(Instant.now())
                 .responsePayload(messageService.getMessage("track.activity.logout"))
                 .build();
 
@@ -89,7 +89,7 @@ public class TrackActivityService extends
                 .ipAddress(ip)
                 .deviceInfo(device)
                 .username(username)
-                .actionDate(LocalDateTime.now())
+                .actionDate(Instant.now())
                 .responsePayload(messageService.getMessage("track.activity.refresh.token"))
                 .build();
 

@@ -8,7 +8,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -49,5 +49,5 @@ public class TrackActivity extends Auditable<String> implements Serializable {
 
     @Column(nullable = false, updatable = false)
     @Builder.Default
-    LocalDateTime actionDate = LocalDateTime.now();
+    Instant actionDate = Instant.now();
 }

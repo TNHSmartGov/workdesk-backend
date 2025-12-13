@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.hateoas.RepresentationModel;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,8 +35,8 @@ public class UserDTO extends RepresentationModel<UserDTO> implements Identifiabl
     Integer ial;
     Boolean enabled;
     Boolean locked;
-    LocalDateTime lockTime;
-    LocalDateTime accountExpiryDate;
+    Instant lockTime;
+    Instant accountExpiryDate;
     Integer failedLoginAttempts;
     Boolean ignorePayment;
     Boolean superAdmin;

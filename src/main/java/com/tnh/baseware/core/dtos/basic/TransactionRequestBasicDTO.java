@@ -1,6 +1,6 @@
 package com.tnh.baseware.core.dtos.basic;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -13,6 +13,6 @@ import lombok.Setter;
 public class TransactionRequestBasicDTO {
     UUID id;
     String billNumber;
-    LocalDateTime expDate;
+    Instant expDate;
 
 }

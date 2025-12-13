@@ -25,7 +25,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 @Slf4j
@@ -73,7 +73,7 @@ public class TrackActivityFilter extends BasewareCoreFilter {
                 .method(request.getMethod())
                 .ipAddress(request.getRemoteAddr())
                 .deviceInfo(request.getHeader("User-Agent"))
-                .actionDate(LocalDateTime.now());
+                .actionDate(Instant.now());
 
         try {
             filterChain.doFilter(wrappedRequest, wrappedResponse);

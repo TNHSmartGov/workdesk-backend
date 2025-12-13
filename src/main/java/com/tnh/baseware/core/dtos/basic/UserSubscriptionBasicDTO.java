@@ -1,7 +1,7 @@
 package com.tnh.baseware.core.dtos.basic;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import lombok.AccessLevel;
@@ -24,19 +24,19 @@ public class UserSubscriptionBasicDTO {
     ServicePackageBasicDTO servicePackage;
     ServicePackageOptionBasicDTO servicePackageOption;
 
-    LocalDateTime startDate;
-    LocalDateTime endDate;
+    Instant startDate;
+    Instant endDate;
     String status;
     BigDecimal basePrice;
     BigDecimal finalPrice;
     BigDecimal totalAmount;
     BigDecimal paidAmount;
-    LocalDateTime lastPaymentDate;
+    Instant lastPaymentDate;
     String paymentStatus;
     BigDecimal discountAmount;
     BigDecimal discountPercentage;
     BigDecimal commissionAmount;
     BigDecimal commissionPercentage;
     Integer registrationYears;
-    LocalDateTime renewedAt;
+    Instant renewedAt;
 }

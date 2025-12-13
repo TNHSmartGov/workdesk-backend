@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -50,7 +50,7 @@ public class UserEditorForm {
     @NotNull(message = "{enabled.not.null}")
     @Schema(description = "true: enabled, false: disabled", defaultValue = "true")
     Boolean enabled;
-    LocalDateTime accountExpiryDate;
+    Instant accountExpiryDate;
 
     @NotNull(message = "{role.not.null}")
     UUID role;

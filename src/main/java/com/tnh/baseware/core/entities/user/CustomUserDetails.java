@@ -6,7 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -47,7 +47,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isAccountNonExpired() {
         return Optional.ofNullable(user)
-                .map(u -> LocalDateTime.now().isBefore(u.getAccountExpiryDate()))
+                .map(u -> Instant.now().isBefore(u.getAccountExpiryDate()))
                 .orElse(false);
     }
 

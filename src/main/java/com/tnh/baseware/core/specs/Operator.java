@@ -4,7 +4,7 @@ import com.tnh.baseware.core.utils.LogStyleHelper;
 import jakarta.persistence.criteria.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Slf4j
 public enum Operator {
@@ -73,9 +73,9 @@ public enum Operator {
             var value = request.getFieldType().parse(request.getValue().toString());
             var valueTo = request.getFieldType().parse(request.getValueTo().toString());
             if (request.getFieldType() == FieldType.DATE) {
-                var startDate = (LocalDateTime) value;
-                var endDate = (LocalDateTime) valueTo;
-                Expression<LocalDateTime> key = this.getPath(root, request);
+                var startDate = (Instant) value;
+                var endDate = (Instant) valueTo;
+                Expression<Instant> key = this.getPath(root, request);
                 return cb.and(cb.and(cb.greaterThanOrEqualTo(key, startDate), cb.lessThanOrEqualTo(key, endDate)),
                         predicate);
             }

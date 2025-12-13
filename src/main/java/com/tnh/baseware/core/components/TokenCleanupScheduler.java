@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Slf4j
 @Component
@@ -25,7 +25,7 @@ public class TokenCleanupScheduler {
     @Scheduled(cron = "${baseware.core.system.token-clear-interval}")
     public void cleanExpiredAndRevokedTokens() {
         try {
-            var deletedCount = tokenRepository.deleteByExpiredTrueOrExpirationBefore(LocalDateTime.now());
+            var deletedCount = tokenRepository.deleteByExpiredTrueOrExpirationBefore(Instant.now());
             log.debug(LogStyleHelper.debug("Token cleanup task ran successfully. Deleted {} expired/revoked tokens."), deletedCount);
         } catch (Exception ex) {
             log.error(LogStyleHelper.error("Error during token cleanup: {}"), ex.getMessage());

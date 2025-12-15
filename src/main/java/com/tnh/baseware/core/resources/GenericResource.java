@@ -39,7 +39,7 @@ import java.util.UUID;
 @Getter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
-public abstract class GenericResource<E, F, D extends RepresentationModel<D> & Identifiable<UUID>, I>
+public abstract class GenericResource<E, F, D extends RepresentationModel<D> & Identifiable<I>, I>
                 implements IGenericResource<E, F, D, I> {
 
         IGenericService<E, F, D, I> service;

@@ -1,11 +1,13 @@
 package com.tnh.baseware.core.entities.task;
 
+import com.tnh.baseware.core.entities.audit.Auditable;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.task.MemberStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,17 +15,23 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "task_members")
-@IdClass(TaskMemberId.class)
-public class TaskMember {
+@Table(
+        name = "task_members",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"task_id", "user_id"})
+        }
+)
+public class TaskMember extends Auditable<String> {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "task_id", nullable = false)
     Task task;
 
-    @Id
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
@@ -37,4 +45,3 @@ public class TaskMember {
     Instant joinedAt;
     Instant completedAt;
 }
-

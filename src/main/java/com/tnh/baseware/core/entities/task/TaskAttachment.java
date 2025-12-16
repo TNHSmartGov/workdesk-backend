@@ -18,6 +18,7 @@ import java.util.UUID;
 public class TaskAttachment extends Auditable<String> {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -25,9 +25,9 @@ public class FileDocument extends Auditable<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
-   
+
     @Column(nullable = false)
-    String name;   
+    String name;
 
     @Column(nullable = false)
     String url;

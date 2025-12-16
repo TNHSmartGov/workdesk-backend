@@ -22,4 +22,3 @@ public class TaskMemberService extends GenericService<TaskMember, TaskMemberEdit
         super(repository, mapper, messageService, TaskMember.class);
     }
 }
-

@@ -14,28 +14,22 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        name = "task_attachments",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"task_id", "file_id"})
-        }
-)
-public class TaskAttachment extends Auditable<String> {
+@Table(name = "task_comment_attachments")
+public class TaskCommentAttachment extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    Task task;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "comment_id", nullable = false)
+    private TaskComment comment;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    User uploader;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "file_id", nullable = false)
-    FileDocument file;
+    private FileDocument file;
 
-    String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uploader_id")
+    private User uploader;
 }
-

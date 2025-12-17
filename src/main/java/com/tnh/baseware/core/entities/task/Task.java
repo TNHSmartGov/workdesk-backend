@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.entities.task;
 
 import com.tnh.baseware.core.entities.audit.Auditable;
+import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.enums.task.TaskPriority;
 import com.tnh.baseware.core.enums.task.TaskStatus;
 import com.tnh.baseware.core.enums.task.TaskType;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tasks")
+@Table
 public class Task extends Auditable<String> {
 
     @Id
@@ -43,5 +44,14 @@ public class Task extends Auditable<String> {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     TaskType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_list_id")
+    private TaskList taskList;
+
 }
 

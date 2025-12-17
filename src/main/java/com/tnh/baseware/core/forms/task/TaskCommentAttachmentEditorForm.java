@@ -1,10 +1,12 @@
-package com.tnh.baseware.core.forms.doc;
+package com.tnh.baseware.core.forms.task;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.tnh.baseware.core.annotations.NotBlankWithFieldName;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,11 +15,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class FileDocumentEditorForm {
+public class TaskCommentAttachmentEditorForm {
 
-    @NotBlankWithFieldName(fieldName = "fileName")
-    String fileName;
+    @NotNull(message = "{comment.id.not.null}")
+    UUID commentId;
 
-    String description;
-
+    @NotNull(message = "{file.id.not.null}")
+    UUID fileId;
 }

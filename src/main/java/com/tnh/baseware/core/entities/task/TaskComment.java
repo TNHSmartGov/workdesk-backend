@@ -30,5 +30,9 @@ public class TaskComment extends Auditable<String> {
 
     @Column(columnDefinition = "text", nullable = false)
     String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private TaskComment parentComment;
 }
 

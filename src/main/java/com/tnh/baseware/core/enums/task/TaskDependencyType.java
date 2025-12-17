@@ -15,7 +15,8 @@ public enum TaskDependencyType implements BaseEnum<String> {
     FS("FS", "finish_start", "Hoàn thành → Bắt đầu"),
     SS("SS", "start_start", "Bắt đầu → Bắt đầu"),
     FF("FF", "finish_finish", "Hoàn thành → Hoàn thành"),
-    SF("SF", "start_finish", "Bắt đầu → Hoàn thành");
+    SF("SF", "start_finish", "Bắt đầu → Hoàn thành"),
+    PARENT("PARENT", "parent", "Công việc cha – con");
 
     String value;
     String name;

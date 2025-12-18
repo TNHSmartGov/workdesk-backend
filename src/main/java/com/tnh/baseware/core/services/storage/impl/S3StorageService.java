@@ -1,6 +1,5 @@
 package com.tnh.baseware.core.services.storage.impl;
 
-import com.tnh.baseware.core.components.TenantContext;
 import com.tnh.baseware.core.exceptions.BWCGenericRuntimeException;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.storage.IStorageService;
@@ -34,7 +33,7 @@ public class S3StorageService implements IStorageService<String> {
     @Override
     public String uploadFile(MultipartFile file) {
         try {
-            String bucketName = initTenantBucket();
+            String bucketName = initBucket();
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             String path = LocalDate.now().format(formatter) + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -49,14 +48,14 @@ public class S3StorageService implements IStorageService<String> {
             );
             return path;
         } catch (Exception e) {
-            throw new BWCGenericRuntimeException(messageService.getMessage("file.upload.error", TenantContext.getTenantId()));
+            throw new BWCGenericRuntimeException(messageService.getMessage("file.upload.error"));
         }
     }
 
     @Override
     public InputStream downloadFile(String path) {
         try {
-            String bucketName = initTenantBucket();
+            String bucketName = initBucket();
             return minioClient.getObject(
                     GetObjectArgs.builder()
                             .bucket(bucketName)
@@ -64,14 +63,14 @@ public class S3StorageService implements IStorageService<String> {
                             .build()
             );
         } catch (Exception e) {
-            throw new BWCGenericRuntimeException(messageService.getMessage("file.download.error", TenantContext.getTenantId()));
+            throw new BWCGenericRuntimeException(messageService.getMessage("file.download.error"));
         }
     }
 
     @Override
     public void deleteFile(String path) {
         try {
-            String bucketName = initTenantBucket();
+            String bucketName = initBucket();
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
                             .bucket(bucketName)
@@ -79,20 +78,19 @@ public class S3StorageService implements IStorageService<String> {
                             .build()
             );
         } catch (Exception e) {
-            throw new BWCGenericRuntimeException(messageService.getMessage("file.delete.error", TenantContext.getTenantId()));
+            throw new BWCGenericRuntimeException(messageService.getMessage("file.delete.error"));
         }
     }
 
-    private String initTenantBucket() {
-        String tenantId = TenantContext.getTenantId();
-        String tenantBucket = bucketPrefix + tenantId;
+    private String initBucket() {
+        String bucketName = bucketPrefix + "default"; // Or any static name
         try {
-            if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(tenantBucket).build())) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(tenantBucket).build());
+            if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
             }
         } catch (Exception e) {
-            throw new BWCGenericRuntimeException("Init bucket failed for tenant: " + tenantId);
+            throw new BWCGenericRuntimeException("Init bucket failed: " + bucketName);
         }
-        return tenantBucket;
+        return bucketName;
     }
 }

@@ -1,8 +1,6 @@
 package com.tnh.baseware.core.services.user.imp;
 
 import com.tnh.baseware.core.components.GenericEntityFetcher;
-import com.tnh.baseware.core.components.TenantContext;
-import com.tnh.baseware.core.dtos.user.TenantContextDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.Menu;
@@ -53,7 +51,6 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     PasswordEncoder passwordEncoder;
     JwtTokenService jwtTokenService;
     SecurityProperties securityProperties;
-    TenantService tenantService;
     IMenuMapper menuMapper;
     GenericEntityFetcher fetcher;
 
@@ -66,7 +63,6 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
             PasswordEncoder passwordEncoder,
             JwtTokenService jwtTokenService,
             SecurityProperties securityProperties,
-            TenantService tenantService,
             IMenuMapper menuMapper, GenericEntityFetcher fetcher) {
         super(repository, mapper, messageService, User.class);
         this.roleRepository = roleRepository;
@@ -75,7 +71,6 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenService = jwtTokenService;
         this.securityProperties = securityProperties;
-        this.tenantService = tenantService;
         this.menuMapper = menuMapper;
         this.fetcher = fetcher;
     }
@@ -99,51 +94,34 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     @Override
     @Transactional
     public UserDTO registerUser(RegisterForm form, HttpServletRequest request) {
-        var tenantName = request.getHeader("X-Tenant");
-        if (BasewareUtils.isBlank(tenantName)) {
-            throw new BWCValidationException(messageService.getMessage("tenant.name.empty"));
+        if (repository.existsByUsernameOrPhoneOrEmailOrIdn(form.getUsername(), form.getPhone(), form.getEmail(),
+                form.getIdn())) {
+            throw new BWCValidationException(messageService.getMessage("user.already.exists"));
         }
 
-        var tenant = tenantService.findByNameAndActiveTrue(tenantName)
-                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("tenant.not.found", tenantName)));
+        var user = User.builder()
+                .username(form.getUsername())
+                .password(passwordEncoder.encode(form.getPassword()))
+                .firstName(form.getFirstName())
+                .lastName(form.getLastName())
+                .fullName(form.getFullName())
+                .phone(form.getPhone())
+                .email(form.getEmail())
+                .avatarUrl(form.getAvatarUrl())
+                .idn(form.getIdn())
+                .ial(form.getIal())
+                .enabled(securityProperties.getRegister().isEnabled())
+                .build();
 
-        TenantContext.setTenant(TenantContextDTO.builder()
-                .tenantId(tenant.getName())
-                .schemaName(tenant.getSchemaName())
-                .build());
+        var roles = roleRepository.findAllByField("name", securityProperties.getRegister().getRoleDefault());
+        var role = BasewareUtils.isBlank(roles) ? null : roles.getFirst();
 
-        try {
-            if (repository.existsByUsernameOrPhoneOrEmailOrIdn(form.getUsername(), form.getPhone(), form.getEmail(),
-                    form.getIdn())) {
-                throw new BWCValidationException(messageService.getMessage("user.already.exists"));
-            }
-
-            var user = User.builder()
-                    .username(form.getUsername())
-                    .password(passwordEncoder.encode(form.getPassword()))
-                    .firstName(form.getFirstName())
-                    .lastName(form.getLastName())
-                    .fullName(form.getFullName())
-                    .phone(form.getPhone())
-                    .email(form.getEmail())
-                    .avatarUrl(form.getAvatarUrl())
-                    .idn(form.getIdn())
-                    .ial(form.getIal())
-                    .enabled(securityProperties.getRegister().isEnabled())
-                    .build();
-
-            var roles = roleRepository.findAllByField("name", securityProperties.getRegister().getRoleDefault());
-            var role = BasewareUtils.isBlank(roles) ? null : roles.getFirst();
-
-            if (BasewareUtils.isBlank(role)) {
-                throw new BWCNotFoundException(messageService.getMessage("role.not.found"));
-            }
-
-            user.addRole(role);
-            return mapper.entityToDTO(repository.save(user));
-        } finally {
-            TenantContext.clear();
+        if (BasewareUtils.isBlank(role)) {
+            throw new BWCNotFoundException(messageService.getMessage("role.not.found"));
         }
+
+        user.addRole(role);
+        return mapper.entityToDTO(repository.save(user));
     }
 
     @Override

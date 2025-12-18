@@ -1,6 +1,5 @@
 package com.tnh.baseware.core.services.user.imp;
 
-import com.tnh.baseware.core.components.TenantContext;
 import com.tnh.baseware.core.dtos.user.RoleDTO;
 import com.tnh.baseware.core.entities.user.Role;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
@@ -53,7 +52,7 @@ public class RoleService extends GenericService<Role, RoleEditorForm, RoleDTO, I
         var role = repository.findById(id).orElseThrow(() ->
                 new BWCNotFoundException(messageService.getMessage("role.not.found", id)));
         repository.delete(role);
-        privilegeCacheService.invalidateAllUserPrivilegesByRole(TenantContext.getTenantId(), role);
+        privilegeCacheService.invalidateAllUserPrivilegesByRole(role);
     }
 
     @Override
@@ -69,7 +68,7 @@ public class RoleService extends GenericService<Role, RoleEditorForm, RoleDTO, I
         users.forEach(user -> user.getRoles().add(role));
 
         userRepository.saveAll(users);
-        privilegeCacheService.invalidateAllUserPrivilegesByRole(TenantContext.getTenantId(), role);
+        privilegeCacheService.invalidateAllUserPrivilegesByRole(role);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class RoleService extends GenericService<Role, RoleEditorForm, RoleDTO, I
         users.forEach(user -> user.getRoles().remove(role));
 
         userRepository.saveAll(users);
-        privilegeCacheService.invalidateAllUserPrivilegesByRole(TenantContext.getTenantId(), role);
+        privilegeCacheService.invalidateAllUserPrivilegesByRole(role);
     }
 
     @Override
@@ -101,7 +100,7 @@ public class RoleService extends GenericService<Role, RoleEditorForm, RoleDTO, I
         role.getPrivileges().addAll(privileges);
 
         repository.save(role);
-        privilegeCacheService.invalidateAllUserPrivilegesByRole(TenantContext.getTenantId(), role);
+        privilegeCacheService.invalidateAllUserPrivilegesByRole(role);
     }
 
     @Override
@@ -117,7 +116,7 @@ public class RoleService extends GenericService<Role, RoleEditorForm, RoleDTO, I
         privileges.forEach(role.getPrivileges()::remove);
 
         repository.save(role);
-        privilegeCacheService.invalidateAllUserPrivilegesByRole(TenantContext.getTenantId(), role);
+        privilegeCacheService.invalidateAllUserPrivilegesByRole(role);
     }
 
     @Override
@@ -133,7 +132,7 @@ public class RoleService extends GenericService<Role, RoleEditorForm, RoleDTO, I
         menus.forEach(menu -> menu.getRoles().add(role));
 
         menuRepository.saveAll(menus);
-        privilegeCacheService.invalidateAllUserPrivilegesByRole(TenantContext.getTenantId(), role);
+        privilegeCacheService.invalidateAllUserPrivilegesByRole(role);
     }
 
     @Override
@@ -149,7 +148,7 @@ public class RoleService extends GenericService<Role, RoleEditorForm, RoleDTO, I
         menus.forEach(menu -> menu.getRoles().remove(role));
 
         menuRepository.saveAll(menus);
-        privilegeCacheService.invalidateAllUserPrivilegesByRole(TenantContext.getTenantId(), role);
+        privilegeCacheService.invalidateAllUserPrivilegesByRole(role);
     }
 
     @Override

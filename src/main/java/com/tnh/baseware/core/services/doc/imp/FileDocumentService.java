@@ -1,7 +1,6 @@
 package com.tnh.baseware.core.services.doc.imp;
 
 import com.tnh.baseware.core.components.EnumRegistry;
-import com.tnh.baseware.core.components.TenantContext;
 import com.tnh.baseware.core.dtos.doc.FileDocumentDTO;
 import com.tnh.baseware.core.dtos.doc.FileResource;
 import com.tnh.baseware.core.entities.doc.FileDocument;
@@ -70,7 +69,7 @@ public class FileDocumentService extends
                 }
             }
             throw new BWCGenericRuntimeException(
-                    messageService.getMessage("file.upload.error", TenantContext.getTenantId()), e
+                    messageService.getMessage("file.upload.error"), e
             );
         }
     }
@@ -110,7 +109,7 @@ public class FileDocumentService extends
             }
 
             throw new BWCGenericRuntimeException(
-                    messageService.getMessage("file.batch.upload.error", TenantContext.getTenantId()), e
+                    messageService.getMessage("file.batch.upload.error"), e
             );
         }
     }
@@ -123,7 +122,7 @@ public class FileDocumentService extends
             InputStream stream = storageService.downloadFile(doc.getUrl());
             return new FileResource(stream, doc.getName(), null);
         } catch (Exception e) {
-            throw new BWCGenericRuntimeException(messageService.getMessage("file.download.error.id", id, TenantContext.getTenantId()));
+            throw new BWCGenericRuntimeException(messageService.getMessage("file.download.error.id", id));
         }
     }
 

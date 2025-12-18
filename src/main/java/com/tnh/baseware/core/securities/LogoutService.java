@@ -1,7 +1,6 @@
 package com.tnh.baseware.core.securities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tnh.baseware.core.components.TenantContext;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.user.CustomUserDetails;
 import com.tnh.baseware.core.properties.SecurityProperties;
@@ -57,10 +56,9 @@ public class LogoutService implements LogoutHandler {
 
         try {
             var username = jwtTokenService.extractUsername(accessToken);
-            var tenantId = jwtTokenService.extractTenantId(accessToken);
             var sessionId = jwtTokenService.extractSessionId(accessToken);
 
-            if (username.isEmpty() || tenantId.isEmpty() || sessionId.isEmpty()) {
+            if (username.isEmpty() || sessionId.isEmpty()) {
                 log.debug(LogStyleHelper.debug("Logout failed: Token is invalid"));
                 sendErrorResponse(response);
                 return;
@@ -76,11 +74,11 @@ public class LogoutService implements LogoutHandler {
             if (securityProperties.getJwt().isAllowMultipleDevices()) {
                 // multiple device login
                 jwtTokenService.revokeAllValidTokensBySessionId(UUID.fromString(sessionId.get()));
-                privilegeCacheService.clearUserPrivilegeAsync(tenantId.get(), String.valueOf(userDetails.getUser().getId()), sessionId.get());
+                privilegeCacheService.clearUserPrivilegeAsync(String.valueOf(userDetails.getUser().getId()), sessionId.get());
             } else {
                 // single device login
                 jwtTokenService.revokeAllValidTokensByUser(userDetails.getUser().getId());
-                privilegeCacheService.clearUserPrivilegeAsync(tenantId.get(), String.valueOf(userDetails.getUser().getId()));
+                privilegeCacheService.clearUserPrivilegeAsync(String.valueOf(userDetails.getUser().getId()));
             }
 
             if (systemProperties.isTrackingActive())
@@ -93,7 +91,6 @@ public class LogoutService implements LogoutHandler {
             log.debug(LogStyleHelper.debug("Logout failed: Failed to revoke token: {}"), e.getMessage());
             sendErrorResponse(response);
         } finally {
-            TenantContext.clear();
             SecurityContextHolder.clearContext();
         }
     }

@@ -78,7 +78,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     @Override
     @Transactional
     public UserDTO create(UserEditorForm form) {
-        var user = mapper.formToEntity(form, fetcher, roleRepository, passwordEncoder);
+        var user = mapper.formToEntity(form, passwordEncoder);
         return mapper.entityToDTO(repository.save(user));
     }
 
@@ -87,7 +87,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     public UserDTO update(UUID id, UserEditorForm form) {
         var user = repository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", id)));
-        mapper.updateUserFromForm(form, user, fetcher, roleRepository);
+        mapper.updateUserFromForm(form, user);
         return mapper.entityToDTO(repository.save(user));
     }
 

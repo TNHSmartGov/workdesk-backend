@@ -1,5 +1,6 @@
 package com.tnh.baseware.core.configs;
 
+import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.components.CustomRequiredFieldConverter;
 import com.tnh.baseware.core.properties.OpenApiProperties;
 import com.tnh.baseware.core.utils.LogStyleHelper;
@@ -12,13 +13,18 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 
 import java.util.List;
 
@@ -91,5 +97,88 @@ public class OpenApiConfiguration {
                 .type(SecurityScheme.Type.valueOf(security.getType().toUpperCase()))
                 .bearerFormat(security.getBearerFormat())
                 .in(SecurityScheme.In.valueOf(security.getIn().toUpperCase()));
+    }
+
+    @Bean
+    public OperationCustomizer apiOkResponseCustomizer() {
+        return (operation, handlerMethod) -> {
+
+            ApiOkResponse apiOk = handlerMethod.getMethodAnnotation(ApiOkResponse.class);
+            if (apiOk == null) {
+                return operation;
+            }
+
+            Schema<?> dataSchema = switch (apiOk.type()) {
+                case OBJECT -> objectSchema(apiOk.value());
+                case LIST -> listSchema(apiOk.value());
+                case PAGE -> pageSchema(apiOk.value());
+                case HATEOAS_PAGE -> hateoasPageSchema(apiOk.value());
+            };
+
+            Schema<?> responseSchema = baseEnvelopeSchema(dataSchema);
+
+            operation.getResponses().addApiResponse("200",
+                    new ApiResponse().description("Success")
+                            .content(new Content().addMediaType(
+                                    MediaType.APPLICATION_JSON_VALUE,
+                                    new io.swagger.v3.oas.models.media.MediaType().schema(responseSchema)
+                            ))
+            );
+
+            return operation;
+        };
+    }
+
+    private Schema<?> baseEnvelopeSchema(Schema<?> dataSchema) {
+        return new Schema<>()
+                .type("object")
+                .addProperty("message", new StringSchema())
+                .addProperty("result", new BooleanSchema())
+                .addProperty("code", new IntegerSchema())
+                .addProperty("data", dataSchema);
+    }
+
+    private Schema<?> objectSchema(Class<?> dto) {
+        return new Schema<>().$ref("#/components/schemas/" + dto.getSimpleName());
+    }
+
+    private Schema<?> listSchema(Class<?> dto) {
+        return new ArraySchema().items(
+                new Schema<>().$ref("#/components/schemas/" + dto.getSimpleName())
+        );
+    }
+
+    private Schema<?> pageSchema(Class<?> dto) {
+        return new Schema<>()
+                .type("object")
+                .addProperty("content", listSchema(dto))
+                .addProperty("totalElements", new IntegerSchema())
+                .addProperty("totalPages", new IntegerSchema())
+                .addProperty("size", new IntegerSchema())
+                .addProperty("number", new IntegerSchema());
+    }
+
+    private Schema<?> hateoasPageSchema(Class<?> dto) {
+        return new Schema<>()
+                .type("object")
+                .addProperty("content", listSchema(dto))
+                .addProperty("page", new Schema<>()
+                        .addProperty("size", new IntegerSchema())
+                        .addProperty("totalElements", new IntegerSchema())
+                        .addProperty("totalPages", new IntegerSchema())
+                        .addProperty("number", new IntegerSchema())
+                )
+                .addProperty("_links", new Schema<>()
+                        .additionalProperties(new Schema<>().$ref(
+                                "#/components/schemas/Link"
+                        ))
+                );
+    }
+
+    @Bean
+    public OpenApiCustomizer hideHateoasLinks() {
+        return openApi -> openApi.getComponents().getSchemas().values()
+                .forEach(schema -> schema.getProperties()
+                        .remove("_links"));
     }
 }

@@ -99,11 +99,8 @@ public class User extends Auditable<String> implements Serializable {
     @Builder.Default
     Set<Role> roles = new HashSet<>();
 
-    @JsonIgnore
-    @ManyToMany
-    @JoinTable(name = "users_organizations", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "id"))
-    @Builder.Default
-    Set<Organization> organizations = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<UserOrganization> organizations;
 
     public Set<GrantedAuthority> getAuthorities() {
         return roles.stream()

@@ -3,6 +3,7 @@ package com.tnh.baseware.core.entities.adu;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tnh.baseware.core.entities.audit.Auditable;
 import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.OrganizationLevel;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,14 +48,14 @@ public class Organization extends Auditable<String> implements Serializable {
     Double latitude;
     Double longitude;
 
+    Boolean isSystem;
+
     @Column(nullable = false)
     @Builder.Default
     Integer level = OrganizationLevel.PROVINCE.getValue();
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "organizations", fetch = FetchType.LAZY)
-    @Builder.Default
-    Set<User> users = new HashSet<>();
+    @OneToMany(mappedBy = "organization")
+    Set<UserOrganization> users;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")

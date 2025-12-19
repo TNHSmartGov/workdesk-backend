@@ -1,5 +1,6 @@
 package com.tnh.baseware.core.entities.audit;
 
+import com.tnh.baseware.core.enums.CategoryCode;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,8 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"code"}),
-        @UniqueConstraint(columnNames = {"name"})
+        @UniqueConstraint(columnNames = {"code", "name"})
 })
 public class Category extends Auditable<String> implements Serializable {
 
@@ -28,8 +28,9 @@ public class Category extends Auditable<String> implements Serializable {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    String code;
+    CategoryCode code;
 
     @Column(nullable = false)
     String name;

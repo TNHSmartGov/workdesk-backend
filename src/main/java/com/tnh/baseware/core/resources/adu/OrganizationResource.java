@@ -1,9 +1,13 @@
 package com.tnh.baseware.core.resources.adu;
 
+import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.adu.OrganizationDTO;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
+import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.entities.adu.Organization;
+import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.forms.adu.OrganizationEditorForm;
+import com.tnh.baseware.core.forms.user.ChangeUserTitleEditorForm;
 import com.tnh.baseware.core.properties.SystemProperties;
 import com.tnh.baseware.core.resources.GenericResource;
 import com.tnh.baseware.core.services.IGenericService;
@@ -42,7 +46,7 @@ public class OrganizationResource extends
         }
 
         @Operation(summary = "Assign all organizations to a parent unit")
-        @ApiResponse(responseCode = "200", description = "Organizations assigned", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PostMapping("/{id}/assign-organizations")
         public ResponseEntity<ApiMessageDTO<Integer>> assignOrganizations(@PathVariable UUID id,
                         @RequestBody List<UUID> ids) {
@@ -56,7 +60,7 @@ public class OrganizationResource extends
         }
 
         @Operation(summary = "Remove all organizations from a parent unit")
-        @ApiResponse(responseCode = "200", description = "Organizations removed", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @DeleteMapping("/{id}/remove-organizations")
         public ResponseEntity<ApiMessageDTO<Integer>> removeOrganizations(@PathVariable UUID id,
                         @RequestBody List<UUID> ids) {
@@ -70,7 +74,7 @@ public class OrganizationResource extends
         }
 
         @Operation(summary = "Assign all users to an organization")
-        @ApiResponse(responseCode = "200", description = "Users assigned", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PostMapping("/{id}/assign-users")
         public ResponseEntity<ApiMessageDTO<Integer>> assignUsers(@PathVariable UUID id,
                         @RequestBody List<UUID> userIds) {
@@ -84,7 +88,7 @@ public class OrganizationResource extends
         }
 
         @Operation(summary = "Remove all users from an organization")
-        @ApiResponse(responseCode = "200", description = "Users removed", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @DeleteMapping("/{id}/remove-users")
         public ResponseEntity<ApiMessageDTO<Integer>> removeUsers(@PathVariable UUID id,
                         @RequestBody List<UUID> userIds) {
@@ -95,5 +99,20 @@ public class OrganizationResource extends
                                 .message(messageService.getMessage("users.removed"))
                                 .code(HttpStatus.OK.value())
                                 .build());
+        }
+
+        @Operation(summary = "Change user's title")
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
+        @PutMapping("{orgId}/users/{userId}/title")
+        public ResponseEntity<ApiMessageDTO<Integer>> changeTitle(@PathVariable UUID orgId,
+                                                                  @PathVariable UUID userId,
+                                                                  @RequestBody ChangeUserTitleEditorForm request) {
+                organizationService.changeTitle(orgId, userId, request.getTitle());
+                return ResponseEntity.ok(ApiMessageDTO.<Integer>builder()
+                        .data(1)
+                        .result(true)
+                        .message(messageService.getMessage("users.title.changed"))
+                        .code(HttpStatus.OK.value())
+                        .build());
         }
 }

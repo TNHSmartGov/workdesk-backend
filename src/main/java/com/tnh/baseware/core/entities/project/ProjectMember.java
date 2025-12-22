@@ -2,6 +2,7 @@ package com.tnh.baseware.core.entities.project;
 
 import com.tnh.baseware.core.entities.audit.Auditable;
 import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,7 +35,8 @@ public class ProjectMember extends Auditable<String> {
     private User user;
 
     @Column(nullable = false)
-    private String role; // PM, MEMBER, VIEWER
+    private ProjectMemberRole role;
 
+    @Column(nullable = false, updatable = false)
     private Instant joinedAt;
 }

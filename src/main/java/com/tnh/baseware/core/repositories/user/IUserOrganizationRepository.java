@@ -9,10 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public interface IUserOrganizationRepository extends IGenericRepository<UserOrganization, UUID> {
     boolean existsByUserIdAndOrganizationId(UUID userId, UUID organizationId);
@@ -96,4 +93,7 @@ public interface IUserOrganizationRepository extends IGenericRepository<UserOrga
             @Param("userId") UUID userId,
             @Param("title") Category title
     );
+
+    List<UserOrganization> findByOrganizationIdAndUserIdInAndActiveTrue(UUID orgId, Collection<UUID> userIds);
+    Optional<UserOrganization> findByUserIdAndOrganizationIdAndActiveTrue(UUID userId, UUID  orgId);
 }

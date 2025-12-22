@@ -3,10 +3,12 @@ package com.tnh.baseware.core.services.adu.imp;
 import com.tnh.baseware.core.dtos.adu.OrganizationDTO;
 import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.entities.audit.Category;
+import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.CategoryCode;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.forms.adu.OrganizationEditorForm;
+import com.tnh.baseware.core.forms.user.AssignUserEditorForm;
 import com.tnh.baseware.core.mappers.adu.IOrganizationMapper;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
 import com.tnh.baseware.core.repositories.audit.ICategoryRepository;
@@ -23,9 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -126,44 +127,77 @@ public class OrganizationService extends
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void assignUsers(UUID id, List<UUID> ids) {
-        if (BasewareUtils.isBlank(ids)) {
+    public void assignUsers(UUID id, List<AssignUserEditorForm> forms) {
+        if (BasewareUtils.isBlank(forms)) {
             return;
         }
 
-        var organization = repository.findById(id).orElseThrow(() ->
-                new BWCNotFoundException(messageService.getMessage("organization.not.found", id)));
+        var organization = repository.findById(id)
+                .orElseThrow(() -> new BWCNotFoundException(
+                        messageService.getMessage("organization.not.found", id)));
 
-        var users = userRepository.findAllById(ids);
-        if (BasewareUtils.isBlank(users)) {
-            return;
+        // Nếu userId bị trùng -> lấy bản mới nhất
+        Map<UUID, AssignUserEditorForm> distinctFormsMap = forms.stream()
+                .collect(Collectors.toMap(
+                        AssignUserEditorForm::getUserId,
+                        Function.identity(),
+                        (existing, replacement) -> replacement
+                ));
+
+        Collection<AssignUserEditorForm> distinctForms = distinctFormsMap.values();
+
+        Set<UUID> userIds = distinctFormsMap.keySet();
+        Set<UUID> titleIds = distinctForms.stream()
+                .map(AssignUserEditorForm::getTitleId)
+                .collect(Collectors.toSet());
+
+        Map<UUID, User> userMap = userRepository.findAllById(userIds)
+                .stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        if (userMap.size() != userIds.size()) {
+            throw new BWCNotFoundException(messageService.getMessage("user.not.found"));
         }
 
-        Set<UUID> existingUserIds =
-                userOrganizationRepository
-                        .findActiveUserIdsByOrganizationId(id);
+        Map<UUID, Category> titleMap = categoryRepository.findByCodeAndIdIn(
+                        CategoryCode.ORGANIZATION_TITLE, titleIds
+                ).stream()
+                .collect(Collectors.toMap(Category::getId, Function.identity()));
 
-        Category defaultTitle =
-                categoryRepository.findByCodeAndName(
-                        CategoryCode.ORGANIZATION_TITLE,
-                        "STAFF"
-                ).orElseThrow(() ->
-                        new IllegalStateException("Default title STAFF not found")
-                );
+        if (titleMap.size() != titleIds.size()) {
+            throw new BWCNotFoundException(messageService.getMessage("title.not.found"));
+        }
 
-        List<UserOrganization> toCreate = users.stream()
-                .filter(user -> !existingUserIds.contains(user.getId()))
-                .map(user -> UserOrganization.builder()
-                        .user(user)
+        List<UserOrganization> existingAssignments =
+                userOrganizationRepository.findByOrganizationIdAndUserIdInAndActiveTrue(id, userIds);
+
+        Map<UUID, UserOrganization> existingMap = existingAssignments.stream()
+                .collect(Collectors.toMap(uo -> uo.getUser().getId(), Function.identity()));
+
+        List<UserOrganization> toSave = new ArrayList<>();
+
+        for (AssignUserEditorForm form : distinctForms) {
+            UserOrganization uo = existingMap.get(form.getUserId());
+
+            if (uo == null) {
+                uo = UserOrganization.builder()
+                        .user(userMap.get(form.getUserId()))
                         .organization(organization)
-                        .title(defaultTitle)
+                        .title(titleMap.get(form.getTitleId()))
                         .active(true)
-                        .build()
-                )
-                .toList();
+                        .build();
+                toSave.add(uo);
+            } else {
+                if (!uo.getTitle().getId().equals(form.getTitleId())) {
+                    uo.setTitle(titleMap.get(form.getTitleId()));
+                    uo.setActive(true);
+                    toSave.add(uo);
+                }
+            }
+        }
 
-        if (!toCreate.isEmpty()) {
-            userOrganizationRepository.saveAll(toCreate);
+        if (!toSave.isEmpty()) {
+            userOrganizationRepository.saveAll(toSave);
         }
     }
 
@@ -196,32 +230,28 @@ public class OrganizationService extends
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void changeTitle(UUID orgId, UUID userId, String title) {
+    public void changeTitle(UUID orgId, UUID userId, UUID titleId) {
 
         UserOrganization uo = userOrganizationRepository
-                .findByUserIdAndOrganizationId(userId, orgId)
+                .findByUserIdAndOrganizationIdAndActiveTrue(userId, orgId)
                 .orElseThrow(() ->
                         new BWCNotFoundException(
                                 messageService.getMessage("user.not.in.organization", userId, orgId)
                         )
                 );
 
-        if (!Boolean.TRUE.equals(uo.getActive())) {
-            throw new IllegalStateException("User is inactive in this organization");
+        if (uo.getTitle().getId().equals(titleId)) {
+            return;
         }
 
         Category titleCategory = categoryRepository
-                .findByCodeAndName(
-                        CategoryCode.ORGANIZATION_TITLE,
-                        title
-                )
+                .findByCodeAndId(CategoryCode.ORGANIZATION_TITLE, titleId)
                 .orElseThrow(() ->
                         new BWCNotFoundException(
-                                messageService.getMessage("title.not.found", title)
+                                messageService.getMessage("title.not.found", titleId)
                         )
                 );
 
         uo.setTitle(titleCategory);
-        userOrganizationRepository.save(uo);
     }
 }

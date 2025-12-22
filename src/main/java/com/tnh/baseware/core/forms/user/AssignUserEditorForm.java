@@ -15,7 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ChangeUserTitleEditorForm {
+public class AssignUserEditorForm {
     @NotBlank
-    UUID titleId;
+    private UUID userId;
+    @NotBlank
+    private UUID titleId;
 }

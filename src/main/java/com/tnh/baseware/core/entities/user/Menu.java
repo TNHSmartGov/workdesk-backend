@@ -39,7 +39,7 @@ public class Menu extends Auditable<String> implements Serializable {
     @Column(unique = true, nullable = false)
     String alias;
 
-    @Column(nullable = false)
+    @Column
     String note;
 
     @Column(nullable = false)

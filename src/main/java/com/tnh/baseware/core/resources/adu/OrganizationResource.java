@@ -7,6 +7,7 @@ import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.forms.adu.OrganizationEditorForm;
+import com.tnh.baseware.core.forms.user.AssignUserEditorForm;
 import com.tnh.baseware.core.forms.user.ChangeUserTitleEditorForm;
 import com.tnh.baseware.core.properties.SystemProperties;
 import com.tnh.baseware.core.resources.GenericResource;
@@ -77,8 +78,8 @@ public class OrganizationResource extends
         @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PostMapping("/{id}/assign-users")
         public ResponseEntity<ApiMessageDTO<Integer>> assignUsers(@PathVariable UUID id,
-                        @RequestBody List<UUID> userIds) {
-                organizationService.assignUsers(id, userIds);
+                        @RequestBody List<AssignUserEditorForm> form) {
+                organizationService.assignUsers(id, form);
                 return ResponseEntity.ok(ApiMessageDTO.<Integer>builder()
                                 .data(1)
                                 .result(true)
@@ -107,7 +108,7 @@ public class OrganizationResource extends
         public ResponseEntity<ApiMessageDTO<Integer>> changeTitle(@PathVariable UUID orgId,
                                                                   @PathVariable UUID userId,
                                                                   @RequestBody ChangeUserTitleEditorForm request) {
-                organizationService.changeTitle(orgId, userId, request.getTitle());
+                organizationService.changeTitle(orgId, userId, request.getTitleId());
                 return ResponseEntity.ok(ApiMessageDTO.<Integer>builder()
                         .data(1)
                         .result(true)

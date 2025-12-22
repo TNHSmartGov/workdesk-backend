@@ -11,6 +11,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -36,4 +37,10 @@ public class TaskEditorForm {
 
     @NotNull(message = "{type.not.null}")
     TaskType type;
+
+    @NotNull(message = "{project_id.not.null}")
+    UUID projectId;
+
+    @NotNull(message = "{project_id.not.null}")
+    UUID taskListId;
 }

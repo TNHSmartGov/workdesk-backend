@@ -35,6 +35,9 @@ public class UserOrganization extends Auditable<String> {
     @ManyToOne(fetch = FetchType.LAZY)
     Category title;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    Category position;
+
     @Builder.Default
     Boolean active = true;
 }

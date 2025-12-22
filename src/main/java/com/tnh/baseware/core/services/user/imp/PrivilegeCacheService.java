@@ -52,8 +52,8 @@ public class PrivilegeCacheService {
         return matchPattern(urlPattern, requestURI);
     }
 
-    public void cachePrivileges(String tenantId, String userId, List<String> privileges) {
-        var key = securityProperties.getPrivilege().getPrefix() + tenantId + ":" + userId;
+    public void cachePrivileges(String userId, List<String> privileges) {
+        var key = securityProperties.getPrivilege().getPrefix() + userId;
         try {
             var json = objectMapper.writeValueAsString(privileges);
             redisTemplate.opsForValue().set(key, json, securityProperties.getPrivilege().getTtl(), TimeUnit.MILLISECONDS);
@@ -63,8 +63,8 @@ public class PrivilegeCacheService {
         }
     }
 
-    public void cachePrivileges(String tenantId, String userId, String sessionId, List<String> privileges) {
-        var key = securityProperties.getPrivilege().getPrefix() + tenantId + ":" + userId + ":" + sessionId;
+    public void cachePrivileges(String userId, String sessionId, List<String> privileges) {
+        var key = securityProperties.getPrivilege().getPrefix() + userId + ":" + sessionId;
         try {
             var json = objectMapper.writeValueAsString(privileges);
             redisTemplate.opsForValue().set(key, json, securityProperties.getPrivilege().getTtl(), TimeUnit.MILLISECONDS);
@@ -74,8 +74,8 @@ public class PrivilegeCacheService {
         }
     }
 
-    public List<String> getPrivileges(String tenantId, String userId) {
-        var key = securityProperties.getPrivilege().getPrefix() + tenantId + ":" + userId;
+    public List<String> getPrivileges(String userId) {
+        var key = securityProperties.getPrivilege().getPrefix() + userId;
         var json = (String) redisTemplate.opsForValue().get(key);
         if (json == null) return Collections.emptyList();
 
@@ -88,8 +88,8 @@ public class PrivilegeCacheService {
         }
     }
 
-    public List<String> getPrivileges(String tenantId, String userId, String sessionId) {
-        var key = securityProperties.getPrivilege().getPrefix() + tenantId + ":" + userId + ":" + sessionId;
+    public List<String> getPrivileges(String userId, String sessionId) {
+        var key = securityProperties.getPrivilege().getPrefix() + userId + ":" + sessionId;
         var json = (String) redisTemplate.opsForValue().get(key);
         if (json == null) return Collections.emptyList();
 
@@ -117,22 +117,22 @@ public class PrivilegeCacheService {
     }
 
     @Async
-    public void clearUserPrivilegeAsync(String tenantId, String userId) {
-        clearUserCache(tenantId, userId);
+    public void clearUserPrivilegeAsync(String userId) {
+        clearUserCache(userId);
     }
 
     @Async
-    public void clearUserPrivilegeAsync(String tenantId, String userId, String sessionId) {
-        clearUserCache(tenantId, userId, sessionId);
+    public void clearUserPrivilegeAsync(String userId, String sessionId) {
+        clearUserCache(userId, sessionId);
     }
 
-    public void clearUserCache(String tenantId, String userId) {
-        var key = securityProperties.getPrivilege().getPrefix() + tenantId + ":" + userId;
+    public void clearUserCache(String userId) {
+        var key = securityProperties.getPrivilege().getPrefix() + userId;
         redisTemplate.delete(key);
     }
 
-    public void clearUserCache(String tenantId, String userId, String sessionId) {
-        var key = securityProperties.getPrivilege().getPrefix() + tenantId + ":" + userId + ":" + sessionId;
+    public void clearUserCache(String userId, String sessionId) {
+        var key = securityProperties.getPrivilege().getPrefix() + userId + ":" + sessionId;
         redisTemplate.delete(key);
     }
 
@@ -140,22 +140,22 @@ public class PrivilegeCacheService {
         patternCache.clear();
     }
 
-    public void invalidatePrivilegeCache(String tenantId, Privilege privilege) {
+    public void invalidatePrivilegeCache(Privilege privilege) {
         var users = privilege.getRoles().stream()
                 .filter(role -> role.getUsers() != null)
                 .flatMap(role -> role.getUsers().stream())
                 .toList();
 
-        users.forEach(user -> clearUserPrivilegeAsync(tenantId, String.valueOf(user.getId())));
+        users.forEach(user -> clearUserPrivilegeAsync(String.valueOf(user.getId())));
 
         clearPatternCache();
         clearPatternCache();
         log.debug(LogStyleHelper.debug("Deleted privilege cache for privilege {} - affected {} user(s)"), privilege.getId(), users.size());
     }
 
-    public void invalidateAllUserPrivilegesByRole(String tenantId, Role role) {
+    public void invalidateAllUserPrivilegesByRole(Role role) {
         if (role.getUsers() == null) return;
-        role.getUsers().forEach(user -> clearUserPrivilegeAsync(tenantId, String.valueOf(user.getId())));
+        role.getUsers().forEach(user -> clearUserPrivilegeAsync(String.valueOf(user.getId())));
     }
 
     @Async

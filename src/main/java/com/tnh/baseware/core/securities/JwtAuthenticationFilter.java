@@ -80,10 +80,9 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
 
         try {
             var username = jwtTokenService.extractUsername(accessToken);
-            var tenantId = jwtTokenService.extractTenantId(accessToken);
             var sessionId = jwtTokenService.extractSessionId(accessToken);
 
-            if (username.isEmpty() || tenantId.isEmpty() || sessionId.isEmpty()) {
+            if (username.isEmpty() || sessionId.isEmpty()) {
                 log.debug(LogStyleHelper.debug("JWT token is invalid or expired"));
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "error.unauthorized");
                 return;
@@ -101,9 +100,9 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
                     .map(GrantedAuthority::getAuthority).toList();
 
             if (securityProperties.getJwt().isAllowMultipleDevices()) {
-                privilegeCacheService.cachePrivileges(tenantId.get(), String.valueOf(userDetails.getUser().getId()), sessionId.get(), privileges);
+                privilegeCacheService.cachePrivileges(String.valueOf(userDetails.getUser().getId()), sessionId.get(), privileges);
             } else {
-                privilegeCacheService.cachePrivileges(tenantId.get(), String.valueOf(userDetails.getUser().getId()), privileges);
+                privilegeCacheService.cachePrivileges(String.valueOf(userDetails.getUser().getId()), privileges);
             }
 
             var authToken = new UsernamePasswordAuthenticationToken(

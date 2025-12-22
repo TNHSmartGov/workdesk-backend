@@ -40,9 +40,7 @@ public class UserEditorForm {
     String avatarUrl;
     String address;
     String idn;
-    @NotNull(message = "{ignore.payment.not.null}")
-    @Schema(description = "true: user can view cams without payment, false: user must pay to view cams", defaultValue = "false")
-    Boolean ignorePayment; // user can view cams without payment
+
     @NotNull(message = "{ial.not.null}")
     @Schema(description = "0: level 0 identity account, 1: level 1 identity account, 2: level 2 identity account", defaultValue = "0")
     Integer ial;
@@ -52,8 +50,6 @@ public class UserEditorForm {
     Boolean enabled;
     Instant accountExpiryDate;
 
-    @NotNull(message = "{role.not.null}")
-    UUID role;
     @NotNull(message = "{user.type.not.null}")
     @Schema(description = "Values are retrieved from 'users/enums?name=UserType'")
     String userType;

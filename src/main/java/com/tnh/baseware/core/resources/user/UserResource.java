@@ -1,9 +1,11 @@
 package com.tnh.baseware.core.resources.user;
 
+import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.forms.user.ChangePasswordForm;
 import com.tnh.baseware.core.forms.user.ResetPasswordForm;
 import com.tnh.baseware.core.forms.user.UserEditorForm;
@@ -51,7 +53,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Edit user profile")
-        @ApiResponse(responseCode = "200", description = "User profile updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/profile")
         public ResponseEntity<ApiMessageDTO<UserDTO>> editProfile(@PathVariable UUID id,
                         @Valid @RequestBody UserProfileForm form) {
@@ -65,7 +67,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Enable a user")
-        @ApiResponse(responseCode = "200", description = "User enabled", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/enable")
         public ResponseEntity<ApiMessageDTO<Integer>> enableUser(@PathVariable UUID id) {
                 userService.enableUser(id);
@@ -78,7 +80,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Disable a user")
-        @ApiResponse(responseCode = "200", description = "User disabled", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/disable")
         public ResponseEntity<ApiMessageDTO<Integer>> disableUser(@PathVariable UUID id) {
                 userService.disableUser(id);
@@ -91,7 +93,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Lock a user")
-        @ApiResponse(responseCode = "200", description = "User locked", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/lock")
         public ResponseEntity<ApiMessageDTO<Integer>> lockUser(@PathVariable UUID id) {
                 userService.lockUser(id);
@@ -104,7 +106,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Unlock a user")
-        @ApiResponse(responseCode = "200", description = "User unlocked", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/unlock")
         public ResponseEntity<ApiMessageDTO<Integer>> unlockUser(@PathVariable UUID id) {
                 userService.unlockUser(id);
@@ -117,7 +119,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Reset failed login attempts")
-        @ApiResponse(responseCode = "200", description = "Failed login attempts reset", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/reset-failed-login-attempts")
         public ResponseEntity<ApiMessageDTO<Integer>> resetFailedLoginAttempts(@PathVariable UUID id) {
                 userService.resetFailedLoginAttempts(id);
@@ -130,7 +132,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Change password")
-        @ApiResponse(responseCode = "200", description = "Password changed", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/change-password")
         public ResponseEntity<ApiMessageDTO<Integer>> changePassword(@PathVariable UUID id,
                         @Valid @RequestBody ChangePasswordForm form) {
@@ -144,7 +146,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Reset password")
-        @ApiResponse(responseCode = "200", description = "Password reset", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
         @PutMapping("/reset-password")
         public ResponseEntity<ApiMessageDTO<Integer>> resetPassword(@RequestBody ResetPasswordForm form) {
                 userService.resetPassword(form);
@@ -157,7 +159,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find an user by token")
-        @ApiResponse(responseCode = "200", description = "User retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserTokenDTO.class, type = ApiResponseType.OBJECT)
         @GetMapping("/by-token")
         public ResponseEntity<ApiMessageDTO<UserTokenDTO>> findByToken(HttpServletRequest request) {
                 var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -180,7 +182,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users by organization")
-        @ApiResponse(responseCode = "200", description = "Users retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(UserDTO.class)
         @GetMapping("/by-organization/{organizationId}")
         public ResponseEntity<ApiMessageDTO<List<UserDTO>>> findAllByOrganization(@PathVariable UUID organizationId) {
                 var users = userService.findAllByOrganization(organizationId);
@@ -193,7 +195,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users by organization with pagination")
-        @ApiResponse(responseCode = "200", description = "Users retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.HATEOAS_PAGE)
         @GetMapping("/by-organization/{organizationId}/pagination")
         public ResponseEntity<ApiMessageDTO<PagedModel<UserDTO>>> findAllByOrganizationWithPagination(
                         @PathVariable UUID organizationId,
@@ -210,7 +212,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users without organization")
-        @ApiResponse(responseCode = "200", description = "Users retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserDTO.class)
         @GetMapping("/without-organization/{organizationId}")
         public ResponseEntity<ApiMessageDTO<List<UserDTO>>> findAllWithoutOrganization(
                         @PathVariable UUID organizationId) {
@@ -224,7 +226,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users without organization with pagination")
-        @ApiResponse(responseCode = "200", description = "Users retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.HATEOAS_PAGE)
         @GetMapping("/without-organization/{organizationId}/pagination")
         public ResponseEntity<ApiMessageDTO<PagedModel<UserDTO>>> findAllWithoutOrganizationWithPagination(
                         @PathVariable UUID organizationId,
@@ -241,7 +243,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users without role")
-        @ApiResponse(responseCode = "200", description = "Users retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserDTO.class)
         @GetMapping("/without-role/{roleId}")
         public ResponseEntity<ApiMessageDTO<List<UserDTO>>> findAllWithoutRole(@PathVariable UUID roleId) {
                 var users = userService.findAllWithoutRole(roleId);
@@ -254,7 +256,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users without role with pagination")
-        @ApiResponse(responseCode = "200", description = "Users retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.HATEOAS_PAGE)
         @GetMapping("/without-role/{roleId}/pagination")
         public ResponseEntity<ApiMessageDTO<PagedModel<UserDTO>>> findAllWithoutRoleWithPagination(
                         @PathVariable UUID roleId,
@@ -271,7 +273,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users by role")
-        @ApiResponse(responseCode = "200", description = "Users retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserDTO.class)
         @GetMapping("/by-role/{roleId}")
         public ResponseEntity<ApiMessageDTO<List<UserDTO>>> findAllByRole(@PathVariable UUID roleId) {
                 var users = userService.findAllByRole(roleId);
@@ -284,7 +286,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users by role with pagination")
-        @ApiResponse(responseCode = "200", description = "Users retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+        @ApiOkResponse(value = UserDTO.class, type =  ApiResponseType.HATEOAS_PAGE)
         @GetMapping("/by-role/{roleId}/pagination")
         public ResponseEntity<ApiMessageDTO<PagedModel<UserDTO>>> findAllByRoleWithPagination(@PathVariable UUID roleId,
                         Pageable pageable,

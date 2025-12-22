@@ -163,3 +163,11 @@ server:
 springdoc:
   api-docs:
     path: "/api-docs"
+minio:
+  end-point: "http://localhost:9000"
+  security:
+    access-key: "minioadmin"
+    secret-key: "minioadmin"
+  bucket-prefix: "workdesk-"
+storage:
+  strategy: s3StorageService

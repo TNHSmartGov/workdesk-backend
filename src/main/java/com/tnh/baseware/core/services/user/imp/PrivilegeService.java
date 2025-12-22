@@ -1,6 +1,5 @@
 package com.tnh.baseware.core.services.user.imp;
 
-import com.tnh.baseware.core.components.TenantContext;
 import com.tnh.baseware.core.dtos.user.PrivilegeDTO;
 import com.tnh.baseware.core.entities.user.Privilege;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
@@ -52,7 +51,7 @@ public class PrivilegeService extends GenericService<Privilege, PrivilegeEditorF
         mapper.formToEntity(form, privilege);
 
         var privilegeNew = repository.save(privilege);
-        privilegeCacheService.invalidatePrivilegeCache(TenantContext.getTenantId(), privilege);
+        privilegeCacheService.invalidatePrivilegeCache(privilege);
 
         return mapper.entityToDTO(privilegeNew);
     }
@@ -64,7 +63,7 @@ public class PrivilegeService extends GenericService<Privilege, PrivilegeEditorF
                 new BWCNotFoundException(messageService.getMessage("privilege.not.found", id)));
         repository.delete(privilege);
 
-        privilegeCacheService.invalidatePrivilegeCache(TenantContext.getTenantId(), privilege);
+        privilegeCacheService.invalidatePrivilegeCache(privilege);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.tnh.baseware.core.configs;
 
 import com.tnh.baseware.core.components.CustomAuthorizationFilter;
-import com.tnh.baseware.core.components.TenantFilter;
 import com.tnh.baseware.core.components.TrackActivityFilter;
 import com.tnh.baseware.core.properties.CorsProperties;
 import com.tnh.baseware.core.properties.SecurityProperties;
@@ -41,7 +40,6 @@ public class SecurityConfiguration {
     CustomAuthorizationFilter customAuthorizationFilter;
     TrackActivityFilter trackActivityFilter;
     JwtAuthenticationFilter jwtAuthenticationFilter;
-    TenantFilter tenantFilter;
 
     CorsProperties corsProperties;
     SecurityUriProperties securityUriProperties;
@@ -81,8 +79,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(bypassUrls).permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(tenantFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(jwtAuthenticationFilter, TenantFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(customAuthorizationFilter, JwtAuthenticationFilter.class)
                 .addFilterAfter(trackActivityFilter, CustomAuthorizationFilter.class)
                 .logout(logout -> logout

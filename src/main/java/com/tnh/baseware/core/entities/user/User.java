@@ -64,10 +64,6 @@ public class User extends Auditable<String> implements Serializable {
 
     @Column(nullable = false)
     @Builder.Default
-    Boolean ignorePayment = Boolean.FALSE; // user can view cams without payment
-
-    @Column(nullable = false)
-    @Builder.Default
     Integer ial = 0;
 
     @Column(nullable = false)
@@ -103,11 +99,8 @@ public class User extends Auditable<String> implements Serializable {
     @Builder.Default
     Set<Role> roles = new HashSet<>();
 
-    @JsonIgnore
-    @ManyToMany
-    @JoinTable(name = "users_organizations", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "id"))
-    @Builder.Default
-    Set<Organization> organizations = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<UserOrganization> organizations;
 
     public Set<GrantedAuthority> getAuthorities() {
         return roles.stream()

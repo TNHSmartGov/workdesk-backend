@@ -232,6 +232,16 @@
             <artifactId>telegrambots-abilities</artifactId>
             <version>9.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
     </dependencies>
 
     <build>

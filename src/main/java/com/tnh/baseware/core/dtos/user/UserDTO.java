@@ -38,7 +38,6 @@ public class UserDTO extends RepresentationModel<UserDTO> implements Identifiabl
     Instant lockTime;
     Instant accountExpiryDate;
     Integer failedLoginAttempts;
-    Boolean ignorePayment;
     Boolean superAdmin;
     String userType;
     List<RoleDTO> roles;

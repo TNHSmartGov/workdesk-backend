@@ -76,10 +76,9 @@ public class CustomAuthorizationFilter extends BasewareCoreFilter {
 
         try {
             var username = jwtTokenService.extractUsername(accessToken);
-            var tenantId = jwtTokenService.extractTenantId(accessToken);
             var sessionId = jwtTokenService.extractSessionId(accessToken);
 
-            if (username.isEmpty() || tenantId.isEmpty() || sessionId.isEmpty()) {
+            if (username.isEmpty() || sessionId.isEmpty()) {
                 log.debug(LogStyleHelper.debug("JWT token is invalid or expired"));
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "error.unauthorized");
                 return;
@@ -100,10 +99,9 @@ public class CustomAuthorizationFilter extends BasewareCoreFilter {
             }
 
             var privileges = securityProperties.getJwt().isAllowMultipleDevices()
-                    ? privilegeCacheService.getPrivileges(tenantId.get(), String.valueOf(userDetails.getUser().getId()),
+                    ? privilegeCacheService.getPrivileges(String.valueOf(userDetails.getUser().getId()),
                             sessionId.get())
-                    : privilegeCacheService.getPrivileges(tenantId.get(),
-                            String.valueOf(userDetails.getUser().getId()));
+                    : privilegeCacheService.getPrivileges(String.valueOf(userDetails.getUser().getId()));
 
             if (!privilegeCacheService.hasPrivilege(requestMethod, requestURI, privileges)) {
                 log.debug(LogStyleHelper.debug("User '{}' does not have access to '{} {}'"), username, requestMethod,

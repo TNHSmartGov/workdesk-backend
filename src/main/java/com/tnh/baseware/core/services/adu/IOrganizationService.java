@@ -27,4 +27,6 @@ public interface IOrganizationService
     void assignUsers(UUID id, List<UUID> ids);
 
     void removeUsers(UUID id, List<UUID> ids);
+
+    void changeTitle(UUID orgId, UUID userId, String title);
 }

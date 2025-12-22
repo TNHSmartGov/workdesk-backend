@@ -2,10 +2,15 @@ package com.tnh.baseware.core.services.adu.imp;
 
 import com.tnh.baseware.core.dtos.adu.OrganizationDTO;
 import com.tnh.baseware.core.entities.adu.Organization;
+import com.tnh.baseware.core.entities.audit.Category;
+import com.tnh.baseware.core.entities.user.UserOrganization;
+import com.tnh.baseware.core.enums.CategoryCode;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.forms.adu.OrganizationEditorForm;
 import com.tnh.baseware.core.mappers.adu.IOrganizationMapper;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
+import com.tnh.baseware.core.repositories.audit.ICategoryRepository;
+import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
@@ -19,6 +24,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,13 +36,19 @@ public class OrganizationService extends
         IOrganizationService {
 
     IUserRepository userRepository;
+    IUserOrganizationRepository  userOrganizationRepository;
+    ICategoryRepository  categoryRepository;
 
     public OrganizationService(IOrganizationRepository repository,
                                IOrganizationMapper mapper,
                                MessageService messageService,
-                               IUserRepository userRepository) {
+                               IUserRepository userRepository,
+                               IUserOrganizationRepository  userOrganizationRepository,
+                               ICategoryRepository  categoryRepository) {
         super(repository, mapper, messageService, Organization.class);
         this.userRepository = userRepository;
+        this.userOrganizationRepository = userOrganizationRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -127,26 +139,89 @@ public class OrganizationService extends
             return;
         }
 
-        users.forEach(user -> user.getOrganizations().add(organization));
-        userRepository.saveAll(users);
+        Set<UUID> existingUserIds =
+                userOrganizationRepository
+                        .findActiveUserIdsByOrganizationId(id);
+
+        Category defaultTitle =
+                categoryRepository.findByCodeAndName(
+                        CategoryCode.ORGANIZATION_TITLE,
+                        "STAFF"
+                ).orElseThrow(() ->
+                        new IllegalStateException("Default title STAFF not found")
+                );
+
+        List<UserOrganization> toCreate = users.stream()
+                .filter(user -> !existingUserIds.contains(user.getId()))
+                .map(user -> UserOrganization.builder()
+                        .user(user)
+                        .organization(organization)
+                        .title(defaultTitle)
+                        .active(true)
+                        .build()
+                )
+                .toList();
+
+        if (!toCreate.isEmpty()) {
+            userOrganizationRepository.saveAll(toCreate);
+        }
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void removeUsers(UUID id, List<UUID> ids) {
-        if (BasewareUtils.isBlank(ids)) {
+    public void removeUsers(UUID organizationId, List<UUID> userIds) {
+
+        if (BasewareUtils.isBlank(userIds)) {
             return;
         }
 
-        var organization = repository.findById(id).orElseThrow(() ->
-                new BWCNotFoundException(messageService.getMessage("organization.not.found", id)));
-
-        var users = userRepository.findAllById(ids);
-        if (BasewareUtils.isBlank(users)) {
-            return;
+        boolean orgExists = repository.existsById(organizationId);
+        if (!orgExists) {
+            throw new BWCNotFoundException(
+                    messageService.getMessage("organization.not.found", organizationId)
+            );
         }
 
-        users.forEach(user -> user.getOrganizations().remove(organization));
-        userRepository.saveAll(users);
+        int updated = userOrganizationRepository.deactivateUsers(
+                organizationId,
+                userIds
+        );
+
+        if (updated == 0) {
+            throw new BWCNotFoundException(
+                    messageService.getMessage("users.not.in.organization")
+            );
+        }
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void changeTitle(UUID orgId, UUID userId, String title) {
+
+        UserOrganization uo = userOrganizationRepository
+                .findByUserIdAndOrganizationId(userId, orgId)
+                .orElseThrow(() ->
+                        new BWCNotFoundException(
+                                messageService.getMessage("user.not.in.organization", userId, orgId)
+                        )
+                );
+
+        if (!Boolean.TRUE.equals(uo.getActive())) {
+            throw new IllegalStateException("User is inactive in this organization");
+        }
+
+        Category titleCategory = categoryRepository
+                .findByCodeAndName(
+                        CategoryCode.ORGANIZATION_TITLE,
+                        title
+                )
+                .orElseThrow(() ->
+                        new BWCNotFoundException(
+                                messageService.getMessage("title.not.found", title)
+                        )
+                );
+
+        uo.setTitle(titleCategory);
+        userOrganizationRepository.save(uo);
     }
 }

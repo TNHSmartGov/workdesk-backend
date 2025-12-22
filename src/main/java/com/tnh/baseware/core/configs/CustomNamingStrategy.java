@@ -29,7 +29,7 @@ public class CustomNamingStrategy extends PhysicalNamingStrategyStandardImpl {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final String TABLE_PREFIX_PROD = "ivms_";
+    private static final String TABLE_PREFIX_PROD = "";
     private static final String TABLE_PREFIX_DEV = "";
     private static final String EMPTY_IDENTIFIER = "";
     private static final Pattern MANY_TO_MANY_PATTERN = Pattern.compile("^[a-z_]+_[a-z_]+$", Pattern.CASE_INSENSITIVE);

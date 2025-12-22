@@ -1,8 +1,10 @@
 package com.tnh.baseware.core.resources.user;
 
+import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.dtos.user.AuthenticationDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
+import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.forms.user.AuthenticationForm;
 import com.tnh.baseware.core.forms.user.RegisterForm;
 import com.tnh.baseware.core.services.MessageService;
@@ -37,9 +39,7 @@ public class AuthenticationResource {
     IUserService userService;
 
     @Operation(summary = "Register a new user")
-    @ApiResponse(responseCode = "200", description = "User registered",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ApiMessageDTO.class)))
+    @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.OBJECT)
     @PostMapping("/register")
     public ResponseEntity<ApiMessageDTO<UserDTO>> registerUser(@Valid @RequestBody RegisterForm form,
                                                                HttpServletRequest request) {
@@ -54,9 +54,7 @@ public class AuthenticationResource {
     }
 
     @Operation(summary = "Authenticate a user")
-    @ApiResponse(responseCode = "200", description = "User logged in",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ApiMessageDTO.class)))
+    @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.OBJECT)
     @PostMapping("/login")
     public ResponseEntity<ApiMessageDTO<AuthenticationDTO>> login(@Valid @RequestBody AuthenticationForm form,
                                                                   HttpServletRequest request) {
@@ -71,9 +69,7 @@ public class AuthenticationResource {
     }
 
     @Operation(summary = "Refresh token")
-    @ApiResponse(responseCode = "200", description = "Token refreshed",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ApiMessageDTO.class)))
+    @ApiOkResponse(value = AuthenticationDTO.class, type = ApiResponseType.OBJECT)
     @PostMapping("/refresh-token")
     public ResponseEntity<ApiMessageDTO<AuthenticationDTO>> refreshToken(HttpServletRequest request) {
         var authenticationDTO = authenticationService.refreshToken(request);

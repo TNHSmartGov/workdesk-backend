@@ -37,6 +37,8 @@ public class Role extends Auditable<String> implements Serializable {
 
         Boolean isDefault;
 
+        Boolean isSystem;
+
         @JsonIgnore
         @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
         @Builder.Default

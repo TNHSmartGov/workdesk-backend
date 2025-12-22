@@ -105,6 +105,18 @@ public interface IGenericRepository<T, I> extends JpaRepository<T, I>, JpaSpecif
         saveAll(findByIdIn(ids));
     }
 
+    @Transactional
+    default void restoreSoftDeleteById(I id) {
+        findById(id).ifPresent(entity -> {
+            try {
+                entity.getClass().getMethod("setDeleted", Boolean.class).invoke(entity, Boolean.FALSE);
+                save(entity);
+            } catch (Exception e) {
+                throw new BWCGenericRuntimeException("Entity not support soft delete", e);
+            }
+        });
+    }
+
     @Transactional(readOnly = true)
     default Optional<T> findByField(String fieldName, Object value) {
         Specification<T> specification = createFieldSpecification(fieldName, value);

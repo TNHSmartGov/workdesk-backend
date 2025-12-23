@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.tnh.baseware.core.enums.task.TaskPriority;
 import com.tnh.baseware.core.enums.task.TaskStatus;
 import com.tnh.baseware.core.enums.task.TaskType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -30,6 +31,7 @@ public class TaskEditorForm {
     Instant dueDate;
 
     @NotNull(message = "{status.not.null}")
+    @Schema(description = "Values are retrieved from 'tasks/enums?name=TaskStatus'")
     TaskStatus status;
 
     @NotNull(message = "{priority.not.null}")
@@ -37,9 +39,6 @@ public class TaskEditorForm {
 
     @NotNull(message = "{type.not.null}")
     TaskType type;
-
-    @NotNull(message = "{project_id.not.null}")
-    UUID projectId;
 
     @NotNull(message = "{project_id.not.null}")
     UUID taskListId;

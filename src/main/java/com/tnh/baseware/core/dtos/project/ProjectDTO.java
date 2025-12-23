@@ -20,8 +20,10 @@ import java.util.UUID;
 public class ProjectDTO extends RepresentationModel<ProjectDTO> implements Identifiable<UUID> {
     UUID id;
     String name;
+    String code;
     String description;
-    OrganizationDTO organization;
+    UUID organizationId;
+    String organizationName;
     Instant startDate;
     Instant endDate;
     ProjectStatus status;

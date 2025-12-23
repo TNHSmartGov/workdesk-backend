@@ -16,6 +16,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Getter
@@ -37,6 +42,8 @@ public abstract class GenericService<E, F, D, R extends IGenericRepository<E, I>
     M mapper;
     MessageService messageService;
     Class<E> entityClass;
+
+    private static final Map<String, Class<?>> ENUM_CACHE = new ConcurrentHashMap<>();
 
     @Override
     @Transactional
@@ -207,33 +214,67 @@ public abstract class GenericService<E, F, D, R extends IGenericRepository<E, I>
     @Override
     @Transactional(readOnly = true)
     public List<? extends EnumDTO<?>> getEnumValues(String enumName) {
-        try {
-            var basePackage = "com.tnh.baseware.core.enums";
-            var className = basePackage + "." + enumName;
-            var clazz = Class.forName(className);
 
-            if (!clazz.isEnum() || !BaseEnum.class.isAssignableFrom(clazz)) {
-                throw new BWCGenericRuntimeException(
-                        messageService.getMessage("enum.not.found", entityClass.getSimpleName(), enumName));
+        try {
+            Class<?> enumClass = ENUM_CACHE.get(enumName);
+
+            if (enumClass == null) {
+                String basePackage = "com.tnh.baseware.core.enums";
+
+                ClassPathScanningCandidateComponentProvider scanner =
+                        new ClassPathScanningCandidateComponentProvider(false);
+
+                scanner.addIncludeFilter((metadataReader, metadataReaderFactory) -> true);
+
+                for (BeanDefinition bd : scanner.findCandidateComponents(basePackage)) {
+                    Class<?> clazz = Class.forName(bd.getBeanClassName());
+
+                    if (clazz.isEnum()
+                            && BaseEnum.class.isAssignableFrom(clazz)
+                            && clazz.getSimpleName().equals(enumName)) {
+
+                        enumClass = clazz;
+                        break;
+                    }
+                }
+
+                ENUM_CACHE.put(enumName, Objects.requireNonNullElse(enumClass, Void.class));
             }
 
-            var constants = clazz.getEnumConstants();
+            if (enumClass == null || enumClass == Void.class) {
+                throw new BWCNotFoundException(
+                        messageService.getMessage(
+                                "enum.not.found",
+                                entityClass.getSimpleName(),
+                                enumName
+                        )
+                );
+            }
+
+            Object[] constants = enumClass.getEnumConstants();
 
             return Arrays.stream(constants)
                     .map(e -> {
-                        var baseEnum = (BaseEnum<?>) e;
-                        var displayName = extractDisplayName(e, enumName);
-                        return new EnumDTO<>(baseEnum.getValue(), ((Enum<?>) e).name(), displayName);
+                        BaseEnum<?> baseEnum = (BaseEnum<?>) e;
+                        String displayName = extractDisplayName(e, enumName);
+                        return new EnumDTO<>(
+                                baseEnum.getValue(),
+                                ((Enum<?>) e).name(),
+                                displayName
+                        );
                     })
                     .toList();
-        } catch (ClassNotFoundException e) {
-            log.debug(LogStyleHelper.error("Class not found: {}"), e.getMessage());
-            throw new BWCNotFoundException(
-                    messageService.getMessage("enum.not.found", entityClass.getSimpleName(), enumName), e);
+
         } catch (Exception e) {
-            log.debug(LogStyleHelper.error("Error retrieving enum values: {}"), e.getMessage());
+            log.debug("Error retrieving enum values: {}", e.getMessage(), e);
             throw new BWCGenericRuntimeException(
-                    messageService.getMessage("enum.error", entityClass.getSimpleName(), enumName), e);
+                    messageService.getMessage(
+                            "enum.error",
+                            entityClass.getSimpleName(),
+                            enumName
+                    ),
+                    e
+            );
         }
     }
 

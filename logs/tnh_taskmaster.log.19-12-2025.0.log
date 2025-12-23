@@ -1,0 +1,608 @@
+19-12-2025 08:45:24.743 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 08:45:24.767 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 08:45:26.875 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 08:45:26.877 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 08:45:26.890 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 08:45:26.894 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 09:36:07.662 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 11520 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 09:36:07.664 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 09:36:12.436 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 09:36:12.448 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 09:36:12.448 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 09:36:12.536 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 09:36:12.536 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 4822 ms
+19-12-2025 09:36:12.916 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 09:36:13.327 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 09:36:13.732 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 09:36:13.733 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 09:36:14.021 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1e8c9083
+19-12-2025 09:36:14.024 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 09:36:16.988 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 09:36:17.789 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 09:36:17.798 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 09:36:17.798 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 09:36:19.780 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 09:36:20.087 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 09:36:20.958 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 09:36:22.358 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 09:36:22.371 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 15.431 seconds (process running for 16.879)
+19-12-2025 09:36:22.382 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 09:36:22.455 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 09:36:22.472 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 99ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 09:36:22.473 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 09:36:30.738 [http-nio-127.0.0.1-8888-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
+19-12-2025 09:36:30.739 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
+19-12-2025 09:36:30.741 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 2 ms
+19-12-2025 09:38:40.534 [HikariPool-1 housekeeper] WARN  c.zaxxer.hikari.pool.ProxyLeakTask.run - Connection leak detection triggered for org.postgresql.jdbc.PgConnection@1e8c9083 on thread http-nio-127.0.0.1-8888-exec-1, stack trace follows
+java.lang.Exception: Apparent connection leak detected
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:127)
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.getConnection(DatasourceConnectionProviderImpl.java:126)
+	at org.hibernate.internal.NonContextualJdbcConnectionAccess.obtainConnection(NonContextualJdbcConnectionAccess.java:46)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:126)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getPhysicalConnection(LogicalConnectionManagedImpl.java:156)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getConnectionForTransactionManagement(LogicalConnectionManagedImpl.java:286)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.begin(LogicalConnectionManagedImpl.java:294)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.begin(JdbcResourceLocalTransactionCoordinatorImpl.java:232)
+	at org.hibernate.engine.transaction.internal.TransactionImpl.begin(TransactionImpl.java:83)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:176)
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:532)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.createTransactionIfNecessary(TransactionAspectSupport.java:639)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:374)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:728)
+	at com.tnh.baseware.core.services.user.imp.UserService$$SpringCGLIB$$0.registerUser(<generated>)
+	at com.tnh.baseware.core.resources.user.AuthenticationResource.registerUser(AuthenticationResource.java:46)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at com.tnh.baseware.core.components.TrackActivityFilter.doFilterInternal(TrackActivityFilter.java:60)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at com.tnh.baseware.core.components.CustomAuthorizationFilter.doFilterInternal(CustomAuthorizationFilter.java:56)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at com.tnh.baseware.core.securities.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:61)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:243)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:238)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1740)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+19-12-2025 09:38:40.539 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool.run - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m26s407ms870µs200ns).
+19-12-2025 09:38:40.597 [http-nio-127.0.0.1-8888-exec-1] INFO  c.zaxxer.hikari.pool.ProxyLeakTask.cancel - Previously reported leaked connection org.postgresql.jdbc.PgConnection@1e8c9083 on thread http-nio-127.0.0.1-8888-exec-1 was returned to the pool (unleaked)
+19-12-2025 10:36:41.240 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 10:36:41.276 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 10:36:43.610 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 10:36:43.612 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 10:36:43.645 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 10:36:43.651 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 11:24:35.045 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 33528 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 11:24:35.047 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 11:24:37.633 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 11:24:37.644 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 11:24:37.645 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 11:24:37.717 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 11:24:37.717 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2624 ms
+19-12-2025 11:24:38.062 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 11:24:38.466 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 11:24:38.740 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 11:24:38.741 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 11:24:38.902 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4b0df349
+19-12-2025 11:24:38.903 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 11:24:41.731 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 11:24:42.521 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 11:24:42.529 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 11:24:42.529 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 11:24:44.367 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 11:24:44.607 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 11:24:45.431 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 11:24:46.640 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 11:24:46.652 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 12.233 seconds (process running for 13.234)
+19-12-2025 11:24:46.661 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 11:24:46.735 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 11:24:46.752 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 99ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 11:24:46.753 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 11:25:02.346 [http-nio-127.0.0.1-8888-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
+19-12-2025 11:25:02.346 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
+19-12-2025 11:25:02.348 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 1 ms
+19-12-2025 11:25:05.696 [http-nio-127.0.0.1-8888-exec-10] INFO  o.s.api.AbstractOpenApiResource.getOpenApi - Init duration for springdoc-openapi is: 2984 ms
+19-12-2025 11:28:53.469 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 11:28:53.471 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 11:28:55.523 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 11:28:55.524 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 11:28:55.527 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 11:28:55.529 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 11:28:59.891 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 25588 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 11:28:59.893 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 11:29:02.229 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 11:29:02.238 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 11:29:02.240 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 11:29:02.311 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 11:29:02.312 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2372 ms
+19-12-2025 11:29:02.639 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 11:29:02.947 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 11:29:03.162 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 11:29:03.162 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 11:29:03.284 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5ec921f1
+19-12-2025 11:29:03.286 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 11:29:06.016 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 11:29:06.676 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 11:29:06.686 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 11:29:06.687 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 11:29:08.432 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 11:29:08.684 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 11:29:09.500 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 11:29:10.704 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 11:29:10.717 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 11.352 seconds (process running for 12.186)
+19-12-2025 11:29:10.727 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 11:29:10.799 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 11:29:10.816 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 98ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 11:29:10.816 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 11:29:35.052 [http-nio-127.0.0.1-8888-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
+19-12-2025 11:29:35.052 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
+19-12-2025 11:29:35.053 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 1 ms
+19-12-2025 11:29:39.163 [http-nio-127.0.0.1-8888-exec-9] INFO  o.s.api.AbstractOpenApiResource.getOpenApi - Init duration for springdoc-openapi is: 3767 ms
+19-12-2025 11:51:16.828 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 11:51:16.830 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 11:51:18.895 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 11:51:18.896 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 11:51:18.904 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 11:51:18.906 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 11:51:25.180 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 17364 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 11:51:25.181 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 11:51:27.408 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 11:51:27.419 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 11:51:27.419 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 11:51:27.497 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 11:51:27.497 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2277 ms
+19-12-2025 11:51:27.810 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 11:51:28.137 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 11:51:28.399 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 11:51:28.399 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 11:51:28.535 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4dd28982
+19-12-2025 11:51:28.536 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 11:51:31.219 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 11:51:31.913 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 11:51:31.920 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 11:51:31.922 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 11:51:33.587 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 11:51:33.834 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 11:51:34.621 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 11:51:35.737 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 11:51:35.754 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 11.099 seconds (process running for 12.025)
+19-12-2025 11:51:35.764 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 11:51:35.835 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 11:51:35.852 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 96ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 11:51:35.852 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 11:51:44.317 [http-nio-127.0.0.1-8888-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
+19-12-2025 11:51:44.318 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
+19-12-2025 11:51:44.320 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 2 ms
+19-12-2025 11:51:48.286 [http-nio-127.0.0.1-8888-exec-5] INFO  o.s.api.AbstractOpenApiResource.getOpenApi - Init duration for springdoc-openapi is: 3576 ms
+19-12-2025 14:13:49.943 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 14:13:49.968 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 14:13:52.225 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 14:13:52.228 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 14:13:52.253 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 14:13:52.256 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 14:14:33.564 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 20432 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 14:14:33.566 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 14:14:37.864 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 14:14:37.874 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 14:14:37.874 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 14:14:37.951 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 14:14:37.951 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 4341 ms
+19-12-2025 14:14:38.285 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 14:14:38.639 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 14:14:38.886 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 14:14:38.887 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 14:14:39.047 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@30be6a05
+19-12-2025 14:14:39.048 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 14:14:41.724 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 14:14:42.437 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 14:14:42.449 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 14:14:42.449 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 14:14:44.195 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 14:14:44.435 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 14:14:45.215 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 14:14:46.325 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 14:14:46.337 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 13.384 seconds (process running for 14.56)
+19-12-2025 14:14:46.346 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 14:14:46.418 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 14:14:46.433 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 94ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 14:14:46.433 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 14:15:43.745 [http-nio-127.0.0.1-8888-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
+19-12-2025 14:15:43.745 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
+19-12-2025 14:15:43.748 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 3 ms
+19-12-2025 14:41:17.048 [http-nio-127.0.0.1-8888-exec-3] ERROR c.t.b.core.services.GenericService.extractDisplayName - ❌ Missing displayName on enum CategoryCode
+19-12-2025 14:41:17.052 [http-nio-127.0.0.1-8888-exec-3] ERROR c.t.b.core.services.GenericService.extractDisplayName - ❌ Missing displayName on enum CategoryCode
+19-12-2025 14:42:26.408 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 14:42:26.412 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 14:42:28.498 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 14:42:28.499 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 14:42:28.505 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 14:42:28.506 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 15:41:44.008 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 24436 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 15:41:44.011 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 15:41:47.121 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 15:41:47.133 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 15:41:47.135 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 15:41:47.216 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 15:41:47.216 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 3143 ms
+19-12-2025 15:41:47.616 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 15:41:48.075 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 15:41:48.408 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 15:41:48.409 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 15:41:48.642 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@331eb953
+19-12-2025 15:41:48.644 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 15:41:50.830 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+19-12-2025 15:41:50.830 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uklc12oj95glwuai43731cf8kwp" of relation "users_organizations" does not exist, skipping
+19-12-2025 15:41:52.146 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 15:41:53.050 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 15:41:53.060 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 15:41:53.061 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 15:41:55.573 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 15:41:55.863 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 15:41:57.021 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 15:41:58.802 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 15:41:58.820 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 15.63 seconds (process running for 17.101)
+19-12-2025 15:41:58.832 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 15:41:58.931 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 15:41:58.951 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 130ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 15:41:58.951 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 15:54:34.973 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 15:54:34.978 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 15:54:37.049 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 15:54:37.050 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 15:54:37.057 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 15:54:37.058 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 15:57:12.584 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 23464 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 15:57:12.585 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 15:57:14.815 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 15:57:14.827 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 15:57:14.828 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 15:57:14.902 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 15:57:14.902 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2285 ms
+19-12-2025 15:57:15.197 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 15:57:15.553 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 15:57:15.847 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 15:57:15.848 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 15:57:15.990 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6c79a7c1
+19-12-2025 15:57:15.991 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 15:57:18.772 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 15:57:19.491 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 15:57:19.500 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 15:57:19.501 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 15:57:21.575 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 15:57:21.872 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 15:57:22.706 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 15:57:23.950 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 15:57:23.964 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 11.908 seconds (process running for 12.78)
+19-12-2025 15:57:23.973 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 15:57:24.044 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 15:57:24.060 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 95ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 15:57:24.061 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 15:59:24.893 [http-nio-127.0.0.1-8888-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
+19-12-2025 15:59:24.893 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
+19-12-2025 15:59:24.894 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 1 ms
+19-12-2025 16:04:46.273 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 16:04:46.276 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 16:04:48.311 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 16:04:48.312 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 16:04:48.317 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 16:04:48.318 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 16:04:52.208 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 28876 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 16:04:52.209 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 16:04:54.329 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 16:04:54.338 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 16:04:54.340 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 16:04:54.409 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 16:04:54.409 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2164 ms
+19-12-2025 16:04:54.731 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 16:04:55.059 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 16:04:55.277 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 16:04:55.277 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 16:04:55.410 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6e43c01f
+19-12-2025 16:04:55.412 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 16:04:57.985 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 16:04:58.705 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 16:04:58.715 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 16:04:58.716 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 16:05:00.454 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 16:05:00.717 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 16:05:01.426 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 16:05:02.560 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 16:05:02.575 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 10.895 seconds (process running for 11.641)
+19-12-2025 16:05:02.585 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 16:05:02.653 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 16:05:02.671 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 95ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 16:05:02.671 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 16:05:06.477 [http-nio-127.0.0.1-8888-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
+19-12-2025 16:05:06.478 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
+19-12-2025 16:05:06.479 [http-nio-127.0.0.1-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 1 ms
+19-12-2025 16:05:48.152 [http-nio-127.0.0.1-8888-exec-2] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logExceptions - SQL Error: 0, SQLState: 23505
+19-12-2025 16:05:48.153 [http-nio-127.0.0.1-8888-exec-2] ERROR o.h.e.jdbc.spi.SqlExceptionHelper.logExceptions - ERROR: duplicate key value violates unique constraint "ukiwylx6fb2dqdw8kfc31vaiiyp"
+  Detail: Key (code)=(ORGANIZATION_TITLE) already exists.
+19-12-2025 16:07:26.784 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 16:07:26.786 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 16:07:28.839 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 16:07:28.839 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 16:07:28.843 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 16:07:28.844 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 16:07:32.595 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 15152 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 16:07:32.597 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 16:07:34.711 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 16:07:34.722 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 16:07:34.723 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 16:07:34.792 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 16:07:34.793 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2163 ms
+19-12-2025 16:07:35.163 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 16:07:35.647 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 16:07:36.017 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 16:07:36.018 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 16:07:36.347 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@56dae6
+19-12-2025 16:07:36.349 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 16:07:38.121 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+19-12-2025 16:07:38.121 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukq1emsonpklpemi1kdwjy80gdf" of relation "categories" does not exist, skipping
+19-12-2025 16:07:39.328 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 16:07:40.155 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 16:07:40.166 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 16:07:40.166 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 16:07:42.299 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 16:07:42.594 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 16:07:43.422 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 16:07:44.723 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 16:07:44.743 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 12.618 seconds (process running for 13.36)
+19-12-2025 16:07:44.757 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 16:07:44.863 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 16:07:44.883 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 138ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 16:07:44.884 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 16:07:47.860 [http-nio-127.0.0.1-8888-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
+19-12-2025 16:07:47.861 [http-nio-127.0.0.1-8888-exec-2] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
+19-12-2025 16:07:47.863 [http-nio-127.0.0.1-8888-exec-2] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 2 ms
+19-12-2025 16:07:48.662 [http-nio-127.0.0.1-8888-exec-2] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logExceptions - SQL Error: 0, SQLState: 23505
+19-12-2025 16:07:48.662 [http-nio-127.0.0.1-8888-exec-2] ERROR o.h.e.jdbc.spi.SqlExceptionHelper.logExceptions - ERROR: duplicate key value violates unique constraint "ukiwylx6fb2dqdw8kfc31vaiiyp"
+  Detail: Key (code)=(ORGANIZATION_TITLE) already exists.
+19-12-2025 16:07:50.265 [http-nio-127.0.0.1-8888-exec-1] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logExceptions - SQL Error: 0, SQLState: 23505
+19-12-2025 16:07:50.265 [http-nio-127.0.0.1-8888-exec-1] ERROR o.h.e.jdbc.spi.SqlExceptionHelper.logExceptions - ERROR: duplicate key value violates unique constraint "ukiwylx6fb2dqdw8kfc31vaiiyp"
+  Detail: Key (code)=(ORGANIZATION_TITLE) already exists.
+19-12-2025 16:10:11.370 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 16:10:11.372 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 16:10:13.424 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 16:10:13.425 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 16:10:13.429 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 16:10:13.431 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 16:25:04.087 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 18884 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 16:25:04.087 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 16:25:07.600 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 16:25:07.613 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 16:25:07.614 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 16:25:07.726 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 16:25:07.727 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 3596 ms
+19-12-2025 16:25:08.150 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 16:25:08.732 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 16:25:09.060 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 16:25:09.061 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 16:25:09.369 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@48463900
+19-12-2025 16:25:09.371 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 16:25:13.689 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 16:25:14.979 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 16:25:14.993 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 16:25:14.993 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 16:25:18.346 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 16:25:18.908 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 16:25:20.455 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 16:25:22.556 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 16:25:22.577 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 19.036 seconds (process running for 20.041)
+19-12-2025 16:25:22.593 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 16:25:22.742 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 16:25:22.777 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 198ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 16:25:22.778 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+19-12-2025 16:51:22.925 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+19-12-2025 16:51:22.972 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+19-12-2025 16:51:25.495 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+19-12-2025 16:51:25.498 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+19-12-2025 16:51:25.553 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+19-12-2025 16:51:25.630 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+19-12-2025 16:51:30.838 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 27704 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+19-12-2025 16:51:30.839 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+19-12-2025 16:51:33.028 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 8888 (http)
+19-12-2025 16:51:33.037 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+19-12-2025 16:51:33.039 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+19-12-2025 16:51:33.113 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+19-12-2025 16:51:33.113 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2235 ms
+19-12-2025 16:51:33.423 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
+19-12-2025 16:51:33.791 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+19-12-2025 16:51:34.022 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+19-12-2025 16:51:34.022 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+19-12-2025 16:51:34.164 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@470fc16c
+19-12-2025 16:51:34.165 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+19-12-2025 16:51:37.010 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+19-12-2025 16:51:37.797 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+19-12-2025 16:51:37.806 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 20 enums
+19-12-2025 16:51:37.806 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 20 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, ProjectStatus, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType, TaskDependencyType]
+19-12-2025 16:51:39.828 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+19-12-2025 16:51:40.089 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+19-12-2025 16:51:40.910 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+19-12-2025 16:51:42.075 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 8888 (http) with context path '/'
+19-12-2025 16:51:42.088 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 11.934 seconds (process running for 12.858)
+19-12-2025 16:51:42.096 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+19-12-2025 16:51:42.165 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+19-12-2025 16:51:42.187 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:8888/
+	External: 	http://localhost:8888/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 99ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+19-12-2025 16:51:42.187 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]

@@ -1,0 +1,6 @@
+21-12-2025 18:18:03.784 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+21-12-2025 18:18:03.830 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+21-12-2025 18:18:06.028 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+21-12-2025 18:18:06.031 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+21-12-2025 18:18:06.060 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+21-12-2025 18:18:06.068 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.

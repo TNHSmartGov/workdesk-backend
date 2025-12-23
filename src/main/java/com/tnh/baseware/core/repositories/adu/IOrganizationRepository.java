@@ -16,4 +16,5 @@ public interface IOrganizationRepository extends IGenericRepository<Organization
     @Query("SELECT o FROM Organization o")
     List<Organization> findAllWithParent();
 
+
 }

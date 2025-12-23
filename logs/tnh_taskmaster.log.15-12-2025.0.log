@@ -1,117 +1,49 @@
-23-12-2025 08:01:54.708 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
-23-12-2025 08:01:54.769 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
-23-12-2025 08:01:57.066 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
-23-12-2025 08:01:57.068 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
-23-12-2025 08:01:57.140 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
-23-12-2025 08:01:57.161 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
-23-12-2025 08:54:33.657 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 10752 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
-23-12-2025 08:54:33.659 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
-23-12-2025 08:54:41.758 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
-23-12-2025 08:54:41.774 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
-23-12-2025 08:54:41.775 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
-23-12-2025 08:54:41.883 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
-23-12-2025 08:54:41.884 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 8167 ms
-23-12-2025 08:54:42.490 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
-23-12-2025 08:54:43.123 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
-23-12-2025 08:54:43.552 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
-23-12-2025 08:54:43.553 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
-23-12-2025 08:54:43.847 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7893b8c
-23-12-2025 08:54:43.849 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
-23-12-2025 08:54:48.079 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
-23-12-2025 08:54:49.027 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
-23-12-2025 08:54:49.040 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 26 enums
-23-12-2025 08:54:49.040 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 26 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, DocumentFileType, SpringProfile, AlertTargetType, ZoneType, TokenType, ExternalSource, TaskType, TaskDocumentRelationType, DocumentType, InboundStatus, AlertSource, TaskStatus, DocumentStatus, ProjectStatus, AlertChannel, TaskName, AgentRole, LogActionType, MemberStatus, UserType, TaskDependencyType]
-23-12-2025 08:54:51.217 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
-23-12-2025 08:54:51.505 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
-23-12-2025 08:54:52.334 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
-23-12-2025 08:54:53.612 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 9999 (http) with context path '/'
-23-12-2025 08:54:53.625 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 20.84 seconds (process running for 22.917)
-23-12-2025 08:54:53.635 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
-23-12-2025 08:54:53.735 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
-23-12-2025 08:54:53.759 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
-	Application 'tnh-taskmaster' is running! Access URLs:
-	Local: 	http://localhost:9999/
-	External: 	http://localhost:9999/
-	Profile(s): 	[init, tls, uribypass, openapi, dev]
-	Startup time: 133ms
-	JVM Version: 21.0.5
-----------------------------------------------------------
-23-12-2025 08:54:53.760 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
-23-12-2025 08:56:23.445 [http-nio-127.0.0.1-9999-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
-23-12-2025 08:56:23.445 [http-nio-127.0.0.1-9999-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
-23-12-2025 08:56:23.448 [http-nio-127.0.0.1-9999-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 3 ms
-23-12-2025 08:59:45.929 [http-nio-127.0.0.1-9999-exec-3] ERROR c.t.b.c.s.u.i.PrivilegeCacheService.cachePrivileges - ❌ Error caching privileges for user 849d95e3-aba6-4dd1-8264-d2e1213430c0 with session f199c03c-66aa-42a0-8f55-df087a4ce091
-23-12-2025 08:59:45.930 [http-nio-127.0.0.1-9999-exec-3] ERROR c.t.b.c.s.JwtAuthenticationFilter.doFilterInternal - ❌ Error occurred while processing JWT token: Error caching privileges for user 849d95e3-aba6-4dd1-8264-d2e1213430c0
-23-12-2025 09:00:20.660 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
-23-12-2025 09:00:20.662 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
-23-12-2025 09:00:22.726 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
-23-12-2025 09:00:22.727 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
-23-12-2025 09:00:22.731 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
-23-12-2025 09:00:22.732 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
-23-12-2025 09:00:25.669 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 10356 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
-23-12-2025 09:00:25.671 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
-23-12-2025 09:00:27.838 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
-23-12-2025 09:00:27.848 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
-23-12-2025 09:00:27.848 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
-23-12-2025 09:00:27.931 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
-23-12-2025 09:00:27.931 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2220 ms
-23-12-2025 09:00:28.261 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with authentication
-23-12-2025 09:00:28.624 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
-23-12-2025 09:00:28.881 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
-23-12-2025 09:00:28.881 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
-23-12-2025 09:00:29.031 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@79194b1c
-23-12-2025 09:00:29.032 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
-23-12-2025 09:00:32.760 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
-23-12-2025 09:00:33.670 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
-23-12-2025 09:00:33.683 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 26 enums
-23-12-2025 09:00:33.683 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 26 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, DocumentFileType, SpringProfile, AlertTargetType, ZoneType, TokenType, ExternalSource, TaskType, TaskDocumentRelationType, DocumentType, InboundStatus, AlertSource, TaskStatus, DocumentStatus, ProjectStatus, AlertChannel, TaskName, AgentRole, LogActionType, MemberStatus, UserType, TaskDependencyType]
-23-12-2025 09:00:36.207 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
-23-12-2025 09:00:36.533 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
-23-12-2025 09:00:37.490 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
-23-12-2025 09:00:38.716 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 9999 (http) with context path '/'
-23-12-2025 09:00:38.732 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 13.711 seconds (process running for 14.646)
-23-12-2025 09:00:38.742 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
-23-12-2025 09:00:38.820 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
-23-12-2025 09:00:38.842 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
-	Application 'tnh-taskmaster' is running! Access URLs:
-	Local: 	http://localhost:9999/
-	External: 	http://localhost:9999/
-	Profile(s): 	[init, tls, uribypass, openapi, dev]
-	Startup time: 107ms
-	JVM Version: 21.0.5
-----------------------------------------------------------
-23-12-2025 09:00:38.842 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
-23-12-2025 09:01:24.324 [http-nio-127.0.0.1-9999-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
-23-12-2025 09:01:24.324 [http-nio-127.0.0.1-9999-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
-23-12-2025 09:01:24.326 [http-nio-127.0.0.1-9999-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 1 ms
-23-12-2025 09:37:06.698 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
-23-12-2025 09:37:06.782 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
-23-12-2025 09:37:09.075 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
-23-12-2025 09:37:09.076 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
-23-12-2025 09:37:09.110 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
-23-12-2025 09:37:09.117 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
-23-12-2025 09:40:59.452 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 37584 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
-23-12-2025 09:40:59.453 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
-23-12-2025 09:41:01.686 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
-23-12-2025 09:41:01.698 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
-23-12-2025 09:41:01.698 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
-23-12-2025 09:41:01.777 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
-23-12-2025 09:41:01.777 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2291 ms
-23-12-2025 09:41:02.087 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
-23-12-2025 09:41:02.435 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
-23-12-2025 09:41:02.657 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
-23-12-2025 09:41:02.657 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
-23-12-2025 09:41:02.909 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@55d35f7a
-23-12-2025 09:41:02.911 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
-23-12-2025 09:41:04.481 [main] WARN  o.h.t.s.i.ExceptionHandlerLoggedImpl.handleException - GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists project_members alter column role set data type smallint" via JDBC [ERROR: column "role" cannot be cast automatically to type smallint
-  Hint: You might need to specify "USING role::smallint".]
-org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table if exists project_members alter column role set data type smallint" via JDBC [ERROR: column "role" cannot be cast automatically to type smallint
-  Hint: You might need to specify "USING role::smallint".]
+15-12-2025 13:46:44.095 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 36608 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+15-12-2025 13:46:44.098 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+15-12-2025 13:46:48.848 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
+15-12-2025 13:46:48.860 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+15-12-2025 13:46:48.861 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+15-12-2025 13:46:48.951 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+15-12-2025 13:46:48.952 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 4804 ms
+15-12-2025 13:46:49.386 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
+15-12-2025 13:46:50.283 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+15-12-2025 13:46:50.717 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+15-12-2025 13:46:50.718 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+15-12-2025 13:46:50.984 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@31f96cf
+15-12-2025 13:46:50.986 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+15-12-2025 13:46:53.299 [main] WARN  o.h.t.s.i.ExceptionHandlerLoggedImpl.handleException - GenerationTarget encountered exception accepting command : Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
+org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94)
 	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576)
 	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516)
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.migrateTable(AbstractSchemaMigrator.java:334)
-	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:84)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.createTable(AbstractSchemaMigrator.java:316)
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:80)
 	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233)
 	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112)
 	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280)
@@ -230,8 +162,8 @@ org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "a
 	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
 	at com.tnh.baseware.core.BasewareCoreApplication.main(BasewareCoreApplication.java:39)
-Caused by: org.postgresql.util.PSQLException: ERROR: column "role" cannot be cast automatically to type smallint
-  Hint: You might need to specify "USING role::smallint".
+Caused by: org.postgresql.util.PSQLException: ERROR: schema "master" does not exist
+  Position: 20
 	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733)
 	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420)
 	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372)
@@ -245,19 +177,24 @@ Caused by: org.postgresql.util.PSQLException: ERROR: column "role" cannot be cas
 	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80)
 	... 122 common frames omitted
-23-12-2025 09:41:05.821 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
-23-12-2025 09:41:06.724 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
-23-12-2025 09:41:06.735 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 26 enums
-23-12-2025 09:41:06.736 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 26 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, DocumentFileType, SpringProfile, AlertTargetType, ZoneType, TokenType, ExternalSource, TaskType, TaskDocumentRelationType, DocumentType, InboundStatus, AlertSource, TaskStatus, DocumentStatus, ProjectStatus, AlertChannel, TaskName, AgentRole, LogActionType, MemberStatus, UserType, TaskDependencyType]
-23-12-2025 09:41:07.662 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext.refresh - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'organizationResource' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\resources\adu\OrganizationResource.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'organizationService' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\services\adu\imp\OrganizationService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'IOrganizationRepository' defined in com.tnh.baseware.core.repositories.adu.IOrganizationRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); No property 'userOrganizations' found for type 'Organization'
-23-12-2025 09:41:07.665 [main] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
-23-12-2025 09:41:07.666 [main] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
-23-12-2025 09:41:07.677 [main] INFO  o.a.catalina.core.StandardService.log - Stopping service [Tomcat]
-23-12-2025 09:41:07.686 [main] INFO  o.s.b.a.l.ConditionEvaluationReportLogger.logMessage - 
+15-12-2025 13:46:53.307 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 13:46:53.307 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 13:46:53.308 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 13:46:53.308 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 13:46:53.309 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 13:46:53.309 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 13:46:53.310 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 13:46:53.310 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 13:46:54.228 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+15-12-2025 13:46:56.215 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext.refresh - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'taskMemberResource' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\resources\task\TaskMemberResource.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'taskMemberService' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\services\task\imp\TaskMemberService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'ITaskMemberRepository' defined in com.tnh.baseware.core.repositories.task.ITaskMemberRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); No property 'id' found for type 'TaskMember'
+15-12-2025 13:46:56.219 [main] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+15-12-2025 13:46:56.221 [main] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+15-12-2025 13:46:56.235 [main] INFO  o.a.catalina.core.StandardService.log - Stopping service [Tomcat]
+15-12-2025 13:46:56.247 [main] INFO  o.s.b.a.l.ConditionEvaluationReportLogger.logMessage - 
 
 Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-23-12-2025 09:41:07.701 [main] ERROR o.s.boot.SpringApplication.reportFailure - Application run failed
-org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'organizationResource' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\resources\adu\OrganizationResource.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'organizationService' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\services\adu\imp\OrganizationService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'IOrganizationRepository' defined in com.tnh.baseware.core.repositories.adu.IOrganizationRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); No property 'userOrganizations' found for type 'Organization'
+15-12-2025 13:46:56.268 [main] ERROR o.s.boot.SpringApplication.reportFailure - Application run failed
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'taskMemberResource' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\resources\task\TaskMemberResource.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'taskMemberService' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\services\task\imp\TaskMemberService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'ITaskMemberRepository' defined in com.tnh.baseware.core.repositories.task.ITaskMemberRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); No property 'id' found for type 'TaskMember'
 	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:804)
 	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387)
@@ -278,7 +215,7 @@ org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating
 	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
 	at com.tnh.baseware.core.BasewareCoreApplication.main(BasewareCoreApplication.java:39)
-Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'organizationService' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\services\adu\imp\OrganizationService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'IOrganizationRepository' defined in com.tnh.baseware.core.repositories.adu.IOrganizationRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); No property 'userOrganizations' found for type 'Organization'
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'taskMemberService' defined in file [D:\VNPTProject\workdesk-backend\target\classes\com\tnh\baseware\core\services\task\imp\TaskMemberService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'ITaskMemberRepository' defined in com.tnh.baseware.core.repositories.task.ITaskMemberRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); No property 'id' found for type 'TaskMember'
 	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:804)
 	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387)
@@ -295,7 +232,7 @@ Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Err
 	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
 	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
 	... 19 common frames omitted
-Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'IOrganizationRepository' defined in com.tnh.baseware.core.repositories.adu.IOrganizationRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); No property 'userOrganizations' found for type 'Organization'
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'ITaskMemberRepository' defined in com.tnh.baseware.core.repositories.task.ITaskMemberRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); No property 'id' found for type 'TaskMember'
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
@@ -309,7 +246,7 @@ Caused by: org.springframework.beans.factory.BeanCreationException: Error creati
 	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
 	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
 	... 33 common frames omitted
-Caused by: org.springframework.data.repository.query.QueryCreationException: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); No property 'userOrganizations' found for type 'Organization'
+Caused by: org.springframework.data.repository.query.QueryCreationException: Could not create query for public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); Reason: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); No property 'id' found for type 'TaskMember'
 	at org.springframework.data.repository.query.QueryCreationException.create(QueryCreationException.java:101)
 	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.lookupQuery(QueryExecutorMethodInterceptor.java:120)
 	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.mapMethodsToQuery(QueryExecutorMethodInterceptor.java:104)
@@ -325,14 +262,14 @@ Caused by: org.springframework.data.repository.query.QueryCreationException: Cou
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1865)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1814)
 	... 44 common frames omitted
-Caused by: java.lang.IllegalArgumentException: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.adu.IOrganizationRepository.findAllByUserOrganizations_Users_Id(java.util.UUID); No property 'userOrganizations' found for type 'Organization'
+Caused by: java.lang.IllegalArgumentException: Failed to create query for method public abstract java.util.List com.tnh.baseware.core.repositories.IGenericRepository.findByIdIn(java.util.List); No property 'id' found for type 'TaskMember'
 	at org.springframework.data.jpa.repository.query.PartTreeJpaQuery.<init>(PartTreeJpaQuery.java:107)
 	at org.springframework.data.jpa.repository.query.JpaQueryLookupStrategy$CreateQueryLookupStrategy.resolveQuery(JpaQueryLookupStrategy.java:128)
 	at org.springframework.data.jpa.repository.query.JpaQueryLookupStrategy$CreateIfNotFoundQueryLookupStrategy.resolveQuery(JpaQueryLookupStrategy.java:260)
 	at org.springframework.data.jpa.repository.query.JpaQueryLookupStrategy$AbstractQueryLookupStrategy.resolveQuery(JpaQueryLookupStrategy.java:99)
 	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.lookupQuery(QueryExecutorMethodInterceptor.java:116)
 	... 56 common frames omitted
-Caused by: org.springframework.data.mapping.PropertyReferenceException: No property 'userOrganizations' found for type 'Organization'
+Caused by: org.springframework.data.mapping.PropertyReferenceException: No property 'id' found for type 'TaskMember'
 	at org.springframework.data.mapping.PropertyPath.<init>(PropertyPath.java:94)
 	at org.springframework.data.mapping.PropertyPath.create(PropertyPath.java:455)
 	at org.springframework.data.mapping.PropertyPath.create(PropertyPath.java:431)
@@ -364,28 +301,52 @@ Caused by: org.springframework.data.mapping.PropertyReferenceException: No prope
 	at org.springframework.data.repository.query.parser.PartTree.<init>(PartTree.java:103)
 	at org.springframework.data.jpa.repository.query.PartTreeJpaQuery.<init>(PartTreeJpaQuery.java:101)
 	... 60 common frames omitted
-23-12-2025 09:44:05.262 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 35204 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
-23-12-2025 09:44:05.263 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
-23-12-2025 09:44:07.564 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
-23-12-2025 09:44:07.574 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
-23-12-2025 09:44:07.574 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
-23-12-2025 09:44:07.658 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
-23-12-2025 09:44:07.659 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2357 ms
-23-12-2025 09:44:07.961 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
-23-12-2025 09:44:08.319 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
-23-12-2025 09:44:08.557 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
-23-12-2025 09:44:08.557 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
-23-12-2025 09:44:08.702 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@490dfe25
-23-12-2025 09:44:08.703 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
-23-12-2025 09:44:10.242 [main] WARN  o.h.t.s.i.ExceptionHandlerLoggedImpl.handleException - GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists project_members alter column role set data type smallint" via JDBC [ERROR: column "role" cannot be cast automatically to type smallint
-  Hint: You might need to specify "USING role::smallint".]
-org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table if exists project_members alter column role set data type smallint" via JDBC [ERROR: column "role" cannot be cast automatically to type smallint
-  Hint: You might need to specify "USING role::smallint".]
+15-12-2025 14:51:53.654 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 36268 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+15-12-2025 14:51:53.656 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+15-12-2025 14:51:56.752 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
+15-12-2025 14:51:56.767 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+15-12-2025 14:51:56.768 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+15-12-2025 14:51:56.867 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+15-12-2025 14:51:56.868 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 3156 ms
+15-12-2025 14:51:57.278 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
+15-12-2025 14:51:57.750 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+15-12-2025 14:51:58.018 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+15-12-2025 14:51:58.018 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+15-12-2025 14:51:58.216 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@60b8c05c
+15-12-2025 14:51:58.217 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+15-12-2025 14:52:00.069 [main] WARN  o.h.t.s.i.ExceptionHandlerLoggedImpl.handleException - GenerationTarget encountered exception accepting command : Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
+org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94)
 	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576)
 	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516)
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.migrateTable(AbstractSchemaMigrator.java:334)
-	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:84)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.createTable(AbstractSchemaMigrator.java:316)
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:80)
 	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233)
 	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112)
 	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280)
@@ -504,8 +465,8 @@ org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "a
 	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
 	at com.tnh.baseware.core.BasewareCoreApplication.main(BasewareCoreApplication.java:39)
-Caused by: org.postgresql.util.PSQLException: ERROR: column "role" cannot be cast automatically to type smallint
-  Hint: You might need to specify "USING role::smallint".
+Caused by: org.postgresql.util.PSQLException: ERROR: schema "master" does not exist
+  Position: 20
 	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733)
 	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420)
 	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372)
@@ -519,62 +480,241 @@ Caused by: org.postgresql.util.PSQLException: ERROR: column "role" cannot be cas
 	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80)
 	... 122 common frames omitted
-23-12-2025 09:44:11.487 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
-23-12-2025 09:44:12.201 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
-23-12-2025 09:44:12.211 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 26 enums
-23-12-2025 09:44:12.211 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 26 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, DocumentFileType, SpringProfile, AlertTargetType, ZoneType, TokenType, ExternalSource, TaskType, TaskDocumentRelationType, DocumentType, InboundStatus, AlertSource, TaskStatus, DocumentStatus, ProjectStatus, AlertChannel, TaskName, AgentRole, LogActionType, MemberStatus, UserType, TaskDependencyType]
-23-12-2025 09:44:13.948 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
-23-12-2025 09:44:14.185 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
-23-12-2025 09:44:14.945 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
-23-12-2025 09:44:16.004 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 9999 (http) with context path '/'
-23-12-2025 09:44:16.017 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 11.284 seconds (process running for 12.132)
-23-12-2025 09:44:16.035 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
-23-12-2025 09:44:16.108 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
-23-12-2025 09:44:16.131 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+15-12-2025 14:52:00.076 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 14:52:00.077 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 14:52:00.078 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 14:52:00.078 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 14:52:00.080 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 14:52:00.080 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 14:52:00.080 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 14:52:00.081 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 14:52:00.127 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 14:52:00.127 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk42os9o8pgotw3bjbg11e7nj35" of relation "task_members" does not exist, skipping
+15-12-2025 14:52:01.253 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+15-12-2025 14:52:03.358 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+15-12-2025 14:52:03.672 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+15-12-2025 14:52:04.613 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+15-12-2025 14:52:06.122 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 9999 (http) with context path '/'
+15-12-2025 14:52:06.137 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 13.119 seconds (process running for 14.23)
+15-12-2025 14:52:06.148 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+15-12-2025 14:52:06.226 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+15-12-2025 14:52:06.243 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
 	Application 'tnh-taskmaster' is running! Access URLs:
 	Local: 	http://localhost:9999/
 	External: 	http://localhost:9999/
 	Profile(s): 	[init, tls, uribypass, openapi, dev]
-	Startup time: 111ms
+	Startup time: 104ms
 	JVM Version: 21.0.5
 ----------------------------------------------------------
-23-12-2025 09:44:16.131 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
-23-12-2025 09:44:44.850 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
-23-12-2025 09:44:44.853 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
-23-12-2025 09:44:46.903 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
-23-12-2025 09:44:46.903 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
-23-12-2025 09:44:46.907 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
-23-12-2025 09:44:46.908 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
-23-12-2025 09:44:50.903 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 38892 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
-23-12-2025 09:44:50.905 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
-23-12-2025 09:44:52.842 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
-23-12-2025 09:44:52.854 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
-23-12-2025 09:44:52.854 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
-23-12-2025 09:44:52.936 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
-23-12-2025 09:44:52.936 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 1998 ms
-23-12-2025 09:44:53.258 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
-23-12-2025 09:44:53.566 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
-23-12-2025 09:44:53.764 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
-23-12-2025 09:44:53.765 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
-23-12-2025 09:44:53.888 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7b8b755d
-23-12-2025 09:44:53.890 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
-23-12-2025 09:44:56.514 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
-23-12-2025 09:44:57.209 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
-23-12-2025 09:44:57.220 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 26 enums
-23-12-2025 09:44:57.220 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 26 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, DocumentFileType, SpringProfile, AlertTargetType, ZoneType, TokenType, ExternalSource, TaskType, TaskDocumentRelationType, DocumentType, InboundStatus, AlertSource, TaskStatus, DocumentStatus, ProjectStatus, AlertChannel, TaskName, AgentRole, LogActionType, MemberStatus, UserType, TaskDependencyType]
-23-12-2025 09:44:59.043 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
-23-12-2025 09:44:59.268 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
-23-12-2025 09:45:00.038 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
-23-12-2025 09:45:01.109 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 9999 (http) with context path '/'
-23-12-2025 09:45:01.119 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 10.696 seconds (process running for 11.439)
-23-12-2025 09:45:01.128 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
-23-12-2025 09:45:01.201 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
-23-12-2025 09:45:01.220 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+15-12-2025 14:52:06.244 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+15-12-2025 14:52:41.222 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+15-12-2025 14:52:41.225 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+15-12-2025 14:52:43.263 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+15-12-2025 14:52:43.263 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+15-12-2025 14:52:43.268 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+15-12-2025 14:52:43.270 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+15-12-2025 16:58:50.385 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 30312 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+15-12-2025 16:58:50.387 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+15-12-2025 16:58:55.901 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
+15-12-2025 16:58:55.910 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+15-12-2025 16:58:55.910 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+15-12-2025 16:58:55.982 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+15-12-2025 16:58:55.983 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 5561 ms
+15-12-2025 16:58:56.299 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
+15-12-2025 16:58:56.678 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+15-12-2025 16:58:56.901 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+15-12-2025 16:58:56.901 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+15-12-2025 16:58:57.052 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4a83d61c
+15-12-2025 16:58:57.054 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+15-12-2025 16:58:58.366 [main] WARN  o.h.t.s.i.ExceptionHandlerLoggedImpl.handleException - GenerationTarget encountered exception accepting command : Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
+org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.createTable(AbstractSchemaMigrator.java:316)
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:80)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144)
+	at java.base/java.util.HashMap.forEach(HashMap.java:1429)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141)
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37)
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35)
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:324)
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:463)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1517)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:66)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:419)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:400)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1865)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1814)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveConstructorArguments(ConstructorResolver.java:691)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:513)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1367)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1197)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1717)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1466)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1739)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1627)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1224)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1681)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1627)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1224)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.getOrderedBeansOfType(ServletContextInitializerBeans.java:211)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:174)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:169)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAdaptableBeans(ServletContextInitializerBeans.java:154)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.<init>(ServletContextInitializerBeans.java:87)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.getServletContextInitializerBeans(ServletWebServerApplicationContext.java:271)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.selfInitialize(ServletWebServerApplicationContext.java:245)
+	at org.springframework.boot.web.embedded.tomcat.TomcatStarter.onStartup(TomcatStarter.java:52)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4464)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:772)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:203)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:412)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:870)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:438)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:128)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:107)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:517)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:219)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:193)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:167)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at com.tnh.baseware.core.BasewareCoreApplication.main(BasewareCoreApplication.java:39)
+Caused by: org.postgresql.util.PSQLException: ERROR: schema "master" does not exist
+  Position: 20
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733)
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420)
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372)
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434)
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:356)
+	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:341)
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:317)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:312)
+	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94)
+	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80)
+	... 120 common frames omitted
+15-12-2025 16:58:58.371 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 16:58:58.371 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 16:58:58.372 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 16:58:58.372 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 16:58:58.372 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 16:58:58.372 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 16:58:58.373 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+15-12-2025 16:58:58.373 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+15-12-2025 16:58:59.375 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+15-12-2025 16:59:00.075 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+15-12-2025 16:59:00.082 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 18 enums
+15-12-2025 16:59:00.082 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 18 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType]
+15-12-2025 16:59:01.259 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+15-12-2025 16:59:01.552 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+15-12-2025 16:59:02.209 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+15-12-2025 16:59:03.176 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 9999 (http) with context path '/'
+15-12-2025 16:59:03.186 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 13.304 seconds (process running for 14.036)
+15-12-2025 16:59:03.194 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+15-12-2025 16:59:03.256 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+15-12-2025 16:59:03.268 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
 	Application 'tnh-taskmaster' is running! Access URLs:
 	Local: 	http://localhost:9999/
 	External: 	http://localhost:9999/
 	Profile(s): 	[init, tls, uribypass, openapi, dev]
-	Startup time: 101ms
+	Startup time: 82ms
 	JVM Version: 21.0.5
 ----------------------------------------------------------
-23-12-2025 09:45:01.222 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+15-12-2025 16:59:03.269 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]

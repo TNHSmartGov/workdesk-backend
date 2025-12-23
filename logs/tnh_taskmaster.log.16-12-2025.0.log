@@ -1,0 +1,496 @@
+16-12-2025 08:17:39.320 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+16-12-2025 08:17:39.345 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+16-12-2025 08:17:41.512 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+16-12-2025 08:17:41.512 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+16-12-2025 08:17:41.525 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+16-12-2025 08:17:41.529 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+16-12-2025 11:56:02.425 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 17308 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+16-12-2025 11:56:02.426 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+16-12-2025 11:56:09.597 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
+16-12-2025 11:56:09.605 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+16-12-2025 11:56:09.605 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+16-12-2025 11:56:09.675 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+16-12-2025 11:56:09.676 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 7195 ms
+16-12-2025 11:56:10.057 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
+16-12-2025 11:56:10.477 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+16-12-2025 11:56:10.693 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+16-12-2025 11:56:10.693 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+16-12-2025 11:56:10.852 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2a9fd482
+16-12-2025 11:56:10.853 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+16-12-2025 11:56:12.231 [main] WARN  o.h.t.s.i.ExceptionHandlerLoggedImpl.handleException - GenerationTarget encountered exception accepting command : Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
+org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.createTable(AbstractSchemaMigrator.java:316)
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:80)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144)
+	at java.base/java.util.HashMap.forEach(HashMap.java:1429)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141)
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37)
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35)
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:324)
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:463)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1517)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:66)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:419)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:400)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1865)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1814)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveConstructorArguments(ConstructorResolver.java:691)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:513)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1367)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1197)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1717)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1466)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1739)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1627)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1224)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1681)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1627)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1224)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.getOrderedBeansOfType(ServletContextInitializerBeans.java:211)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:174)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:169)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAdaptableBeans(ServletContextInitializerBeans.java:154)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.<init>(ServletContextInitializerBeans.java:87)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.getServletContextInitializerBeans(ServletWebServerApplicationContext.java:271)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.selfInitialize(ServletWebServerApplicationContext.java:245)
+	at org.springframework.boot.web.embedded.tomcat.TomcatStarter.onStartup(TomcatStarter.java:52)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4464)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:772)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:203)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:412)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:870)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:438)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:128)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:107)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:517)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:219)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:193)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:167)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at com.tnh.baseware.core.BasewareCoreApplication.main(BasewareCoreApplication.java:39)
+Caused by: org.postgresql.util.PSQLException: ERROR: schema "master" does not exist
+  Position: 20
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733)
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420)
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372)
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434)
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:356)
+	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:341)
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:317)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:312)
+	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94)
+	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80)
+	... 120 common frames omitted
+16-12-2025 11:56:12.237 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.237 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+16-12-2025 11:56:12.238 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.238 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+16-12-2025 11:56:12.238 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.238 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+16-12-2025 11:56:12.240 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.240 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+16-12-2025 11:56:12.347 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.347 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukiwylx6fb2dqdw8kfc31vaiiyp" of relation "categories" does not exist, skipping
+16-12-2025 11:56:12.350 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.350 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukt8o6pivur7nn124jehx7cygw5" of relation "categories" does not exist, skipping
+16-12-2025 11:56:12.353 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.353 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk8gtji4wdceln0554rbl06eudf" of relation "communes" does not exist, skipping
+16-12-2025 11:56:12.356 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.356 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk5dhgnik9p8t72kaktdb8kd8dt" of relation "countries" does not exist, skipping
+16-12-2025 11:56:12.359 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.359 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk7fcv9rm1ecfeumh1lo4tuntgm" of relation "menus" does not exist, skipping
+16-12-2025 11:56:12.362 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.362 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk752mo4d1g26knhksum5pek87" of relation "menus" does not exist, skipping
+16-12-2025 11:56:12.365 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.366 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukkamtsqvsul6leg7svd95mmydq" of relation "organizations" does not exist, skipping
+16-12-2025 11:56:12.367 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.369 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukp9pbw3flq9hkay8hdx3ypsldy" of relation "organizations" does not exist, skipping
+16-12-2025 11:56:12.371 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.372 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk2i57dq3l21p59802utu819two" of relation "privileges" does not exist, skipping
+16-12-2025 11:56:12.374 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.374 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukm2tnonbcaquofx1ccy060ejyc" of relation "privileges" does not exist, skipping
+16-12-2025 11:56:12.376 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.377 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukdalikev902uvkpwn632apqe1k" of relation "provinces" does not exist, skipping
+16-12-2025 11:56:12.379 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.380 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukofx66keruapi6vyqpv6f2or37" of relation "roles" does not exist, skipping
+16-12-2025 11:56:12.382 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.382 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukl5rbtgdor10s6yymgc92lhics" of relation "task_attachments" does not exist, skipping
+16-12-2025 11:56:12.386 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.386 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk42os9o8pgotw3bjbg11e7nj35" of relation "task_members" does not exist, skipping
+16-12-2025 11:56:12.389 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.389 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uke0yrpnbigl6lhq5f9jf2gr0pl" of relation "tokens" does not exist, skipping
+16-12-2025 11:56:12.391 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.391 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukdu5v5sr43g5bfnji4vb8hg5s3" of relation "users" does not exist, skipping
+16-12-2025 11:56:12.394 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 11:56:12.395 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukr43af9ap4edm43mmtq01oddj6" of relation "users" does not exist, skipping
+16-12-2025 11:56:12.732 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+16-12-2025 11:56:13.485 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+16-12-2025 11:56:13.495 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 18 enums
+16-12-2025 11:56:13.495 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 18 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType]
+16-12-2025 11:56:15.013 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+16-12-2025 11:56:15.253 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+16-12-2025 11:56:16.045 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+16-12-2025 11:56:17.099 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 9999 (http) with context path '/'
+16-12-2025 11:56:17.110 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 15.372 seconds (process running for 17.544)
+16-12-2025 11:56:17.119 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+16-12-2025 11:56:17.219 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+16-12-2025 11:56:17.484 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:9999/
+	External: 	http://localhost:9999/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 373ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+16-12-2025 11:56:17.484 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+16-12-2025 13:32:10.376 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+16-12-2025 13:32:10.379 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+16-12-2025 13:32:12.507 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+16-12-2025 13:32:12.508 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+16-12-2025 13:32:12.516 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+16-12-2025 13:32:12.519 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.
+16-12-2025 13:52:58.134 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarting - Starting BasewareCoreApplication using Java 21.0.5 with PID 36036 (D:\VNPTProject\workdesk-backend\target\classes started by Tan Nga in D:\VNPTProject\workdesk-backend)
+16-12-2025 13:52:58.136 [main] INFO  c.t.b.core.BasewareCoreApplication.logStartupProfileInfo - The following 5 profiles are active: "init", "tls", "uribypass", "openapi", "dev"
+16-12-2025 13:53:00.276 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize - Tomcat initialized with port 9999 (http)
+16-12-2025 13:53:00.286 [main] INFO  o.a.catalina.core.StandardService.log - Starting service [Tomcat]
+16-12-2025 13:53:00.286 [main] INFO  o.a.catalina.core.StandardEngine.log - Starting Servlet engine: [Apache Tomcat/10.1.40]
+16-12-2025 13:53:00.379 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring embedded WebApplicationContext
+16-12-2025 13:53:00.379 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext - Root WebApplicationContext: initialization completed in 2202 ms
+16-12-2025 13:53:00.721 [main] INFO  c.t.b.c.configs.CacheConfiguration.redisConnectionFactory - ✅ Configuring Redis connection to localhost:6379 with no authentication
+16-12-2025 13:53:01.079 [main] INFO  c.t.b.c.configs.CustomNamingStrategy.init - ✅ Custom naming strategy initialized with development profile (prefix: '')
+16-12-2025 13:53:01.292 [main] WARN  com.zaxxer.hikari.HikariConfig.validateNumerics - HikariPool-1 - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+16-12-2025 13:53:01.292 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Starting...
+16-12-2025 13:53:01.453 [main] INFO  com.zaxxer.hikari.pool.HikariPool.checkFailFast - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2cc82c83
+16-12-2025 13:53:01.454 [main] INFO  com.zaxxer.hikari.HikariDataSource.getConnection - HikariPool-1 - Start completed.
+16-12-2025 13:53:02.764 [main] WARN  o.h.t.s.i.ExceptionHandlerLoggedImpl.handleException - GenerationTarget encountered exception accepting command : Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
+org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "
+    create table master.tenants (
+        id uuid not null,
+        created_by varchar(255) not null,
+        created_date timestamp(6) with time zone not null,
+        deleted boolean not null,
+        modified_by varchar(255) not null,
+        modified_date timestamp(6) with time zone not null,
+        active boolean not null,
+        name varchar(255) not null,
+        schema_name varchar(255) not null,
+        primary key (id)
+    )" via JDBC [ERROR: schema "master" does not exist
+  Position: 20]
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.createTable(AbstractSchemaMigrator.java:316)
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:80)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144)
+	at java.base/java.util.HashMap.forEach(HashMap.java:1429)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141)
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37)
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35)
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:324)
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:463)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1517)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:66)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:419)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:400)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1865)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1814)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveConstructorArguments(ConstructorResolver.java:691)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:513)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1367)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1197)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1717)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1466)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1739)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1627)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1224)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1681)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1627)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1224)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.getOrderedBeansOfType(ServletContextInitializerBeans.java:211)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:174)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:169)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAdaptableBeans(ServletContextInitializerBeans.java:154)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.<init>(ServletContextInitializerBeans.java:87)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.getServletContextInitializerBeans(ServletWebServerApplicationContext.java:271)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.selfInitialize(ServletWebServerApplicationContext.java:245)
+	at org.springframework.boot.web.embedded.tomcat.TomcatStarter.onStartup(TomcatStarter.java:52)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4464)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:772)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:203)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:412)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:870)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:438)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:128)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:107)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:517)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:219)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:193)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:167)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at com.tnh.baseware.core.BasewareCoreApplication.main(BasewareCoreApplication.java:39)
+Caused by: org.postgresql.util.PSQLException: ERROR: schema "master" does not exist
+  Position: 20
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733)
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420)
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372)
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434)
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:356)
+	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:341)
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:317)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:312)
+	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94)
+	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80)
+	... 120 common frames omitted
+16-12-2025 13:53:02.768 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.770 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+16-12-2025 13:53:02.770 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.770 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+16-12-2025 13:53:02.770 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.770 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+16-12-2025 13:53:02.771 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.771 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - relation "tenants" does not exist, skipping
+16-12-2025 13:53:02.866 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.866 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukiwylx6fb2dqdw8kfc31vaiiyp" of relation "categories" does not exist, skipping
+16-12-2025 13:53:02.869 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.870 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukt8o6pivur7nn124jehx7cygw5" of relation "categories" does not exist, skipping
+16-12-2025 13:53:02.873 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.873 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk8gtji4wdceln0554rbl06eudf" of relation "communes" does not exist, skipping
+16-12-2025 13:53:02.875 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.876 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk5dhgnik9p8t72kaktdb8kd8dt" of relation "countries" does not exist, skipping
+16-12-2025 13:53:02.878 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.878 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk7fcv9rm1ecfeumh1lo4tuntgm" of relation "menus" does not exist, skipping
+16-12-2025 13:53:02.879 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.880 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk752mo4d1g26knhksum5pek87" of relation "menus" does not exist, skipping
+16-12-2025 13:53:02.882 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.882 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukkamtsqvsul6leg7svd95mmydq" of relation "organizations" does not exist, skipping
+16-12-2025 13:53:02.884 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.884 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukp9pbw3flq9hkay8hdx3ypsldy" of relation "organizations" does not exist, skipping
+16-12-2025 13:53:02.886 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.886 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk2i57dq3l21p59802utu819two" of relation "privileges" does not exist, skipping
+16-12-2025 13:53:02.887 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.887 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukm2tnonbcaquofx1ccy060ejyc" of relation "privileges" does not exist, skipping
+16-12-2025 13:53:02.889 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.889 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukdalikev902uvkpwn632apqe1k" of relation "provinces" does not exist, skipping
+16-12-2025 13:53:02.891 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.891 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukofx66keruapi6vyqpv6f2or37" of relation "roles" does not exist, skipping
+16-12-2025 13:53:02.893 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.893 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukl5rbtgdor10s6yymgc92lhics" of relation "task_attachments" does not exist, skipping
+16-12-2025 13:53:02.896 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.896 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uk42os9o8pgotw3bjbg11e7nj35" of relation "task_members" does not exist, skipping
+16-12-2025 13:53:02.898 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.898 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "uke0yrpnbigl6lhq5f9jf2gr0pl" of relation "tokens" does not exist, skipping
+16-12-2025 13:53:02.900 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.900 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukdu5v5sr43g5bfnji4vb8hg5s3" of relation "users" does not exist, skipping
+16-12-2025 13:53:02.903 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - SQL Warning Code: 0, SQLState: 00000
+16-12-2025 13:53:02.903 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper.logWarning - constraint "ukr43af9ap4edm43mmtq01oddj6" of relation "users" does not exist, skipping
+16-12-2025 13:53:03.222 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory.<clinit> - Hibernate is in classpath; If applicable, HQL parser will be used.
+16-12-2025 13:53:04.032 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Initializing Enum Registry...
+16-12-2025 13:53:04.042 [main] INFO  c.t.b.core.components.EnumRegistry.scanAndCacheEnums - Successfully cached 18 enums
+16-12-2025 13:53:04.042 [main] INFO  c.t.b.core.components.EnumRegistry.initializeEnumRegistry - Enum Registry initialized with 18 enums: [CategoryCode, Operator, OrganizationLevel, TaskPriority, AlertSeverity, AlertSource, TaskStatus, SpringProfile, AlertTargetType, ZoneType, AlertChannel, TokenType, TaskName, AgentRole, LogActionType, TaskType, MemberStatus, UserType]
+16-12-2025 13:53:05.400 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer.configure - Global AuthenticationManager configured with AuthenticationProvider bean with name customAuthenticationProvider
+16-12-2025 13:53:05.648 [main] INFO  c.t.b.c.configs.AsyncConfiguration.executor - ✅ Async Executor initialized with corePoolSize=10, maxPoolSize=50, queueCapacity=100
+16-12-2025 13:53:06.397 [main] INFO  c.t.b.c.c.SecurityConfiguration.securityFilterChain - ✅ Security filter chain configured successfully
+16-12-2025 13:53:07.397 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start - Tomcat started on port 9999 (http) with context path '/'
+16-12-2025 13:53:07.409 [main] INFO  c.t.b.core.BasewareCoreApplication.logStarted - Started BasewareCoreApplication in 9.808 seconds (process running for 10.52)
+16-12-2025 13:53:07.418 [main] INFO  c.t.b.core.configs.DataInitializer.initRoles - Initializing roles...
+16-12-2025 13:53:07.536 [main] INFO  c.t.b.core.configs.DataInitializer.initUsers - Initializing users...
+16-12-2025 13:53:07.795 [main] INFO  c.t.b.core.BasewareCoreApplication.logApplicationStartup - ----------------------------------------------------------
+	Application 'tnh-taskmaster' is running! Access URLs:
+	Local: 	http://localhost:9999/
+	External: 	http://localhost:9999/
+	Profile(s): 	[init, tls, uribypass, openapi, dev]
+	Startup time: 386ms
+	JVM Version: 21.0.5
+----------------------------------------------------------
+16-12-2025 13:53:07.795 [main] INFO  c.t.b.core.BasewareCoreApplication.validateProfiles - ✅ Application started with profile(s): [init, tls, uribypass, openapi, dev]
+16-12-2025 13:54:13.797 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully - Commencing graceful shutdown. Waiting for active requests to complete
+16-12-2025 13:54:13.799 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown - Graceful shutdown complete
+16-12-2025 13:54:15.896 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Shutting down Async Executor...
+16-12-2025 13:54:15.896 [SpringApplicationShutdownHook] INFO  c.t.b.c.configs.AsyncConfiguration.shutdownExecutor - ✅ Async Executor shutdown completed
+16-12-2025 13:54:15.900 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown initiated...
+16-12-2025 13:54:15.902 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource.close - HikariPool-1 - Shutdown completed.

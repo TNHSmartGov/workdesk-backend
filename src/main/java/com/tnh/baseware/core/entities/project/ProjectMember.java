@@ -35,6 +35,7 @@ public class ProjectMember extends Auditable<String> {
     private User user;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private ProjectMemberRole role;
 
     @Column(nullable = false, updatable = false)

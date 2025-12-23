@@ -93,4 +93,6 @@ public interface IUserOrganizationRepository extends IGenericRepository<UserOrga
   Set<UserOrganization> findByOrganizationIdAndActiveTrue(UUID orgId);
 
   Optional<UserOrganization> findByUserIdAndOrganizationIdAndActiveTrue(UUID userId, UUID orgId);
+
+  Set<UserOrganization> findByUserIdAndActiveTrue(UUID userId);
 }

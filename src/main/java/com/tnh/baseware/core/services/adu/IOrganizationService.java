@@ -31,4 +31,6 @@ public interface IOrganizationService
     void removeUsers(UUID id, List<UUID> ids);
 
     void changeTitle(UUID orgId, UUID userId, UUID titleId);
+
+    List<OrganizationDTO> findAllOfUser(UUID user);
 }

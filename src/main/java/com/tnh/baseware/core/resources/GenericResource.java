@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @RequiredArgsConstructor

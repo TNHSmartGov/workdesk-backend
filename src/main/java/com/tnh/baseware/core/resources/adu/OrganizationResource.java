@@ -4,6 +4,7 @@ import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.adu.OrganizationDTO;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.adu.Organization;
+import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.forms.adu.OrganizationEditorForm;
 import com.tnh.baseware.core.forms.user.AssignUserEditorForm;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @Tag(name = "Organizations", description = "API for managing organizations")
 @RestController
@@ -112,4 +114,35 @@ public class OrganizationResource extends
                                 .code(HttpStatus.OK.value())
                                 .build());
         }
+
+        @Operation(summary = "Get organization of user currently logged in")
+        @ApiOkResponse(value = OrganizationDTO.class, type = ApiResponseType.OBJECT)
+        @GetMapping("by-self")
+        public ResponseEntity<ApiMessageDTO<List<OrganizationDTO>>> getListBySelf() {
+                User currentUser = organizationService.getCurrentUser();
+                List<OrganizationDTO> organizations = organizationService.findAllOfUser(currentUser.getId());
+                ApiMessageDTO<List<OrganizationDTO>> response = ApiMessageDTO.<List<OrganizationDTO>>builder()
+                                .data(organizations)
+                                .result(true)
+                                .message(messageService.getMessage("organizations.retrieved"))
+                                .code(HttpStatus.OK.value())
+                                .build();
+                return ResponseEntity.ok(response);
+        }
+
+        @Operation(summary = "Get organization of user")
+        @ApiOkResponse(value = OrganizationDTO.class, type = ApiResponseType.OBJECT)
+        @GetMapping("by-user/{userId}")
+        public ResponseEntity<ApiMessageDTO<List<OrganizationDTO>>> getListByUserId(@PathVariable UUID userId) {
+
+                List<OrganizationDTO> organizations = organizationService.findAllOfUser(userId);
+                ApiMessageDTO<List<OrganizationDTO>> response = ApiMessageDTO.<List<OrganizationDTO>>builder()
+                                .data(organizations)
+                                .result(true)
+                                .message(messageService.getMessage("organizations.retrieved"))
+                                .code(HttpStatus.OK.value())
+                                .build();
+                return ResponseEntity.ok(response);
+        }
+
 }

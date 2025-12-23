@@ -16,10 +16,6 @@ import com.tnh.baseware.core.services.IGenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.user.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -32,7 +28,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -286,7 +281,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users by role with pagination")
-        @ApiOkResponse(value = UserDTO.class, type =  ApiResponseType.HATEOAS_PAGE)
+        @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.HATEOAS_PAGE)
         @GetMapping("/by-role/{roleId}/pagination")
         public ResponseEntity<ApiMessageDTO<PagedModel<UserDTO>>> findAllByRoleWithPagination(@PathVariable UUID roleId,
                         Pageable pageable,

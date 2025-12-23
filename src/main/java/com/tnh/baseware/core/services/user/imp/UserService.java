@@ -331,7 +331,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     public List<UserDTO> findAllWithoutOrganization(UUID id) {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found", id)));
-        return repository.findAllByEntitiesNotContaining("organizations", organization)
+        return repository.findAllNotInOrganization(organization.getId())
                 .stream()
                 .map(mapper::entityToDTO)
                 .toList();

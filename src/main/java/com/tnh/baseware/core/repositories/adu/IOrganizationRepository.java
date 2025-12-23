@@ -16,5 +16,4 @@ public interface IOrganizationRepository extends IGenericRepository<Organization
     @Query("SELECT o FROM Organization o")
     List<Organization> findAllWithParent();
 
-    List<Organization> findAllByUserOrganizations_Users_Id(UUID userId);
 }

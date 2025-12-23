@@ -5,6 +5,7 @@ import com.tnh.baseware.core.repositories.IGenericRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,6 +24,18 @@ public interface IUserRepository extends IGenericRepository<User, UUID> {
     boolean existsByEmail(String email);
 
     boolean existsByIdn(String idn);
+
+    // find all user that not exist organization id
+    @Query("""
+                SELECT DISTINCT u
+                FROM User u
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM User u2 JOIN u2.organizations uo
+                    WHERE u2 = u and uo.active = true and uo.organization.id = :organizationId
+                )
+            """)
+    List<User> findAllNotInOrganization(UUID organizationId);
 
     Page<User> findDistinctByOrganizations_Organization_IdAndOrganizations_ActiveTrue(UUID organizationId,
             Pageable pageable);

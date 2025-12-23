@@ -249,11 +249,13 @@ public class OrganizationService extends
                 userRepository.findById(user).orElseThrow(
                                 () -> new BWCNotFoundException(
                                                 messageService.getMessage("user.not.found")));
-                Set<UserOrganization> userOrganizations = userOrganizationRepository
+                var userOrganizations = userOrganizationRepository
                                 .findByUserIdAndActiveTrue(user);
-                // get organization array
-                return userOrganizations.stream()
-                                .map(UserOrganization::getOrganization).map(mapper::entityToDTO).toList();
+                var organizations = userOrganizations.stream()
+                                .map(UserOrganization::getOrganization)
+                                .toList();
+
+                return mapper.mapOrganizationsToTree(organizations);
 
         }
 }

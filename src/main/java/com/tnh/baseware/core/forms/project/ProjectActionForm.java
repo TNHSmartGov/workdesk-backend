@@ -2,15 +2,12 @@ package com.tnh.baseware.core.forms.project;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.tnh.baseware.core.enums.project.ProjectStatus;
+import com.tnh.baseware.core.enums.project.ProjectAction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -19,21 +16,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ProjectEditorForm {
-
-    @NotBlank(message = "{code.not.blank}")
-    private String code;
-
-    @NotBlank(message = "{name.not.blank}")
-    String name;
-    @NotBlank(message = "{code.not.blank}")
-    String code;
-
-    String description;
-
-    @NotNull(message = "{organization_id.not.null}")
-    UUID organizationId;
-
-    Instant startDate;
-    Instant endDate;
+public class ProjectActionForm {
+    @NotNull
+    @Schema(description = "Values are retrieved from 'projects/enums?name=ProjectAction'")
+    private ProjectAction action;
 }

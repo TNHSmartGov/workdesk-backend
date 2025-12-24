@@ -1,13 +1,12 @@
 package com.tnh.baseware.core.dtos.project;
 
+import com.tnh.baseware.core.dtos.doc.FileDocumentDTO;
+import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
-import com.tnh.baseware.core.enums.project.ProjectStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.hateoas.RepresentationModel;
 
-import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -17,14 +16,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProjectDTO extends RepresentationModel<ProjectDTO> implements Identifiable<UUID> {
+public class ProjectAttachmentDTO extends RepresentationModel<ProjectAttachmentDTO> implements Identifiable<UUID> {
     UUID id;
-    String name;
-    String code;
+    ProjectDTO project;
+    UserDTO uploader;
+    FileDocumentDTO file;
     String description;
-    BasicOrganizationDTO organization;
-    Instant startDate;
-    Instant endDate;
-    ProjectStatus status;
-    List<ProjectAttachmentDTO> attachments;
 }

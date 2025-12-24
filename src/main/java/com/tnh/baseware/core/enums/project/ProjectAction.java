@@ -10,22 +10,20 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
-public enum ProjectStatus implements BaseEnum<String> {
-
-    DRAFT("DRAFT", "draft", "Mới tạo"),
-    ACTIVE("ACTIVE", "active", "Đang hoạt động"),
-    ARCHIVED("ARCHIVED", "archived", "Đã lưu trữ");
+public enum ProjectAction implements BaseEnum<String> {
+    PUBLISH("PUBLISH", "publish", "Đưa vào hoạt động"),
+    ARCHIVE("ARCHIVE", "archive", "Lưu trữ");
 
     private final String value;
     private final String name;
     private final String displayName;
 
-    public static ProjectStatus fromValue(String value) {
-        for (ProjectStatus status : ProjectStatus.values()) {
+    public static ProjectAction fromValue(String value) {
+        for (ProjectAction status : ProjectAction.values()) {
             if (status.getValue().equalsIgnoreCase(value)) {
                 return status;
             }
         }
-        throw new BWCGenericRuntimeException("Unknown ProjectStatus value: " + value);
+        throw new BWCGenericRuntimeException("Unknown ProjectAction value: " + value);
     }
 }

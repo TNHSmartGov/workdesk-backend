@@ -2,6 +2,7 @@ package com.tnh.baseware.core.services.task.imp;
 
 import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.entities.task.Task;
+import com.tnh.baseware.core.enums.task.TaskAction;
 import com.tnh.baseware.core.forms.task.TaskEditorForm;
 import com.tnh.baseware.core.mappers.task.ITaskMapper;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
@@ -20,5 +21,18 @@ public class TaskService extends GenericService<Task, TaskEditorForm, TaskDTO, I
 
     public TaskService(ITaskRepository repository, ITaskMapper mapper, MessageService messageService) {
         super(repository, mapper, messageService, Task.class);
+    }
+
+//    @Override
+//    public TaskDTO create(TaskEditorForm form) {
+//        TaskDTO dto = new TaskDTO();
+////        if (form.getTaskListId() == null) {
+////
+////        }
+//    }
+
+    @Override
+    public void performAction(UUID id, TaskAction action) {
+
     }
 }

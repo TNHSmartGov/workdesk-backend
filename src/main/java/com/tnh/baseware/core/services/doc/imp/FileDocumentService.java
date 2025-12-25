@@ -1,6 +1,5 @@
 package com.tnh.baseware.core.services.doc.imp;
 
-import com.tnh.baseware.core.components.EnumRegistry;
 import com.tnh.baseware.core.dtos.doc.FileDocumentDTO;
 import com.tnh.baseware.core.dtos.doc.FileResource;
 import com.tnh.baseware.core.entities.doc.FileDocument;
@@ -36,9 +35,9 @@ public class FileDocumentService extends
     IStorageService<String> storageService;
 
     public FileDocumentService(IFileDocumentRepository repository,
-                               IFileDocumentMapper mapper,
-                               MessageService messageService,
-                               IStorageService<String> storageService) {
+            IFileDocumentMapper mapper,
+            MessageService messageService,
+            IStorageService<String> storageService) {
         super(repository, mapper, messageService, FileDocument.class);
         this.storageService = storageService;
     }
@@ -55,6 +54,7 @@ public class FileDocumentService extends
 
             FileDocument doc = FileDocument.builder()
                     .name(file.getOriginalFilename())
+                    .size(file.getSize())
                     .url(filePath)
                     .build();
 
@@ -69,8 +69,7 @@ public class FileDocumentService extends
                 }
             }
             throw new BWCGenericRuntimeException(
-                    messageService.getMessage("file.upload.error"), e
-            );
+                    messageService.getMessage("file.upload.error"), e);
         }
     }
 
@@ -88,6 +87,7 @@ public class FileDocumentService extends
             for (MultipartFile file : files) {
                 FileDocument doc = FileDocument.builder()
                         .name(file.getOriginalFilename())
+                        .size(file.getSize())
                         .url(storageService.uploadFile(file))
                         .build();
 
@@ -109,8 +109,7 @@ public class FileDocumentService extends
             }
 
             throw new BWCGenericRuntimeException(
-                    messageService.getMessage("file.batch.upload.error"), e
-            );
+                    messageService.getMessage("file.batch.upload.error"), e);
         }
     }
 
@@ -194,5 +193,19 @@ public class FileDocumentService extends
             log.warn("Entity not found with id: {}", id);
             return new BWCNotFoundException(messageService.getMessage("entity.not.found", id));
         });
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public FileDocument upFileDocumentEntity(MultipartFile file) {
+        String filePath = storageService.uploadFile(file);
+
+        FileDocument doc = FileDocument.builder()
+                .name(file.getOriginalFilename())
+                .size(file.getSize())
+                .url(filePath)
+                .build();
+
+        return repository.save(doc);
     }
 }

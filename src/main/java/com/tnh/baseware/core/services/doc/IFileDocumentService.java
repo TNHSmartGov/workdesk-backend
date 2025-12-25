@@ -14,9 +14,16 @@ import java.util.UUID;
 public interface IFileDocumentService extends
         IGenericService<FileDocument, FileDocumentEditorForm, FileDocumentDTO, UUID> {
     FileDocumentDTO uploadFile(MultipartFile file);
+
     List<FileDocumentDTO> uploadFiles(List<MultipartFile> files);
+
     FileResource downloadFile(UUID id);
+
     Map<UUID, FileResource> downloadFiles(List<UUID> ids);
+
     void deleteFile(UUID id);
+
     void deleteFiles(List<UUID> ids);
+
+    FileDocument upFileDocumentEntity(MultipartFile file);
 }

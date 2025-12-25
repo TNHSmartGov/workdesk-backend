@@ -25,10 +25,11 @@ public class TaskListResource extends GenericResource<TaskList, TaskListEditorFo
     ITaskListService taskListService;
 
     public TaskListResource(IGenericService<TaskList, TaskListEditorForm, TaskListDTO, UUID> service,
-                            MessageService messageService,
-                            SystemProperties systemProperties,
-                            ITaskListService taskListService) {
+            MessageService messageService,
+            SystemProperties systemProperties,
+            ITaskListService taskListService) {
         super(service, messageService, systemProperties.getApiPrefix() + "/task-lists");
         this.taskListService = taskListService;
     }
+
 }

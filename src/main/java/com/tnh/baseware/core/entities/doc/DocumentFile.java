@@ -28,6 +28,7 @@ public class DocumentFile extends Auditable<String> {
     FileDocument file;
 
     @Column(nullable = false)
-    Boolean original;   // bản gốc hay phụ lục
-}
+    Boolean original; // bản gốc hay phụ lục
 
+    Double size;
+}

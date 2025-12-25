@@ -136,7 +136,9 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
         }
 
         user.addRole(role);
-        return mapper.entityToDTO(repository.save(user));
+        User savedUser = repository.save(user);
+        eventPublisher.publishEvent(new UserCreatedEvent(savedUser.getId(), savedUser.getUsername()));
+        return mapper.entityToDTO(savedUser);
     }
 
     @Override

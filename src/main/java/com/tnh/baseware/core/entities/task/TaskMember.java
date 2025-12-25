@@ -44,7 +44,6 @@ public class TaskMember extends Auditable<String> {
 
         // bổ sung cho gantt
         @Builder.Default
-        Integer personal_progress = 0;
+        Integer personalProgress = 0;
         Integer weight;
-
 }

@@ -27,19 +27,15 @@ public class TaskEditorForm {
 
     String description;
 
-    Instant startDate;
     Instant dueDate;
 
-    @NotNull(message = "{status.not.null}")
-    @Schema(description = "Values are retrieved from 'tasks/enums?name=TaskStatus'")
-    TaskStatus status;
-
     @NotNull(message = "{priority.not.null}")
+    @Schema(description = "Values are retrieved from 'tasks/enums?name=TaskPriority'")
     TaskPriority priority;
 
     @NotNull(message = "{type.not.null}")
+    @Schema(description = "Values are retrieved from 'tasks/enums?name=TaskType'")
     TaskType type;
 
-    @NotNull(message = "{project_id.not.null}")
     UUID taskListId;
 }

@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public enum CategoryCode implements BaseEnum<String> {
     MENU_TYPE("MENU_TYPE"),
+    PROJECT_TYPE("PROJECT_TYPE"),
     SERVICE_PACKAGE_FEATURE_TYPE("SERVICE_PACKAGE_FEATURE_TYPE"),
     ORGANIZATION_TITLE("ORGANIZATION_TITLE");
 

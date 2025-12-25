@@ -6,6 +6,7 @@ import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.Menu;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
+import com.tnh.baseware.core.events.type.UserCreatedEvent;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.user.ChangePasswordForm;
@@ -32,6 +33,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -58,19 +60,21 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     IMenuMapper menuMapper;
     ICategoryMapper categoryMapper;
     IUserOrganizationRepository userOrganizationRepository;
+    ApplicationEventPublisher eventPublisher;
 
     public UserService(IUserRepository repository,
-            IUserMapper mapper,
-            MessageService messageService,
-            IRoleRepository roleRepository,
-            IOrganizationRepository organizationRepository,
-            IMenuRepository menuRepository,
-            PasswordEncoder passwordEncoder,
-            JwtTokenService jwtTokenService,
-            SecurityProperties securityProperties,
-            ICategoryMapper categoryMapper,
-            IUserOrganizationRepository userOrganizationRepository,
-            IMenuMapper menuMapper) {
+                       IUserMapper mapper,
+                       MessageService messageService,
+                       IRoleRepository roleRepository,
+                       IOrganizationRepository organizationRepository,
+                       IMenuRepository menuRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtTokenService jwtTokenService,
+                       SecurityProperties securityProperties,
+                       ICategoryMapper categoryMapper,
+                       IUserOrganizationRepository userOrganizationRepository,
+                       IMenuMapper menuMapper,
+                       ApplicationEventPublisher eventPublisher) {
         super(repository, mapper, messageService, User.class);
         this.roleRepository = roleRepository;
         this.organizationRepository = organizationRepository;
@@ -81,14 +85,16 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
         this.menuMapper = menuMapper;
         this.userOrganizationRepository = userOrganizationRepository;
         this.categoryMapper = categoryMapper;
-
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
     @Transactional
     public UserDTO create(UserEditorForm form) {
         var user = mapper.formToEntity(form, passwordEncoder);
-        return mapper.entityToDTO(repository.save(user));
+        User savedUser = repository.save(user);
+        eventPublisher.publishEvent(new UserCreatedEvent(savedUser.getId(), savedUser.getUsername()));
+        return mapper.entityToDTO(savedUser);
     }
 
     @Override

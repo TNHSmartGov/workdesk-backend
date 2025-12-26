@@ -6,6 +6,7 @@ import com.tnh.baseware.core.entities.audit.Category;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.CategoryCode;
+import com.tnh.baseware.core.enums.TitleDefault;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.forms.adu.OrganizationEditorForm;
 import com.tnh.baseware.core.forms.user.AssignUserEditorForm;
@@ -176,7 +177,11 @@ public class OrganizationService extends
 
                 for (AssignUserEditorForm form : distinctForms) {
                         UserOrganization uo = existingMap.get(form.getUserId());
-
+                        // nếu phòng ban đã có trưởng đơn vị thì k thêm trưởng nữa
+                        if (userOrganizationRepository.existsByOrganization_IdAndTitle_Name(id,
+                                        TitleDefault.UNIT_LEADER.getValue())) {
+                                continue;
+                        }
                         if (uo == null) {
                                 uo = UserOrganization.builder()
                                                 .user(userMap.get(form.getUserId()))

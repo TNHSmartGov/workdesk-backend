@@ -12,13 +12,34 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class ProjectMemberService extends GenericService<ProjectMember, ProjectMemberEditorForm, ProjectMemberDTO, IProjectMemberRepository, IProjectMemberMapper, UUID> implements IProjectMemberService {
+public class ProjectMemberService extends
+        GenericService<ProjectMember, ProjectMemberEditorForm, ProjectMemberDTO, IProjectMemberRepository, IProjectMemberMapper, UUID>
+        implements IProjectMemberService {
 
-    public ProjectMemberService(IProjectMemberRepository repository, IProjectMemberMapper mapper, MessageService messageService) {
+    public ProjectMemberService(IProjectMemberRepository repository, IProjectMemberMapper mapper,
+            MessageService messageService) {
         super(repository, mapper, messageService, ProjectMember.class);
+    }
+
+    @Override
+    public List<ProjectMemberDTO> getMembersByProject(UUID projectId) {
+        // lấy người dùng của dự án cụ thể , nếu người dùng đó là quản lý của đơn vị ,
+        // nếu người dùng
+        var isUserSystem = isUserSystem();
+
+        var members = repository.findDistinctByProject_Id(projectId);
+        return members.stream().map(mapper::entityToDTO).toList();
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public List<ProjectMemberDTO> getMembersByUser(UUID userId) {
+        var members = repository.findDistinctByUser_Id(userId);
+        return members.stream().map(mapper::entityToDTO).toList();
     }
 }

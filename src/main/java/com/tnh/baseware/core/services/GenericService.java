@@ -221,8 +221,8 @@ public abstract class GenericService<E, F, D, R extends IGenericRepository<E, I>
             if (enumClass == null) {
                 String basePackage = "com.tnh.baseware.core.enums";
 
-                ClassPathScanningCandidateComponentProvider scanner =
-                        new ClassPathScanningCandidateComponentProvider(false);
+                ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(
+                        false);
 
                 scanner.addIncludeFilter((metadataReader, metadataReaderFactory) -> true);
 
@@ -246,9 +246,7 @@ public abstract class GenericService<E, F, D, R extends IGenericRepository<E, I>
                         messageService.getMessage(
                                 "enum.not.found",
                                 entityClass.getSimpleName(),
-                                enumName
-                        )
-                );
+                                enumName));
             }
 
             Object[] constants = enumClass.getEnumConstants();
@@ -260,8 +258,7 @@ public abstract class GenericService<E, F, D, R extends IGenericRepository<E, I>
                         return new EnumDTO<>(
                                 baseEnum.getValue(),
                                 ((Enum<?>) e).name(),
-                                displayName
-                        );
+                                displayName);
                     })
                     .toList();
 
@@ -271,10 +268,8 @@ public abstract class GenericService<E, F, D, R extends IGenericRepository<E, I>
                     messageService.getMessage(
                             "enum.error",
                             entityClass.getSimpleName(),
-                            enumName
-                    ),
-                    e
-            );
+                            enumName),
+                    e);
         }
     }
 
@@ -288,6 +283,25 @@ public abstract class GenericService<E, F, D, R extends IGenericRepository<E, I>
             throw new BWCGenericRuntimeException(messageService.getMessage("user.not.authenticated"));
         }
         return userDetails.getUser();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Boolean isUserSystem() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()
+                || !(auth.getPrincipal() instanceof CustomUserDetails userDetails)) {
+            throw new BWCGenericRuntimeException(messageService.getMessage("user.not.authenticated"));
+        }
+        var user = userDetails.getUser();
+        if (user.getSuperAdmin())
+            return true;
+        var orgSys = user.getOrganizations().stream()
+                .filter(org -> Boolean.TRUE.equals(org.getOrganization().getIsSystem()))
+                .findFirst().orElse(null);
+
+        return orgSys != null;
     }
 
     private String extractDisplayName(Object enumConstant, String enumName) {

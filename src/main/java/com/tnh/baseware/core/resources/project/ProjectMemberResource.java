@@ -20,15 +20,18 @@ import java.util.UUID;
 @RestController
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequestMapping("${baseware.core.system.api-prefix}/project-members")
-public class ProjectMemberResource extends GenericResource<ProjectMember, ProjectMemberEditorForm, ProjectMemberDTO, UUID> {
+public class ProjectMemberResource
+        extends GenericResource<ProjectMember, ProjectMemberEditorForm, ProjectMemberDTO, UUID> {
 
     IProjectMemberService projectMemberService;
 
-    public ProjectMemberResource(IGenericService<ProjectMember, ProjectMemberEditorForm, ProjectMemberDTO, UUID> service,
-                                 MessageService messageService,
-                                 SystemProperties systemProperties,
-                                 IProjectMemberService projectMemberService) {
+    public ProjectMemberResource(
+            IGenericService<ProjectMember, ProjectMemberEditorForm, ProjectMemberDTO, UUID> service,
+            MessageService messageService,
+            SystemProperties systemProperties,
+            IProjectMemberService projectMemberService) {
         super(service, messageService, systemProperties.getApiPrefix() + "/project-members");
         this.projectMemberService = projectMemberService;
     }
+
 }

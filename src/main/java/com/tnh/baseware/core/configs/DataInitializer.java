@@ -1,8 +1,12 @@
 package com.tnh.baseware.core.configs;
 
+import com.tnh.baseware.core.entities.audit.Category;
 import com.tnh.baseware.core.entities.user.Role;
 import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.enums.CategoryCode;
+import com.tnh.baseware.core.enums.TitleDefault;
 import com.tnh.baseware.core.properties.InitProperties;
+import com.tnh.baseware.core.repositories.audit.ICategoryRepository;
 import com.tnh.baseware.core.repositories.user.IRoleRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
 import lombok.AccessLevel;
@@ -17,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -31,6 +36,7 @@ public class DataInitializer implements CommandLineRunner {
 
     IUserRepository userRepository;
     IRoleRepository roleRepository;
+    ICategoryRepository categoryRepository;
     InitProperties initProperties;
     PasswordEncoder passwordEncoder;
 
@@ -38,6 +44,7 @@ public class DataInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         initRoles();
+        initCategories();
         initUsers();
     }
 
@@ -62,6 +69,30 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
+    void initCategories() {
+        log.info("Initializing categories...");
+        var values = TitleDefault.values();
+        List<Category> toSave = new ArrayList<>();
+        for (var t : values) {
+            String value = t.getValue();
+            String displayName = t.getDisplayName();
+
+            if (!categoryRepository.existsByCodeAndNameAndIsSystemTrue(CategoryCode.ORGANIZATION_TITLE, value)) {
+                Category category = Category.builder()
+                        .name(value)
+                        .code(CategoryCode.ORGANIZATION_TITLE)
+                        .displayName(displayName)
+                        .description(displayName)
+                        .isSystem(true)
+                        .build();
+                toSave.add(category);
+            }
+        }
+        if (!toSave.isEmpty()) {
+            categoryRepository.saveAllAndFlush(toSave);
+        }
+    }
+
     void initUsers() {
         log.info("Initializing users...");
         var existingUsernames = userRepository.findAll()
@@ -74,7 +105,8 @@ public class DataInitializer implements CommandLineRunner {
                 .filter(u -> !existingUsernames.contains(u.getUsername()))
                 .map(u -> {
                     List<Role> roles = roleRepository.findAllByField("name", u.getRole());
-                    if (roles.isEmpty()) return null;
+                    if (roles.isEmpty())
+                        return null;
                     return User.builder()
                             .username(u.getUsername())
                             .password(passwordEncoder.encode(u.getPassword()))

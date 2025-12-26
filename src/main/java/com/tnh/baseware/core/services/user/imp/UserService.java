@@ -1,6 +1,5 @@
 package com.tnh.baseware.core.services.user.imp;
 
-import com.tnh.baseware.core.components.GenericEntityFetcher;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.Menu;
@@ -63,18 +62,18 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     ApplicationEventPublisher eventPublisher;
 
     public UserService(IUserRepository repository,
-                       IUserMapper mapper,
-                       MessageService messageService,
-                       IRoleRepository roleRepository,
-                       IOrganizationRepository organizationRepository,
-                       IMenuRepository menuRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtTokenService jwtTokenService,
-                       SecurityProperties securityProperties,
-                       ICategoryMapper categoryMapper,
-                       IUserOrganizationRepository userOrganizationRepository,
-                       IMenuMapper menuMapper,
-                       ApplicationEventPublisher eventPublisher) {
+            IUserMapper mapper,
+            MessageService messageService,
+            IRoleRepository roleRepository,
+            IOrganizationRepository organizationRepository,
+            IMenuRepository menuRepository,
+            PasswordEncoder passwordEncoder,
+            JwtTokenService jwtTokenService,
+            SecurityProperties securityProperties,
+            ICategoryMapper categoryMapper,
+            IUserOrganizationRepository userOrganizationRepository,
+            IMenuMapper menuMapper,
+            ApplicationEventPublisher eventPublisher) {
         super(repository, mapper, messageService, User.class);
         this.roleRepository = roleRepository;
         this.organizationRepository = organizationRepository;

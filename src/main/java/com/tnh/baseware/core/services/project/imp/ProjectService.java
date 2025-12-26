@@ -21,23 +21,20 @@ import java.util.UUID;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class ProjectService extends GenericService<Project, ProjectEditorForm, ProjectDTO, IProjectRepository, IProjectMapper, UUID> implements IProjectService {
-    ICategoryRepository  categoryRepository;
+public class ProjectService
+        extends GenericService<Project, ProjectEditorForm, ProjectDTO, IProjectRepository, IProjectMapper, UUID>
+        implements IProjectService {
 
     public ProjectService(IProjectRepository repository,
-                          IProjectMapper mapper,
-                          MessageService messageService,
-                          ICategoryRepository  categoryRepository) {
+            IProjectMapper mapper,
+            MessageService messageService) {
         super(repository, mapper, messageService, Project.class);
-        this.categoryRepository = categoryRepository;
     }
 
     @Override
     @Transactional
     public ProjectDTO create(ProjectEditorForm form) {
         Project project = mapper.formToEntity(form);
-
-
 
         project.setStatus(ProjectStatus.DRAFT);
         return mapper.entityToDTO(repository.save(project));

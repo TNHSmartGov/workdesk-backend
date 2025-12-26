@@ -11,6 +11,7 @@ import com.tnh.baseware.core.forms.project.ProjectAttachmentEditorForm;
 import com.tnh.baseware.core.mappers.project.IProjectAttachmentMapper;
 import com.tnh.baseware.core.repositories.doc.IFileDocumentRepository;
 import com.tnh.baseware.core.repositories.project.IProjectAttachmentRepository;
+import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
@@ -37,12 +38,14 @@ public class ProjectAttachmentService extends
     private final IFileDocumentRepository fileDocumentRepository;
     private final GenericEntityFetcher fetcher;
     IFileDocumentService fileDocumentService;
+    IProjectMemberRepository projectMemberRepository;
 
     public ProjectAttachmentService(IProjectAttachmentRepository repository,
             IProjectAttachmentMapper mapper,
             MessageService messageService,
             IProjectRepository projectRepository,
             IFileDocumentRepository fileDocumentRepository,
+            IProjectMemberRepository projectMemberRepository,
             IFileDocumentService fileDocumentService,
             GenericEntityFetcher fetcher) {
         super(repository, mapper, messageService, ProjectAttachment.class);
@@ -50,6 +53,7 @@ public class ProjectAttachmentService extends
         this.fileDocumentRepository = fileDocumentRepository;
         this.fetcher = fetcher;
         this.fileDocumentService = fileDocumentService;
+        this.projectMemberRepository = projectMemberRepository;
     }
 
     @Override
@@ -95,4 +99,19 @@ public class ProjectAttachmentService extends
         List<ProjectAttachment> saved = repository.saveAll(attachments);
         return saved.stream().map(mapper::entityToDTO).collect(Collectors.toList());
     }
+
+    @Override
+    public List<ProjectAttachmentDTO> getAttackmentByProject(UUID projectId) {
+        var curentUser = getCurrentUser();
+        isUserSystem();
+        // nếu không phải user hệ thống, không phải người dùng của dự án thì không thể
+        // truy cập file
+        if (!projectMemberRepository.existsByProjectIdAndUserId(projectId, curentUser.getId()) && !isUserSystem()) {
+            throw new BWCBusinessException(messageService.getMessage("project.member.not.exist"));
+        }
+        var attachments = repository.findByProjectId(projectId);
+        return attachments.stream().map(mapper::entityToDTO).collect(Collectors.toList());
+
+    }
+
 }

@@ -5,7 +5,13 @@ import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.forms.project.ProjectMemberEditorForm;
 import com.tnh.baseware.core.services.IGenericService;
 
+import java.util.List;
 import java.util.UUID;
 
-public interface IProjectMemberService extends IGenericService<ProjectMember, ProjectMemberEditorForm, ProjectMemberDTO, UUID> {
+public interface IProjectMemberService
+        extends IGenericService<ProjectMember, ProjectMemberEditorForm, ProjectMemberDTO, UUID> {
+
+    List<ProjectMemberDTO> getMembersByProject(UUID projectId);
+
+    List<ProjectMemberDTO> getMembersByUser(UUID userId);
 }

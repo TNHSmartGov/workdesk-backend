@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"code", "name"})
+        @UniqueConstraint(columnNames = { "code", "name" })
 })
 public class Category extends Auditable<String> implements Serializable {
 
@@ -39,4 +39,6 @@ public class Category extends Auditable<String> implements Serializable {
     String displayName;
 
     String description;
+
+    Boolean isSystem;
 }

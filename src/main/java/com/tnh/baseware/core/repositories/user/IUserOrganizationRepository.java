@@ -86,6 +86,8 @@ public interface IUserOrganizationRepository extends IGenericRepository<UserOrga
       @Param("userId") UUID userId,
       @Param("title") Category title);
 
+  Boolean existsByOrganization_IdAndTitle_Name(UUID organizationId, String titleName);
+
   List<UserOrganization> findByOrganizationIdAndUserIdInAndActiveTrue(UUID orgId, Collection<UUID> userIds);
 
   Page<UserOrganization> findByOrganizationIdAndActiveTrue(UUID orgId, Pageable pageable);

@@ -16,4 +16,6 @@ public interface IProjectAttachmentService
     ProjectAttachmentDTO uploadFile(MultipartFile fileUpload, UUID projectId, String description);
 
     List<ProjectAttachmentDTO> uploadFiles(List<MultipartFile> filesUpload, UUID projectId, String description);
+
+    List<ProjectAttachmentDTO> getAttackmentByProject(UUID projectId);
 }

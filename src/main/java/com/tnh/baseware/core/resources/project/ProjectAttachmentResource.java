@@ -11,16 +11,13 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectAttachmentService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,6 +54,20 @@ public class ProjectAttachmentResource
                 .data(1)
                 .result(true)
                 .message(messageService.getMessage("file.add.attached.success"))
+                .code(HttpStatus.OK.value())
+                .build();
+        return ResponseEntity.ok(apiMessageDTO);
+    }
+
+    @Operation(summary = "Get all files of project ")
+    @GetMapping(value = "/{projectId}")
+    public ResponseEntity<ApiMessageDTO<List<ProjectAttachmentDTO>>> getAttackmentByProject(
+            @PathVariable UUID projectId) {
+        var attachments = projectAttachmentService.getAttackmentByProject(projectId);
+        ApiMessageDTO<List<ProjectAttachmentDTO>> apiMessageDTO = ApiMessageDTO.<List<ProjectAttachmentDTO>>builder()
+                .data(attachments)
+                .result(true)
+                .message(messageService.getMessage("file.get.attached.success"))
                 .code(HttpStatus.OK.value())
                 .build();
         return ResponseEntity.ok(apiMessageDTO);

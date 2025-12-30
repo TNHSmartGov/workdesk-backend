@@ -17,4 +17,5 @@ public interface IProjectService extends IGenericService<Project, ProjectEditorF
     public List<Project> getProjectByOrganizationId(UUID organizationId);
 
     public Page<Project> getProjectByOrganizationId(UUID organizationId, int page, int size);
+    Project getOrCreatePersonalProject(UUID userId);
 }

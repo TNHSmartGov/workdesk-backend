@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "document_files")
-public class DocumentFile extends Auditable<String> {
+public class DocumentAttachment extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -2,15 +2,20 @@ package com.tnh.baseware.core.services.project.imp;
 
 import com.tnh.baseware.core.dtos.project.ProjectDTO;
 import com.tnh.baseware.core.entities.project.Project;
+import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.task.TaskList;
 import com.tnh.baseware.core.enums.project.ProjectAction;
+import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
+import com.tnh.baseware.core.enums.project.ProjectType;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
 import com.tnh.baseware.core.mappers.project.IProjectMapper;
+import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.repositories.task.ITaskListRepository;
+import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
@@ -20,6 +25,7 @@ import lombok.experimental.FieldDefaults;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,13 +37,20 @@ public class ProjectService
         extends GenericService<Project, ProjectEditorForm, ProjectDTO, IProjectRepository, IProjectMapper, UUID>
         implements IProjectService {
     ITaskListRepository taskListRepository;
+    IProjectMemberRepository projectMemberRepository;
+    IUserRepository userRepository;
 
     public ProjectService(IProjectRepository repository,
-            IProjectMapper mapper,
-            MessageService messageService,
-            ITaskListRepository taskListRepository) {
+                          IProjectMapper mapper,
+                          MessageService messageService,
+                          ITaskListRepository taskListRepository,
+                          IProjectMemberRepository projectMemberRepository,
+                          IUserRepository userRepository
+    ) {
         super(repository, mapper, messageService, Project.class);
         this.taskListRepository = taskListRepository;
+        this.projectMemberRepository = projectMemberRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -103,5 +116,50 @@ public class ProjectService
     public Page<Project> getProjectByOrganizationId(UUID organizationId, int page, int size) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public Project getOrCreatePersonalProject(UUID userId) {
+        return repository.findPersonalByUser(userId)
+                .orElseGet(() -> {
+                    String projectCode = "PERS_" + userId;
+                    Project project;
+                    try {
+                        project = repository.save(
+                                Project.builder()
+                                        .name("Personal Project")
+                                        .code(projectCode)
+                                        .type(ProjectType.PERSONAL)
+                                        .status(ProjectStatus.ACTIVE)
+                                        .build()
+                        );
+                    } catch (DataIntegrityViolationException e) {
+                        project = repository.findByCode(projectCode)
+                                .orElseThrow(() -> new BWCNotFoundException("Project not found after duplicate error"));
+                    }
+
+                    try {
+                        projectMemberRepository.save(
+                                ProjectMember.builder()
+                                        .project(project)
+                                        .user(userRepository.getReferenceById(userId))
+                                        .role(ProjectMemberRole.OWNER)
+                                        .build()
+                        );
+                    } catch (DataIntegrityViolationException ignore) {
+                    }
+
+                    if (!taskListRepository.existsByProjectId(project.getId())) {
+                        taskListRepository.save(
+                                TaskList.builder()
+                                        .project(project)
+                                        .name("My Tasks")
+                                        .isDefault(true)
+                                        .orderIndex(0)
+                                        .build()
+                        );
+                    }
+
+                    return project;
+                });
     }
 }

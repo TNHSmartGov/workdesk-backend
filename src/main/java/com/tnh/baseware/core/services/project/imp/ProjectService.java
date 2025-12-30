@@ -2,17 +2,23 @@ package com.tnh.baseware.core.services.project.imp;
 
 import com.tnh.baseware.core.dtos.project.ProjectDTO;
 import com.tnh.baseware.core.entities.project.Project;
+import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.task.TaskList;
 import com.tnh.baseware.core.enums.project.ProjectAction;
+import com.tnh.baseware.core.enums.project.ProjectMemberRole;
+import com.tnh.baseware.core.enums.project.ProjectPermission;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
 import com.tnh.baseware.core.mappers.project.IProjectMapper;
+import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.repositories.task.ITaskListRepository;
+import com.tnh.baseware.core.securities.ProjectSecurityService;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
+import com.tnh.baseware.core.services.project.IProjectMemberService;
 import com.tnh.baseware.core.services.project.IProjectService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -31,13 +37,19 @@ public class ProjectService
         extends GenericService<Project, ProjectEditorForm, ProjectDTO, IProjectRepository, IProjectMapper, UUID>
         implements IProjectService {
     ITaskListRepository taskListRepository;
+    ProjectSecurityService projectSecurityService;
+    IProjectMemberRepository projectMemberRepository;
 
     public ProjectService(IProjectRepository repository,
             IProjectMapper mapper,
+            ProjectSecurityService projectSecurityService,
             MessageService messageService,
+            IProjectMemberRepository projectMemberRepository,
             ITaskListRepository taskListRepository) {
         super(repository, mapper, messageService, Project.class);
         this.taskListRepository = taskListRepository;
+        this.projectSecurityService = projectSecurityService;
+        this.projectMemberRepository = projectMemberRepository;
     }
 
     @Override
@@ -62,6 +74,26 @@ public class ProjectService
                             .orderIndex(0)
                             .build());
         }
+
+        var member = ProjectMember.builder()
+                .project(project)
+                .user(getCurrentUser())
+                .role(ProjectMemberRole.OWNER)
+                .build();
+        projectMemberRepository.save(member);
+        return mapper.entityToDTO(repository.save(project));
+    }
+
+    @Override
+    @Transactional
+    public ProjectDTO update(UUID id, ProjectEditorForm form) {
+        var currentUser = getCurrentUser();
+        if (!projectSecurityService.checkPermission(currentUser.getId(), id, ProjectPermission.PROJECT_UPDATE)) {
+            throw new BWCNotFoundException("Project not found");
+        }
+        var project = repository.findById(id)
+                .orElseThrow(() -> new BWCNotFoundException("Project not found"));
+        mapper.formToEntity(form, project);
 
         return mapper.entityToDTO(repository.save(project));
     }

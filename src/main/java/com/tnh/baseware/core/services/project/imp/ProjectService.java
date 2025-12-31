@@ -48,9 +48,9 @@ public class ProjectService
             IProjectMapper mapper,
             ProjectSecurityService projectSecurityService,
             MessageService messageService,
+            IUserRepository userRepository,
             IProjectMemberRepository projectMemberRepository,
-            ITaskListRepository taskListRepository,
-            IUserRepository userRepository) {
+            ITaskListRepository taskListRepository) {
         super(repository, mapper, messageService, Project.class);
         this.taskListRepository = taskListRepository;
         this.projectSecurityService = projectSecurityService;

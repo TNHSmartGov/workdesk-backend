@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
-@Table(name = "file_documents")
+@Table
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)

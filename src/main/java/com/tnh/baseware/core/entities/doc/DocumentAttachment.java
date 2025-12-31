@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "document_files")
+@Table
 public class DocumentAttachment extends Auditable<String> {
 
     @Id

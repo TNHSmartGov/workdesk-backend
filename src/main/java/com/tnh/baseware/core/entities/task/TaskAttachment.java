@@ -15,7 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(
-        name = "task_attachments",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"task_id", "file_id"})
         }

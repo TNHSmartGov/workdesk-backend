@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "task_lists")
+@Table
 public class TaskList extends Auditable<String> {
 
     @Id

@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "task_comment_attachments")
+@Table
 public class TaskCommentAttachment extends Auditable<String> {
 
     @Id

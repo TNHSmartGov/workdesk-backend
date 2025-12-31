@@ -15,7 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(
-        name = "tasks_documents",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"task_id", "document_id"})
         }

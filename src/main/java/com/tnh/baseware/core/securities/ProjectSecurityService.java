@@ -3,12 +3,15 @@ package com.tnh.baseware.core.securities;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
-import java.util.UUID;
-
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectMember;
+import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.entities.user.UserOrganization;
+import com.tnh.baseware.core.enums.TitleDefault;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.enums.project.ProjectPermission;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
@@ -23,14 +26,24 @@ public class ProjectSecurityService {
     }
 
     @Transactional(readOnly = true)
-    public boolean checkPermission(UUID userId, UUID projectId, ProjectPermission permission) {
-        ProjectMember member = projectMemberRepository.findByProjectIdAndUserId(projectId, userId)
+    public boolean checkPermission(User user, Project project, ProjectPermission permission,
+            Set<UserOrganization> userOrgs) {
+        ProjectMember member = projectMemberRepository.findByProjectIdAndUserId(project.getId(), user.getId())
                 .orElse(null);
 
         if (member == null) {
             return false;
         }
-
+        var userOrg = userOrgs.stream()
+                .filter(u -> u.getOrganization().getId().equals(project.getOrganization().getId()))
+                .findFirst().orElse(null);
+        if (userOrg == null) {
+            return false;
+        }
+        if (userOrg.getTitle().getName().equals(TitleDefault.UNIT_LEADER.getValue()) ||
+                userOrg.getTitle().getName().equals(TitleDefault.DEPUTY.getValue())) {
+            return true;
+        }
         ProjectMemberRole role = member.getRole();
         return role.hasPermission(permission);
     }

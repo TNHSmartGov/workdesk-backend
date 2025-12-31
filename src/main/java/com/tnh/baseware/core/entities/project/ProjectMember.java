@@ -22,22 +22,22 @@ public class ProjectMember extends Auditable<String> {
 
         @Id
         @GeneratedValue(strategy = GenerationType.UUID)
-        private UUID id;
+        UUID id;
 
         @ManyToOne(fetch = FetchType.LAZY, optional = false)
         @JoinColumn(name = "project_id", nullable = false)
-        private Project project;
+        Project project;
 
         @ManyToOne(fetch = FetchType.LAZY, optional = false)
         @JoinColumn(name = "user_id", nullable = false)
-        private User user;
+        User user;
 
         @Column(nullable = false)
         @Enumerated(EnumType.STRING)
-        private ProjectMemberRole role;
+        ProjectMemberRole role;
 
         @Column(nullable = false, updatable = false)
-        private Instant joinedAt;
+        Instant joinedAt;
 
         @PrePersist
         protected void onJoin() {

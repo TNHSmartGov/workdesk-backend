@@ -52,20 +52,23 @@ public class ProjectMemberService extends
         var project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new BWCBusinessException(messageService.getMessage("project.not.found")));
         var isUserSystem = isUserSystem();
-        boolean isMemberWithPermission = projectSecurityService.checkPermission(
-                curentUser.getId(),
-                projectId,
-                ProjectPermission.MEMBER_VIEW);
+
         // lấy danh sách phòng ban của người dùng
         Set<UserOrganization> userOrgs = userOrganizationRepository.findByUserIdAndActiveTrue(curentUser.getId());
+        boolean isMemberWithPermission = projectSecurityService.checkPermission(
+                curentUser,
+                project,
+                ProjectPermission.MEMBER_VIEW,
+                userOrgs);
+
         if (!isUserSystem) {
-            if (repository.existsByProject_IdAndUser_Id(projectId, curentUser.getId()) == false) {
-                throw new BWCBusinessException("You are not a member of this project");
+            if (!isMemberWithPermission) {
+                throw new BWCBusinessException(messageService.getMessage("project.member.not.found"));
             }
         }
+
         var members = repository.findDistinctByProject_Id(projectId);
         return members.stream().map(mapper::entityToMemberDTO).toList();
-        // TODO Auto-generated method stub
     }
 
     @Override

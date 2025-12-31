@@ -47,6 +47,4 @@ public interface IUserRepository extends IGenericRepository<User, UUID> {
     // find all users without organization
     List<User> findDistinctByOrganizations_Organization_IdIsNull();
 
-    List<User> findByProjects_Project_Id(UUID projectId);
-
 }

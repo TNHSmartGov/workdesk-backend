@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "task_members", uniqueConstraints = {
+@Table(uniqueConstraints = {
                 @UniqueConstraint(columnNames = { "task_id", "user_id" })
 })
 public class TaskMember extends Auditable<String> {

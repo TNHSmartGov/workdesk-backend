@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "task_activity_logs")
+@Table
 public class TaskActivityLog extends Auditable<String> {
 
     @Id

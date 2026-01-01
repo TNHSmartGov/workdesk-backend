@@ -14,7 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(
-        name = "inbound_documents",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"source_system", "external_document_id"})
         }

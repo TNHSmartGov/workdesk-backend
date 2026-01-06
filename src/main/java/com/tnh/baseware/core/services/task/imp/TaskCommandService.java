@@ -10,10 +10,9 @@ import com.tnh.baseware.core.entities.task.TaskMember;
 import com.tnh.baseware.core.entities.task.TaskRequirement;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.enums.project.ProjectType;
-import com.tnh.baseware.core.enums.task.MemberStatus;
-import com.tnh.baseware.core.enums.task.TaskAction;
-import com.tnh.baseware.core.enums.task.TaskMemberRole;
-import com.tnh.baseware.core.enums.task.TaskStatus;
+import com.tnh.baseware.core.enums.task.*;
+import com.tnh.baseware.core.events.type.TaskActivityEvent;
+import com.tnh.baseware.core.events.type.UserCreatedEvent;
 import com.tnh.baseware.core.exceptions.BWCAccessDeniedException;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
@@ -26,9 +25,10 @@ import com.tnh.baseware.core.repositories.task.ITaskRequirementRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
-import com.tnh.baseware.core.services.task.ITaskService;
+import com.tnh.baseware.core.services.task.ITaskCommandService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,11 +37,12 @@ import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class TaskCommandService extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID> implements ITaskService {
+public class TaskCommandService extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID> implements ITaskCommandService {
     ITaskListRepository taskListRepository;
     ITaskMemberRepository taskMemberRepository;
     IProjectService projectService;
     ITaskRequirementRepository taskRequirementRepository;
+    ApplicationEventPublisher eventPublisher;
 
     public TaskCommandService(ITaskRepository repository,
                               ITaskMapper mapper,
@@ -49,12 +50,14 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
                               ITaskListRepository taskListRepository,
                               ITaskMemberRepository taskMemberRepository,
                               ITaskRequirementRepository taskRequirementRepository,
-                              IProjectService projectService) {
+                              IProjectService projectService,
+                              ApplicationEventPublisher eventPublisher) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
         this.taskMemberRepository = taskMemberRepository;
         this.taskRequirementRepository = taskRequirementRepository;
         this.projectService = projectService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -86,6 +89,11 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
                     .build());
         }
 
+        eventPublisher.publishEvent(new TaskActivityEvent(
+                savedTask, getCurrentUser(), LogActionType.CREATE_TASK,
+                null, null, savedTask.getTitle()
+        ));
+
         return mapper.entityToDTO(savedTask);
     }
 
@@ -97,6 +105,8 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
 
         validateAction(task, action, getCurrentUser().getId());
 
+        String oldStatus = task.getStatus().toString();
+
         switch (action) {
             case START -> start(task);
             case COMPLETE -> complete(task);
@@ -104,6 +114,15 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
             case CANCEL -> cancel(task);
             default -> throw new BWCValidationException(MessageConstant.UNSUPPORTED_ACTION);
         }
+
+        LogActionType logType = (action == TaskAction.CANCEL || task.getStatus() == TaskStatus.DONE)
+                ? LogActionType.CLOSE_TASK
+                : LogActionType.UPDATE_STATUS;
+
+        eventPublisher.publishEvent(new TaskActivityEvent(
+                task, getCurrentUser(), logType,
+                "status", oldStatus, task.getStatus().toString()
+        ));
     }
 
     @Override
@@ -167,12 +186,21 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         TaskMember member = taskMemberRepository.findByTaskIdAndUserId(taskId, userId)
                 .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_ASSIGNED_TO_TASK));
 
+        String oldProgress = String.valueOf(member.getPersonalProgress());
+
         member.setPersonalProgress(progress);
         member.setStatus(calculateStatusFromProgress(progress));
 
         taskMemberRepository.save(member);
 
         updateTaskProgress(member.getTask());
+
+        LogActionType logType = progress == 100 ? LogActionType.MEMBER_SUBMIT : LogActionType.UPDATE_INFO;
+
+        eventPublisher.publishEvent(new TaskActivityEvent(
+                member.getTask(), getCurrentUser(), logType,
+                "progress", oldProgress, String.valueOf(progress)
+        ));
     }
 
     private void start(Task task) {

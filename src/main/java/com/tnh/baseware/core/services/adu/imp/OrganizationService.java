@@ -263,4 +263,21 @@ public class OrganizationService extends
                 return mapper.mapOrganizationsToTree(organizations);
 
         }
+
+        @Override
+        public boolean isSupervisor(UUID orgId, UUID userId) {
+                boolean isSupervisor = false;
+                var userOrg = userOrganizationRepository
+                                .findByUserIdAndOrganizationIdAndActiveTrue(userId, orgId)
+                                .orElseThrow(() -> new BWCNotFoundException(
+                                                messageService.getMessage("user.not.in.organization", userId, orgId)));
+                if (userOrg.getOrganization().getIsSystem()) {
+                        return true;
+                }
+                if (userOrg.getTitle().getName().equals(TitleDefault.UNIT_LEADER.getValue())) {
+                        isSupervisor = true;
+                }
+
+                return isSupervisor;
+        }
 }

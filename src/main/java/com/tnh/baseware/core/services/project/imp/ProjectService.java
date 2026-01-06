@@ -4,10 +4,13 @@ import com.tnh.baseware.core.dtos.project.ProjectDTO;
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.task.TaskList;
+import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.project.ProjectAction;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
+import com.tnh.baseware.core.enums.project.ProjectPermission;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
 import com.tnh.baseware.core.enums.project.ProjectType;
+import com.tnh.baseware.core.exceptions.BWCBusinessException;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
@@ -15,7 +18,9 @@ import com.tnh.baseware.core.mappers.project.IProjectMapper;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.repositories.task.ITaskListRepository;
+import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
+import com.tnh.baseware.core.securities.ProjectSecurityService;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
@@ -23,12 +28,12 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -37,20 +42,25 @@ public class ProjectService
         extends GenericService<Project, ProjectEditorForm, ProjectDTO, IProjectRepository, IProjectMapper, UUID>
         implements IProjectService {
     ITaskListRepository taskListRepository;
+    ProjectSecurityService projectSecurityService;
     IProjectMemberRepository projectMemberRepository;
     IUserRepository userRepository;
+    IUserOrganizationRepository userOrganizationRepository;
 
     public ProjectService(IProjectRepository repository,
-                          IProjectMapper mapper,
-                          MessageService messageService,
-                          ITaskListRepository taskListRepository,
-                          IProjectMemberRepository projectMemberRepository,
-                          IUserRepository userRepository
-    ) {
+            IProjectMapper mapper,
+            ProjectSecurityService projectSecurityService,
+            MessageService messageService,
+            IUserRepository userRepository,
+            IUserOrganizationRepository userOrganizationRepository,
+            IProjectMemberRepository projectMemberRepository,
+            ITaskListRepository taskListRepository) {
         super(repository, mapper, messageService, Project.class);
         this.taskListRepository = taskListRepository;
+        this.projectSecurityService = projectSecurityService;
         this.projectMemberRepository = projectMemberRepository;
         this.userRepository = userRepository;
+        this.userOrganizationRepository = userOrganizationRepository;
     }
 
     @Override
@@ -75,6 +85,30 @@ public class ProjectService
                             .orderIndex(0)
                             .build());
         }
+
+        var member = ProjectMember.builder()
+                .project(project)
+                .user(getCurrentUser())
+                .role(ProjectMemberRole.OWNER)
+                .build();
+        projectMemberRepository.save(member);
+        return mapper.entityToDTO(repository.save(project));
+    }
+
+    @Override
+    @Transactional
+    public ProjectDTO update(UUID id, ProjectEditorForm form) {
+        var currentUser = getCurrentUser();
+        var project = repository.findById(id)
+                .orElseThrow(() -> new BWCNotFoundException("Project not found"));
+        Set<UserOrganization> userOrgs = userOrganizationRepository.findByUserIdAndActiveTrue(currentUser.getId());
+
+        if (userOrgs.isEmpty() || !projectSecurityService.checkPermission(currentUser, project,
+                ProjectPermission.PROJECT_UPDATE, userOrgs)) {
+            throw new BWCBusinessException("You do not have permission to update this project");
+        }
+
+        mapper.formToEntity(form, project);
 
         return mapper.entityToDTO(repository.save(project));
     }
@@ -130,8 +164,7 @@ public class ProjectService
                                         .code(projectCode)
                                         .type(ProjectType.PERSONAL)
                                         .status(ProjectStatus.ACTIVE)
-                                        .build()
-                        );
+                                        .build());
                     } catch (DataIntegrityViolationException e) {
                         project = repository.findByCode(projectCode)
                                 .orElseThrow(() -> new BWCNotFoundException("Project not found after duplicate error"));
@@ -143,8 +176,7 @@ public class ProjectService
                                         .project(project)
                                         .user(userRepository.getReferenceById(userId))
                                         .role(ProjectMemberRole.OWNER)
-                                        .build()
-                        );
+                                        .build());
                     } catch (DataIntegrityViolationException ignore) {
                     }
 
@@ -155,8 +187,7 @@ public class ProjectService
                                         .name("My Tasks")
                                         .isDefault(true)
                                         .orderIndex(0)
-                                        .build()
-                        );
+                                        .build());
                     }
 
                     return project;

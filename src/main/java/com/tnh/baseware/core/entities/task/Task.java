@@ -8,9 +8,7 @@ import com.tnh.baseware.core.enums.task.TaskType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.ws.rs.DefaultValue;
 import lombok.*;
-import lombok.Builder.Default;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
@@ -61,6 +59,7 @@ public class Task extends Auditable<String> {
 
     // bổ sung các trường tạo gantt
     @Builder.Default
-    @Min(0) @Max(100)
+    @Min(0)
+    @Max(100)
     Integer progress = 0;
 }

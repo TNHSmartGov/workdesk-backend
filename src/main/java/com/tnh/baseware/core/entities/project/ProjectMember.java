@@ -15,29 +15,35 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"project_id", "user_id"})
-        }
-)
+@Table(uniqueConstraints = {
+                @UniqueConstraint(columnNames = { "project_id", "user_id" })
+})
 public class ProjectMember extends Auditable<String> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.UUID)
+        UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
+        @JoinColumn(name = "project_id", nullable = false)
+        Project project;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
+        @JoinColumn(name = "user_id", nullable = false)
+        User user;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ProjectMemberRole role;
+        @Column(nullable = false)
+        @Enumerated(EnumType.STRING)
+        ProjectMemberRole role;
 
-    @Column(nullable = false, updatable = false)
-    private Instant joinedAt;
+        @Column(nullable = false, updatable = false)
+        Instant joinedAt;
+
+        @PrePersist
+        protected void onJoin() {
+                if (this.joinedAt == null) {
+                        this.joinedAt = Instant.now();
+                }
+        }
+
 }

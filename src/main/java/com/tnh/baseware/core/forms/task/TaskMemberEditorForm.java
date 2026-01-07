@@ -31,7 +31,7 @@ public class TaskMemberEditorForm {
     UUID userId;
 
     @NotBlank(message = "{role.not.blank}")
-    @Schema(description = "Values are retrieved from 'task-members/enums?name=MemberStatus'")
+    @Schema(description = "Values are retrieved from 'task-members/enums?name=TaskMemberRole'")
     TaskMemberRole role;
 
     @Min(value = 1, message = "{weight.min}")

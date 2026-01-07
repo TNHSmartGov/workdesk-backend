@@ -3,7 +3,10 @@ package com.tnh.baseware.core.forms.task;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.tnh.baseware.core.enums.task.MemberStatus;
+import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -28,12 +31,10 @@ public class TaskMemberEditorForm {
     UUID userId;
 
     @NotBlank(message = "{role.not.blank}")
-    String role;
-
-    @NotNull(message = "{status.not.null}")
     @Schema(description = "Values are retrieved from 'task-members/enums?name=MemberStatus'")
-    MemberStatus status;
+    TaskMemberRole role;
 
-    Instant joinedAt;
-    Instant completedAt;
+    @Min(value = 1, message = "{weight.min}")
+    @Max(value = 100, message = "{weight.max}")
+    Integer weight = 1;
 }

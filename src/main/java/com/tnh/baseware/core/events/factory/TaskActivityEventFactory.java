@@ -1,10 +1,13 @@
-package com.tnh.baseware.core.events.type;
+package com.tnh.baseware.core.events.factory;
 
 import com.tnh.baseware.core.constants.FieldChange;
 import com.tnh.baseware.core.constants.SystemUser;
 import com.tnh.baseware.core.entities.task.Task;
+import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.task.LogActionType;
+import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.enums.task.TaskStatus;
+import com.tnh.baseware.core.events.type.TaskActivityEvent;
 
 import java.util.List;
 
@@ -104,6 +107,59 @@ public final class TaskActivityEventFactory {
                 stringify(oldValue),
                 stringify(newValue)
         );
+    }
+
+    public static TaskActivityEvent memberAssigned(Task task, String actor, User member) {
+        return new TaskActivityEvent(
+                task, actor, LogActionType.ASSIGN_MEMBER,
+                "member", null, member.getUsername()
+        );
+    }
+
+    public static TaskActivityEvent memberRemoved(Task task, String actor, User member) {
+        return new TaskActivityEvent(
+                task, actor, LogActionType.REMOVE_MEMBER,
+                "member", member.getUsername(), null
+        );
+    }
+
+    public static TaskActivityEvent memberRoleChanged(Task task, String actor, User member,
+                                                      TaskMemberRole oldRole, TaskMemberRole newRole) {
+        return new TaskActivityEvent(
+                task, actor, LogActionType.UPDATE_MEMBER_ROLE,
+                "role:" + member.getUsername(),
+                oldRole.toString(), newRole.toString()
+        );
+    }
+
+    public static TaskActivityEvent requirementAdded(Task task, String actor, String content) {
+        return new TaskActivityEvent(
+                task, actor, LogActionType.ADD_REQUIREMENT,
+                "requirement", null, truncate(content, 50)
+        );
+    }
+
+    public static TaskActivityEvent requirementAssigned(Task task, String actor, String content,
+                                                        User oldAssignee, User newAssignee) {
+        return new TaskActivityEvent(
+                task, actor, LogActionType.ASSIGN_REQUIREMENT,
+                "requirement:" + truncate(content, 30),
+                oldAssignee != null ? oldAssignee.getUsername() : null,
+                newAssignee.getUsername()
+        );
+    }
+
+    public static TaskActivityEvent requirementCompleted(Task task, String actor,
+                                                         String content, boolean completed) {
+        return new TaskActivityEvent(
+                task, actor,
+                completed ? LogActionType.COMPLETE_REQUIREMENT : LogActionType.UNCOMPLETE_REQUIREMENT,
+                "requirement", null, truncate(content, 50)
+        );
+    }
+
+    private static String truncate(String s, int maxLen) {
+        return s != null && s.length() > maxLen ? s.substring(0, maxLen) + "..." : s;
     }
 
     private static String stringify(Object v) {

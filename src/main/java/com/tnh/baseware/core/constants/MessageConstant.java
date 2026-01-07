@@ -16,6 +16,9 @@ public class MessageConstant {
     public static final String NOT_IN_PROJECT_TASK = "You are not a member of the project and task";
     public static final String INVALID_PROJECT_ROLE_CONFIG = "Invalid Project Role configuration";
 
+    // User constants
+
+
     // Common constants
     public static final String UNSUPPORTED_ACTION = "Unsupported action";
 }

@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.resources.project;
 
 import com.tnh.baseware.core.dtos.project.ProjectDTO;
+import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.forms.project.ProjectActionForm;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
@@ -10,10 +11,15 @@ import com.tnh.baseware.core.services.IGenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -27,9 +33,9 @@ public class ProjectResource extends GenericResource<Project, ProjectEditorForm,
     IProjectService projectService;
 
     public ProjectResource(IGenericService<Project, ProjectEditorForm, ProjectDTO, UUID> service,
-            MessageService messageService,
-            SystemProperties systemProperties,
-            IProjectService projectService) {
+                           MessageService messageService,
+                           SystemProperties systemProperties,
+                           IProjectService projectService) {
         super(service, messageService, systemProperties.getApiPrefix() + "/projects");
         this.projectService = projectService;
     }
@@ -37,7 +43,22 @@ public class ProjectResource extends GenericResource<Project, ProjectEditorForm,
     @Operation(summary = "Perform an action on project")
     @PostMapping(value = "/{id}/actions")
     public void performAction(@PathVariable UUID id,
-            @RequestBody @Valid ProjectActionForm form) {
+                              @RequestBody @Valid ProjectActionForm form) {
         projectService.performAction(id, form.getAction());
+    }
+
+    @Operation(summary = "Update an existing project by ID")
+    @ApiResponse(responseCode = "200", description = "Entity updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+    @Override
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiMessageDTO<ProjectDTO>> update(@PathVariable UUID id,
+                                                            @Valid @RequestBody ProjectEditorForm f) {
+        var updated = projectService.update(id, f);
+        return ResponseEntity.ok(ApiMessageDTO.<ProjectDTO>builder()
+                .data(updated)
+                .result(true)
+                .message(messageService.getMessage("entity.updated"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 }

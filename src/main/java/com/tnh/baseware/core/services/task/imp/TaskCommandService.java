@@ -13,7 +13,7 @@ import com.tnh.baseware.core.entities.task.TaskRequirement;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.enums.project.ProjectType;
 import com.tnh.baseware.core.enums.task.*;
-import com.tnh.baseware.core.events.type.TaskActivityEventFactory;
+import com.tnh.baseware.core.events.factory.TaskActivityEventFactory;
 import com.tnh.baseware.core.exceptions.BWCAccessDeniedException;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;

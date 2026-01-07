@@ -10,5 +10,5 @@ import java.util.UUID;
 @Repository
 public interface IProjectAttachmentRepository extends IGenericRepository<ProjectAttachment, UUID> {
 
-    List<ProjectAttachment> findByProjectId(UUID projectId);
+    List<ProjectAttachment> findByProject_Id(UUID projectId);
 }

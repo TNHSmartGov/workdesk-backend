@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -27,6 +26,5 @@ public class ProjectDTO extends RepresentationModel<ProjectDTO> implements Ident
     Instant startDate;
     Instant endDate;
     ProjectStatus status;
-    List<ProjectAttachmentDTO> attachments;
 
 }

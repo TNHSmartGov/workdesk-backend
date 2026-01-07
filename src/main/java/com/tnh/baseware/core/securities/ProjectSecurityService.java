@@ -32,19 +32,25 @@ public class ProjectSecurityService {
                 .orElse(null);
 
         if (member == null) {
+            System.out.println("Member not found");
             return false;
         }
         var userOrg = userOrgs.stream()
                 .filter(u -> u.getOrganization().getId().equals(project.getOrganization().getId()))
                 .findFirst().orElse(null);
         if (userOrg == null) {
+            System.out.println("User org not found");
             return false;
         }
         if (userOrg.getTitle().getName().equals(TitleDefault.UNIT_LEADER.getValue()) ||
                 userOrg.getTitle().getName().equals(TitleDefault.DEPUTY.getValue())) {
+            System.out.println("User is unit leader or deputy");
             return true;
         }
         ProjectMemberRole role = member.getRole();
+        System.out.println("User role: " + role);
+        System.out.println("Permission: " + permission);
+        System.out.println("Has permission: " + role.hasPermission(permission));
         return role.hasPermission(permission);
     }
 

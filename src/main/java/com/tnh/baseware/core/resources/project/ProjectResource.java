@@ -1,5 +1,7 @@
 package com.tnh.baseware.core.resources.project;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.tnh.baseware.core.constants.Views;
 import com.tnh.baseware.core.dtos.project.ProjectDTO;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.project.Project;
@@ -47,10 +49,26 @@ public class ProjectResource extends GenericResource<Project, ProjectEditorForm,
         projectService.performAction(id, form.getAction());
     }
 
+    @Operation(summary = "Create a new entity")
+    @ApiResponse(responseCode = "200", description = "Entity created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
+    @Override
+    @PostMapping
+    @JsonView(Views.Create.class)
+    public ResponseEntity<ApiMessageDTO<ProjectDTO>> create(@Valid @RequestBody ProjectEditorForm f) {
+        var created = service.create(f);
+        return ResponseEntity.ok(ApiMessageDTO.<ProjectDTO>builder()
+                .data(created)
+                .result(true)
+                .message(messageService.getMessage("entity.created"))
+                .code(HttpStatus.CREATED.value())
+                .build());
+    }
+
     @Operation(summary = "Update an existing project by ID")
     @ApiResponse(responseCode = "200", description = "Entity updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
     @Override
     @PutMapping("/{id}")
+    @JsonView(Views.Common.class)
     public ResponseEntity<ApiMessageDTO<ProjectDTO>> update(@PathVariable UUID id,
                                                             @Valid @RequestBody ProjectEditorForm f) {
         var updated = projectService.update(id, f);

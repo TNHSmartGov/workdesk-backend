@@ -104,6 +104,13 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         Task task = repository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
 
+        if (form.getTaskListId() != null &&
+                (task.getTaskList() == null || !form.getTaskListId().equals(task.getTaskList().getId()))) {
+            TaskList newList = taskListRepository.findById(form.getTaskListId())
+                    .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_LIST_NOT_FOUND));
+            task.setTaskList(newList);
+        }
+
         TaskSnapshot before = TaskSnapshot.from(task);
 
         mapper.formToEntity(form, task);

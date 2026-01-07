@@ -4,6 +4,7 @@ import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.forms.task.TaskActionForm;
 import com.tnh.baseware.core.forms.task.TaskEditorForm;
+import com.tnh.baseware.core.forms.task.UpdateProgressForm;
 import com.tnh.baseware.core.properties.SystemProperties;
 import com.tnh.baseware.core.resources.GenericResource;
 import com.tnh.baseware.core.services.MessageService;
@@ -43,5 +44,10 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
         taskCommandService.performAction(id, form.getAction());
     }
 
-
+    @Operation(summary = "Update personal progress")
+    @PatchMapping("/{id}/progress")
+    public void updateProgress(@PathVariable UUID id,
+                               @RequestBody @Valid UpdateProgressForm form) {
+        taskCommandService.updatePersonalProgress(id, form.getProgress());
+    }
 }

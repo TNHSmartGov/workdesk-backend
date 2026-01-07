@@ -30,7 +30,7 @@ public class TaskMemberEditorForm {
     @NotNull(message = "{user.id.not.null}")
     UUID userId;
 
-    @NotBlank(message = "{role.not.blank}")
+    @NotNull(message = "{role.not.null}")
     @Schema(description = "Values are retrieved from 'task-members/enums?name=TaskMemberRole'")
     TaskMemberRole role;
 

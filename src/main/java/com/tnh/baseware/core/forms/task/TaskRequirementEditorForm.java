@@ -25,7 +25,6 @@ public class TaskRequirementEditorForm {
     @NotBlank(message = "{content.not.blank}")
     String content;
 
-    @NotNull(message = "{assignee.id.not.null}")
     UUID assigneeId;
 
     @Min(value = 1, message = "{weight.min}")

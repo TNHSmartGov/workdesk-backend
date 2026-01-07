@@ -1,5 +1,6 @@
 package com.tnh.baseware.core.enums.task;
 
+import com.tnh.baseware.core.enums.base.BaseEnum;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.exceptions.BWCGenericRuntimeException;
 import lombok.AccessLevel;
@@ -10,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
-public enum TaskMemberRole {
+public enum TaskMemberRole implements BaseEnum<String> {
     LEAD("LEAD", "lead", "Chủ trì"),
     ASSIGNEE("ASSIGNEE", "assignee", "Người thực hiện"),
     REVIEWER("REVIEWER", "reviewer", "Người kiểm duyệt"),

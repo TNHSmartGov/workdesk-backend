@@ -1,6 +1,8 @@
 package com.tnh.baseware.core.services.task.imp;
 
+import com.tnh.baseware.core.constants.FieldChange;
 import com.tnh.baseware.core.constants.MessageConstant;
+import com.tnh.baseware.core.constants.TaskSnapshot;
 import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.dtos.task.UserTaskPermissionDTO;
 import com.tnh.baseware.core.entities.project.Project;
@@ -10,10 +12,8 @@ import com.tnh.baseware.core.entities.task.TaskMember;
 import com.tnh.baseware.core.entities.task.TaskRequirement;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.enums.project.ProjectType;
-import com.tnh.baseware.core.enums.task.MemberStatus;
-import com.tnh.baseware.core.enums.task.TaskAction;
-import com.tnh.baseware.core.enums.task.TaskMemberRole;
-import com.tnh.baseware.core.enums.task.TaskStatus;
+import com.tnh.baseware.core.enums.task.*;
+import com.tnh.baseware.core.events.factory.TaskActivityEventFactory;
 import com.tnh.baseware.core.exceptions.BWCAccessDeniedException;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
@@ -26,9 +26,11 @@ import com.tnh.baseware.core.repositories.task.ITaskRequirementRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
-import com.tnh.baseware.core.services.task.ITaskService;
+import com.tnh.baseware.core.services.task.ITaskCommandService;
+import com.tnh.baseware.core.utils.DiffUtil;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,11 +39,12 @@ import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class TaskCommandService extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID> implements ITaskService {
+public class TaskCommandService extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID> implements ITaskCommandService {
     ITaskListRepository taskListRepository;
     ITaskMemberRepository taskMemberRepository;
     IProjectService projectService;
     ITaskRequirementRepository taskRequirementRepository;
+    ApplicationEventPublisher eventPublisher;
 
     public TaskCommandService(ITaskRepository repository,
                               ITaskMapper mapper,
@@ -49,12 +52,14 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
                               ITaskListRepository taskListRepository,
                               ITaskMemberRepository taskMemberRepository,
                               ITaskRequirementRepository taskRequirementRepository,
-                              IProjectService projectService) {
+                              IProjectService projectService,
+                              ApplicationEventPublisher eventPublisher) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
         this.taskMemberRepository = taskMemberRepository;
         this.taskRequirementRepository = taskRequirementRepository;
         this.projectService = projectService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -86,7 +91,40 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
                     .build());
         }
 
+        eventPublisher.publishEvent(
+                TaskActivityEventFactory.created(savedTask, getCurrentUser().getUsername())
+        );
+
         return mapper.entityToDTO(savedTask);
+    }
+
+    @Override
+    @Transactional
+    public TaskDTO update(UUID id, TaskEditorForm form) {
+        Task task = repository.findById(id)
+                .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
+
+        if (form.getTaskListId() != null &&
+                (task.getTaskList() == null || !form.getTaskListId().equals(task.getTaskList().getId()))) {
+            TaskList newList = taskListRepository.findById(form.getTaskListId())
+                    .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_LIST_NOT_FOUND));
+            task.setTaskList(newList);
+        }
+
+        TaskSnapshot before = TaskSnapshot.from(task);
+
+        mapper.formToEntity(form, task);
+        Task saved = repository.save(task);
+
+        TaskSnapshot after = TaskSnapshot.from(saved);
+
+        List<FieldChange> changes = DiffUtil.diff(before, after);
+
+        TaskActivityEventFactory
+                .fieldUpdatedBatch(saved, getCurrentUser().getUsername(), changes)
+                .forEach(eventPublisher::publishEvent);
+
+        return mapper.entityToDTO(saved);
     }
 
     @Override
@@ -97,6 +135,8 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
 
         validateAction(task, action, getCurrentUser().getId());
 
+        String oldStatus = task.getStatus().toString();
+
         switch (action) {
             case START -> start(task);
             case COMPLETE -> complete(task);
@@ -104,6 +144,17 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
             case CANCEL -> cancel(task);
             default -> throw new BWCValidationException(MessageConstant.UNSUPPORTED_ACTION);
         }
+
+        repository.save(task);
+
+        eventPublisher.publishEvent(
+                TaskActivityEventFactory.statusChanged(
+                        task,
+                        getCurrentUser().getUsername(),
+                        TaskStatus.valueOf(oldStatus),
+                        task.getStatus()
+                )
+        );
     }
 
     @Override
@@ -151,6 +202,15 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         if (!membersToUpdate.isEmpty()) {
             taskMemberRepository.saveAll(membersToUpdate);
             updateTaskProgress(task);
+
+            eventPublisher.publishEvent(
+                    TaskActivityEventFactory.systemUpdated(
+                            task,
+                            "progress",
+                            null,
+                            task.getProgress()
+                    )
+            );
         }
     }
 
@@ -167,12 +227,23 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         TaskMember member = taskMemberRepository.findByTaskIdAndUserId(taskId, userId)
                 .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_ASSIGNED_TO_TASK));
 
+        Integer oldProgress = member.getPersonalProgress();
+
         member.setPersonalProgress(progress);
         member.setStatus(calculateStatusFromProgress(progress));
 
         taskMemberRepository.save(member);
 
         updateTaskProgress(member.getTask());
+
+        eventPublisher.publishEvent(
+                TaskActivityEventFactory.progressUpdated(
+                        member.getTask(),
+                        getCurrentUser().getUsername(),
+                        oldProgress,
+                        progress
+                )
+        );
     }
 
     private void start(Task task) {
@@ -244,20 +315,15 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
     }
 
     private static boolean checkIsAllowed(TaskAction action, ProjectMemberRole projectRole, TaskMemberRole taskRole) {
-        boolean isProjectAdminOrTaskLead = projectRole == ProjectMemberRole.OWNER || projectRole == ProjectMemberRole.MANAGER || taskRole == TaskMemberRole.LEAD;
+        boolean isProjectAdmin = projectRole == ProjectMemberRole.OWNER
+                || projectRole == ProjectMemberRole.MANAGER;
+        boolean isTaskLead = taskRole == TaskMemberRole.LEAD;
+        boolean isProjectAdminOrTaskLead = isProjectAdmin || isTaskLead;
 
-        if (action == TaskAction.CANCEL) {
-            return isProjectAdminOrTaskLead || taskRole == TaskMemberRole.ASSIGNEE;
-        }
-
-        if (taskRole != null) {
-            return switch (action) {
-                case START, COMPLETE -> isProjectAdminOrTaskLead;
-                case APPROVE -> taskRole == TaskMemberRole.REVIEWER || isProjectAdminOrTaskLead;
-                default -> false;
-            };
-        }
-        return false;
+        return switch (action) {
+            case START, COMPLETE, CANCEL -> isProjectAdminOrTaskLead;
+            case APPROVE -> isProjectAdminOrTaskLead || taskRole == TaskMemberRole.REVIEWER;
+        };
     }
 
     private void updateTaskProgress(Task task) {

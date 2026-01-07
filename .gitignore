@@ -135,4 +135,6 @@ $RECYCLE.BIN/
 
 
 classes
-log
+/logs/
+/logs/**
+*.log

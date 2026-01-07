@@ -1,13 +1,13 @@
-package com.tnh.baseware.core.forms.task;
+package com.tnh.baseware.core.forms.project;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -17,18 +17,17 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class TaskRequirementEditorForm {
+public class ProjectUpdateForm {
+    @NotBlank(message = "{name.not.blank}")
+    String name;
+    @NotBlank(message = "{code.not.blank}")
+    String code;
 
-    @NotNull(message = "{task.id.not.null}")
-    UUID taskId;
+    String description;
 
-    @NotBlank(message = "{content.not.blank}")
-    String content;
+    @NotNull(message = "{organization_id.not.null}")
+    UUID organizationId;
 
-    UUID assigneeId;
-
-    @Min(value = 1, message = "{weight.min}")
-    Integer weight = 1;
-
-    Integer sortOrder;
+    Instant startDate;
+    Instant endDate;
 }

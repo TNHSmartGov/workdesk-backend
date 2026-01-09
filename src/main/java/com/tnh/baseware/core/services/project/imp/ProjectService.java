@@ -4,7 +4,6 @@ import com.tnh.baseware.core.dtos.project.ProjectDTO;
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.task.TaskList;
-import com.tnh.baseware.core.entities.user.CustomUserDetails;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.project.ProjectAction;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
@@ -26,6 +25,7 @@ import com.tnh.baseware.core.securities.ProjectSecurityService;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
+import com.tnh.baseware.core.utils.SecurityUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
@@ -54,6 +54,7 @@ public class ProjectService
     IUserRepository userRepository;
     IUserOrganizationRepository userOrganizationRepository;
     IOrganizationRepository organizationRepository;
+    SecurityUtils securityUtils;
 
     public ProjectService(IProjectRepository repository,
                           IProjectMapper mapper,
@@ -63,7 +64,8 @@ public class ProjectService
                           IUserOrganizationRepository userOrganizationRepository,
                           IProjectMemberRepository projectMemberRepository,
                           ITaskListRepository taskListRepository,
-                          IOrganizationRepository organizationRepository) {
+                          IOrganizationRepository organizationRepository,
+                          SecurityUtils securityUtils) {
         super(repository, mapper, messageService, Project.class);
         this.taskListRepository = taskListRepository;
         this.projectSecurityService = projectSecurityService;
@@ -71,16 +73,13 @@ public class ProjectService
         this.userRepository = userRepository;
         this.userOrganizationRepository = userOrganizationRepository;
         this.organizationRepository = organizationRepository;
+        this.securityUtils = securityUtils;
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProjectDTO findById(UUID id) {
-        UUID orgId = ((CustomUserDetails)
-                SecurityContextHolder.getContext()
-                        .getAuthentication()
-                        .getPrincipal())
-                .getOrganizationId();
+        UUID orgId = securityUtils.currentOrgId();
 
         return repository.findByIdAndOrganizationId(id, orgId)
                 .map(mapper::entityToDTO)
@@ -90,11 +89,7 @@ public class ProjectService
     @Override
     @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
-        UUID orgId = ((CustomUserDetails)
-                SecurityContextHolder.getContext()
-                        .getAuthentication()
-                        .getPrincipal())
-                .getOrganizationId();
+        UUID orgId = securityUtils.currentOrgId();
 
         return repository.findByOrganizationId(orgId, Sort.by(Sort.Order.desc("createdDate")))
                 .stream()
@@ -105,11 +100,7 @@ public class ProjectService
     @Override
     @Transactional(readOnly = true)
     public Page<ProjectDTO> findAll(Pageable pageable) {
-        UUID orgId = ((CustomUserDetails)
-                SecurityContextHolder.getContext()
-                        .getAuthentication()
-                        .getPrincipal())
-                .getOrganizationId();
+        UUID orgId = securityUtils.currentOrgId();
 
         return repository.findByOrganizationId(orgId, pageable)
                 .map(mapper::entityToDTO);
@@ -118,11 +109,7 @@ public class ProjectService
     @Override
     @Transactional
     public ProjectDTO create(ProjectEditorForm form) {
-        UUID orgId = ((CustomUserDetails)
-                SecurityContextHolder.getContext()
-                        .getAuthentication()
-                        .getPrincipal())
-                .getOrganizationId();
+        UUID orgId = securityUtils.currentOrgId();
 
         Project project = mapper.formToEntity(form);
         project.setOrganization(
@@ -159,11 +146,7 @@ public class ProjectService
     @Override
     @Transactional
     public ProjectDTO update(UUID id, ProjectEditorForm form) {
-        UUID orgId = ((CustomUserDetails)
-                SecurityContextHolder.getContext()
-                        .getAuthentication()
-                        .getPrincipal())
-                .getOrganizationId();
+        UUID orgId = securityUtils.currentOrgId();
         var currentUser = getCurrentUser();
         var project = repository.findByIdAndOrganizationId(id, orgId)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
@@ -182,11 +165,7 @@ public class ProjectService
     @Override
     @Transactional
     public void performAction(UUID projectId, ProjectAction action) {
-        UUID orgId = ((CustomUserDetails)
-                SecurityContextHolder.getContext()
-                        .getAuthentication()
-                        .getPrincipal())
-                .getOrganizationId();
+        UUID orgId = securityUtils.currentOrgId();
         var project = repository.findByIdAndOrganizationId(projectId, orgId)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
 

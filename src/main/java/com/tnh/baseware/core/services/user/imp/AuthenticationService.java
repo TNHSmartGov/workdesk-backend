@@ -19,6 +19,7 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.audit.ITrackActivityService;
 import com.tnh.baseware.core.utils.BasewareUtils;
 import com.tnh.baseware.core.utils.LogStyleHelper;
+import com.tnh.baseware.core.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,7 @@ public class AuthenticationService {
         IUserOrganizationRepository userOrganizationRepository;
         IOrganizationRepository organizationRepository;
         IUserRepository userRepository;
+        SecurityUtils securityUtils;
 
         @Transactional
         public AuthenticationDTO login(AuthenticationForm authenticationForm, HttpServletRequest request) {
@@ -164,11 +166,7 @@ public class AuthenticationService {
                 UUID newOrgId,
                 HttpServletRequest request
         ) {
-                CustomUserDetails current =
-                        (CustomUserDetails) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+                CustomUserDetails current = securityUtils.currentUserDetails();
 
                 User user = current.getUser();
                 UUID userId = user.getId();

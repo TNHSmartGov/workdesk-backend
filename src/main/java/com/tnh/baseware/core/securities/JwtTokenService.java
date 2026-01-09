@@ -208,6 +208,13 @@ public class JwtTokenService {
                 });
     }
 
+    public Optional<String> extractAccessTokenFromContext() {
+        return httpRequestContext.currentRequest()
+                .map(req -> req.getHeader(HttpHeaders.AUTHORIZATION))
+                .filter(h -> h.startsWith("Bearer "))
+                .map(h -> h.substring(7));
+    }
+
     @Transactional
     public void revokeAllValidTokensByUser(UUID userId) {
         var user = userRepository.findById(userId).orElseThrow(() ->

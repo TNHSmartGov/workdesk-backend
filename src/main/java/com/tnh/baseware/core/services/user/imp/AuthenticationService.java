@@ -13,6 +13,7 @@ import com.tnh.baseware.core.properties.SecurityProperties;
 import com.tnh.baseware.core.properties.SystemProperties;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
 import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
+import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.securities.JwtTokenService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.audit.ITrackActivityService;
@@ -52,6 +53,7 @@ public class AuthenticationService {
         SystemProperties systemProperties;
         IUserOrganizationRepository userOrganizationRepository;
         IOrganizationRepository organizationRepository;
+        IUserRepository userRepository;
 
         @Transactional
         public AuthenticationDTO login(AuthenticationForm authenticationForm, HttpServletRequest request) {
@@ -66,7 +68,7 @@ public class AuthenticationService {
                 UUID orgId = resolveOrganization(userDetails, authenticationForm.getOrganizationId());
 
                 userDetails.getUser().setLastActiveOrganization(
-                        organizationRepository.getReferenceById(orgId)
+                        organizationRepository.findById(orgId).orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found")))
                 );
 
                 if (!securityProperties.getJwt().isAllowMultipleDevices()) {
@@ -168,24 +170,36 @@ public class AuthenticationService {
 
                 User user = current.getUser();
                 UUID userId = user.getId();
+                UUID currentOrgId = current.getOrganizationId();
 
                 boolean valid = userOrganizationRepository
                         .existsByUserIdAndOrganizationIdAndActiveTrue(userId, newOrgId);
 
                 if (!valid) {
-                        throw new AccessDeniedException(messageService.getMessage("user.org.selection.invalid"));
+                        throw new AccessDeniedException(
+                                messageService.getMessage("user.org.selection.invalid")
+                        );
+                }
+
+                if (newOrgId.equals(currentOrgId)) {
+                        user.setLastActiveOrganization(
+                                organizationRepository.findById(currentOrgId).orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found")))
+                        );
+
+                        return AuthenticationDTO.builder()
+                                .accessToken(null)
+                                .refreshToken(null)
+                                .build();
                 }
 
                 user.setLastActiveOrganization(
-                        organizationRepository.getReferenceById(newOrgId)
+                        organizationRepository.findById(newOrgId).orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found")))
                 );
 
                 if (!securityProperties.getJwt().isAllowMultipleDevices()) {
                         jwtTokenService.revokeAllValidTokensByUser(userId);
                 } else {
-                        String sessionId =
-                                jwtTokenService.extractSessionIdFromContext()
-                                        .orElseThrow(() -> new IllegalStateException("Missing session"));
+                        String sessionId = jwtTokenService.extractSessionIdFromContext() .orElseThrow(() -> new IllegalStateException("Missing session"));
                         jwtTokenService.revokeAllValidTokensBySessionId(UUID.fromString(sessionId));
                 }
 
@@ -196,14 +210,17 @@ public class AuthenticationService {
 
                 UUID newSessionId = UUID.randomUUID();
 
-                var newAccessToken = jwtTokenService.generateToken(newPrincipal, request, newSessionId)
+                String newAccessToken = jwtTokenService
+                        .generateToken(newPrincipal, request, newSessionId)
                         .orElseThrow(() -> new BWCInvalidTokenException(
                                 messageService.getMessage("jwt.token.invalid")));
 
-                var newRefreshToken = jwtTokenService
+                String newRefreshToken = jwtTokenService
                         .generateRefreshToken(newPrincipal, request, newSessionId)
                         .orElseThrow(() -> new BWCInvalidTokenException(
                                 messageService.getMessage("jwt.token.invalid")));
+
+                userRepository.save(user);
 
                 return AuthenticationDTO.builder()
                         .accessToken(newAccessToken)

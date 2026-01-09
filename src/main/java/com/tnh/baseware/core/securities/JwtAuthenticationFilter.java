@@ -84,7 +84,7 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
             var username = jwtTokenService.extractUsername(accessToken);
             var sessionId = jwtTokenService.extractSessionId(accessToken);
             String orgId = jwtTokenService.extractOrganizationId(accessToken)
-                    .orElseThrow(() -> new BWCInvalidTokenException("Missing oid"));
+                    .orElseThrow(() -> new BWCInvalidTokenException(messageService.getMessage("missing.oid")));
 
             if (username.isEmpty() || sessionId.isEmpty()) {
                 log.debug(LogStyleHelper.debug("JWT token is invalid or expired"));

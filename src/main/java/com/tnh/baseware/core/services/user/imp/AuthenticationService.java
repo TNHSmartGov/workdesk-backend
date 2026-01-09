@@ -99,6 +99,8 @@ public class AuthenticationService {
                                         BasewareUtils.getDevice(request.getHeader("User-Agent")),
                                         authenticationForm.getUsername());
 
+                userRepository.save(userDetails.getUser());
+
                 return AuthenticationDTO.builder()
                                 .accessToken(accessToken)
                                 .refreshToken(refreshToken)
@@ -236,7 +238,7 @@ public class AuthenticationService {
                         userOrganizationRepository.findByUsernameAndActiveTrue(userDetails.getUsername());
 
                 if (memberships.isEmpty()) {
-                        throw new IllegalStateException(messageService.getMessage("user.has.no.organization"));
+                        throw new BWCValidationException(messageService.getMessage("user.has.no.organization"));
                 }
 
                 if (memberships.size() == 1) {

@@ -12,11 +12,9 @@ import org.mapstruct.ReportingPolicy;
 public interface IProjectMapper extends IGenericMapper<Project, ProjectEditorForm, ProjectDTO> {
 
     @Override
-    @Mapping(source = "organizationId", target = "organization.id")
     Project formToEntity(ProjectEditorForm form);
 
     @Override
-    @Mapping(source = "organizationId", target = "organization.id")
     void formToEntity(ProjectEditorForm form, @org.mapstruct.MappingTarget Project entity);
 
     ProjectDTO entityToDTO(Project entity);

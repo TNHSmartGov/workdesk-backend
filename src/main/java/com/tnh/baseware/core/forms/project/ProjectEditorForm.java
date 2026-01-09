@@ -31,9 +31,6 @@ public class ProjectEditorForm {
     String description;
 
     @JsonView(Views.Common.class)
-    UUID organizationId;
-
-    @JsonView(Views.Common.class)
     Instant startDate;
 
     @JsonView(Views.Common.class)

@@ -4,6 +4,7 @@ import com.tnh.baseware.core.dtos.project.ProjectDTO;
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.task.TaskList;
+import com.tnh.baseware.core.entities.user.CustomUserDetails;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.project.ProjectAction;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
@@ -15,6 +16,7 @@ import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
 import com.tnh.baseware.core.mappers.project.IProjectMapper;
+import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.repositories.task.ITaskListRepository;
@@ -24,16 +26,21 @@ import com.tnh.baseware.core.securities.ProjectSecurityService;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.UUID;
 
 @Service
@@ -46,27 +53,81 @@ public class ProjectService
     IProjectMemberRepository projectMemberRepository;
     IUserRepository userRepository;
     IUserOrganizationRepository userOrganizationRepository;
+    IOrganizationRepository organizationRepository;
 
     public ProjectService(IProjectRepository repository,
-            IProjectMapper mapper,
-            ProjectSecurityService projectSecurityService,
-            MessageService messageService,
-            IUserRepository userRepository,
-            IUserOrganizationRepository userOrganizationRepository,
-            IProjectMemberRepository projectMemberRepository,
-            ITaskListRepository taskListRepository) {
+                          IProjectMapper mapper,
+                          ProjectSecurityService projectSecurityService,
+                          MessageService messageService,
+                          IUserRepository userRepository,
+                          IUserOrganizationRepository userOrganizationRepository,
+                          IProjectMemberRepository projectMemberRepository,
+                          ITaskListRepository taskListRepository,
+                          IOrganizationRepository organizationRepository) {
         super(repository, mapper, messageService, Project.class);
         this.taskListRepository = taskListRepository;
         this.projectSecurityService = projectSecurityService;
         this.projectMemberRepository = projectMemberRepository;
         this.userRepository = userRepository;
         this.userOrganizationRepository = userOrganizationRepository;
+        this.organizationRepository = organizationRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProjectDTO findById(UUID id) {
+        UUID orgId = ((CustomUserDetails)
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getPrincipal())
+                .getOrganizationId();
+
+        return repository.findByIdAndOrganizationId(id, orgId)
+                .map(mapper::entityToDTO)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectDTO> findAll() {
+        UUID orgId = ((CustomUserDetails)
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getPrincipal())
+                .getOrganizationId();
+
+        return repository.findByOrganizationId(orgId, Sort.by(Sort.Order.desc("createdDate")))
+                .stream()
+                .map(mapper::entityToDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProjectDTO> findAll(Pageable pageable) {
+        UUID orgId = ((CustomUserDetails)
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getPrincipal())
+                .getOrganizationId();
+
+        return repository.findByOrganizationId(orgId, pageable)
+                .map(mapper::entityToDTO);
     }
 
     @Override
     @Transactional
     public ProjectDTO create(ProjectEditorForm form) {
+        UUID orgId = ((CustomUserDetails)
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getPrincipal())
+                .getOrganizationId();
+
         Project project = mapper.formToEntity(form);
+        project.setOrganization(
+                organizationRepository.getReferenceById(orgId)
+        );
         project.setStatus(ProjectStatus.DRAFT);
         project = repository.save(project);
 
@@ -98,9 +159,14 @@ public class ProjectService
     @Override
     @Transactional
     public ProjectDTO update(UUID id, ProjectEditorForm form) {
+        UUID orgId = ((CustomUserDetails)
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getPrincipal())
+                .getOrganizationId();
         var currentUser = getCurrentUser();
-        var project = repository.findById(id)
-                .orElseThrow(() -> new BWCNotFoundException("Project not found"));
+        var project = repository.findByIdAndOrganizationId(id, orgId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
         Set<UserOrganization> userOrgs = userOrganizationRepository.findByUserIdAndActiveTrue(currentUser.getId());
 
         if (userOrgs.isEmpty() || !projectSecurityService.checkPermission(currentUser, project,
@@ -116,9 +182,13 @@ public class ProjectService
     @Override
     @Transactional
     public void performAction(UUID projectId, ProjectAction action) {
-
-        Project project = repository.findById(projectId)
-                .orElseThrow(() -> new BWCNotFoundException("Project not found"));
+        UUID orgId = ((CustomUserDetails)
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getPrincipal())
+                .getOrganizationId();
+        var project = repository.findByIdAndOrganizationId(projectId, orgId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
 
         switch (action) {
             case PUBLISH -> publish(project);
@@ -140,18 +210,7 @@ public class ProjectService
         project.setStatus(ProjectStatus.ARCHIVED);
     }
 
-    @Override
-    public List<Project> getProjectByOrganizationId(UUID organizationId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getProjectByOrganizationId'");
-    }
-
-    @Override
-    public Page<Project> getProjectByOrganizationId(UUID organizationId, int page, int size) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    @Deprecated(forRemoval = false)
     public Project getOrCreatePersonalProject(UUID userId) {
         return repository.findPersonalByUser(userId)
                 .orElseGet(() -> {

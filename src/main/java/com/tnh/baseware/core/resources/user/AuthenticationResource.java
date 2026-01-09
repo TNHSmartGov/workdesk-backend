@@ -7,6 +7,7 @@ import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.forms.user.AuthenticationForm;
 import com.tnh.baseware.core.forms.user.RegisterForm;
+import com.tnh.baseware.core.forms.user.SwitchOrgForm;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.user.IUserService;
 import com.tnh.baseware.core.services.user.imp.AuthenticationService;
@@ -77,5 +78,23 @@ public class AuthenticationResource {
                 .code(HttpStatus.OK.value())
                 .build();
         return ResponseEntity.ok(apiMessageDTO);
+    }
+
+    @PostMapping("/switch-org")
+    public ResponseEntity<ApiMessageDTO<AuthenticationDTO>> switchOrg(
+            @Valid @RequestBody SwitchOrgForm request,
+            HttpServletRequest httpRequest
+    ) {
+        AuthenticationDTO dto =
+                authenticationService.switchOrganization(request.getOrganizationId(), httpRequest);
+
+        return ResponseEntity.ok(
+                ApiMessageDTO.<AuthenticationDTO>builder()
+                        .data(dto)
+                        .result(true)
+                        .message(messageService.getMessage("organization.switched"))
+                        .code(HttpStatus.OK.value())
+                        .build()
+        );
     }
 }

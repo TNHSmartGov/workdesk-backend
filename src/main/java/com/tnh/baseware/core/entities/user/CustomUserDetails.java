@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,6 +23,8 @@ public class CustomUserDetails implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
     User user;
+
+    UUID organizationId;
 
     @Override
     public Set<? extends GrantedAuthority> getAuthorities() {

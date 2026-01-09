@@ -61,7 +61,7 @@ public class JwtTokenService {
     }
 
     public Optional<String> extractOrganizationId(String token) {
-        return extractClaim(token, claims -> claims.getClaim("oid").toString());
+        return extractClaim(token, claims -> Optional.ofNullable(claims.getClaim("oid")).toString());
     }
 
 
@@ -98,7 +98,12 @@ public class JwtTokenService {
     public Optional<String> generateToken(CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put("oid", userDetails.getOrganizationId().toString());
+        var organizationId = userDetails.getOrganizationId();
+        if (organizationId == null) {
+            log.warn(LogStyleHelper.warn(messageService.getMessage("organization.user.null.token")));
+            return Optional.empty();
+        }
+        claims.put("oid", organizationId.toString());
         return generateToken(claims, userDetails, request, sessionId);
     }
 

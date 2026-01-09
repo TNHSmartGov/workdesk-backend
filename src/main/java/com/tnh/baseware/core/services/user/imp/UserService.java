@@ -259,7 +259,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
 
         Optional<String> orgIdOpt = jwtTokenService.extractOrganizationId(token);
 
-        boolean orgRequired = orgIdOpt.isEmpty();
+        boolean orgSelectionRequired = orgIdOpt.isEmpty();
 
         List<Menu> menus;
         if (Boolean.TRUE.equals(user.getSuperAdmin())) {
@@ -294,7 +294,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
                 .accountExpiryDate(user.getAccountExpiryDate())
                 .failedLoginAttempts(user.getFailedLoginAttempts())
                 .lastActiveOrganization(orgIdOpt.map(UUID::fromString).orElse(null))
-                .orgSelectionRequired(orgRequired)
+                .orgSelectionRequired(orgSelectionRequired)
                 .superAdmin(user.getSuperAdmin())
                 .menus(menuMapper.entitiesToDTOs(menus))
                 .build();

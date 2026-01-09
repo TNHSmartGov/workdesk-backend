@@ -3,6 +3,7 @@ package com.tnh.baseware.core.resources.task;
 import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.dtos.task.TaskMemberDTO;
 import com.tnh.baseware.core.dtos.task.TaskRequirementDTO;
+import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.forms.task.*;
 import com.tnh.baseware.core.properties.SystemProperties;
@@ -17,6 +18,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -87,14 +90,14 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
     }
 
 
-    @Operation(summary = "Add requirement")
+    @Operation(summary = "Add requirement to task")
     @PostMapping("/{id}/requirements")
     public TaskRequirementDTO addRequirement(@PathVariable UUID id,
                                              @RequestBody @Valid TaskRequirementEditorForm form) {
         return taskRequirementService.create(id, form);
     }
 
-    @Operation(summary = "Update requirement")
+    @Operation(summary = "Update task requirement")
     @PutMapping("/{id}/requirements/{requirementId}")
     public TaskRequirementDTO updateRequirement(@PathVariable UUID id,
                                                 @PathVariable UUID requirementId,
@@ -102,13 +105,19 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
         return taskRequirementService.update(id, requirementId, form);
     }
 
-    @Operation(summary = "Delete requirement")
+    @Operation(summary = "Delete task requirement")
     @DeleteMapping("/{id}/requirements/{requirementId}")
-    public void deleteRequirement(@PathVariable UUID id, @PathVariable UUID requirementId) {
+    public ResponseEntity<ApiMessageDTO<Integer>> deleteRequirement(@PathVariable UUID id, @PathVariable UUID requirementId) {
         taskRequirementService.delete(id, requirementId);
+        return ResponseEntity.ok(ApiMessageDTO.<Integer>builder()
+                .data(1)
+                .result(true)
+                .message(messageService.getMessage("requirement.deleted"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
-    @Operation(summary = "Assign requirement to member")
+    @Operation(summary = "Assign task requirement to member")
     @PatchMapping("/{id}/requirements/{requirementId}/assign")
     public TaskRequirementDTO assignRequirement(@PathVariable UUID id,
                                                 @PathVariable UUID requirementId,
@@ -116,7 +125,7 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
         return taskRequirementService.assignToMember(id, requirementId, form);
     }
 
-    @Operation(summary = "Toggle requirement complete")
+    @Operation(summary = "Toggle task requirement complete status")
     @PatchMapping("/{id}/requirements/{requirementId}/toggle")
     public void toggleRequirement(@PathVariable UUID id, @PathVariable UUID requirementId) {
         taskRequirementService.toggleComplete(id, requirementId);

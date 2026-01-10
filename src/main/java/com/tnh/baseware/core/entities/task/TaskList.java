@@ -5,6 +5,7 @@ import com.tnh.baseware.core.entities.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -18,18 +19,22 @@ public class TaskList extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    UUID id;
 
     @Column(nullable = false)
-    private String name;
+    String name;
 
     @Column(nullable = false)
-    private Integer orderIndex;
+    Integer orderIndex;
 
     @Column(nullable = false)
-    Boolean isDefault;
+    @Builder.Default
+    Boolean isDefault = false;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+    Project project;
+
+    @OneToMany(mappedBy = "taskList", fetch = FetchType.LAZY)
+    List<Task> tasks;
 }

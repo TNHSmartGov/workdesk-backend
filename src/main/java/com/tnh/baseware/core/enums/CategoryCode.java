@@ -11,12 +11,13 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public enum CategoryCode implements BaseEnum<String> {
-    MENU_TYPE("MENU_TYPE"),
-    PROJECT_TYPE("PROJECT_TYPE"),
-    SERVICE_PACKAGE_FEATURE_TYPE("SERVICE_PACKAGE_FEATURE_TYPE"),
-    ORGANIZATION_TITLE("ORGANIZATION_TITLE");
+    MENU_TYPE("MENU_TYPE", "Menu Type", "Kiểu menu "),
+    PROJECT_TYPE("PROJECT_TYPE", "Project Type", "Kiểu dự án"),
+    ORGANIZATION_TITLE("ORGANIZATION_TITLE", "Organization Title", "Chức danh tổ chức");
 
     String value;
+    String name;
+    String displayName;
 
     public static CategoryCode fromValue(String value) {
         for (var category : CategoryCode.values()) {

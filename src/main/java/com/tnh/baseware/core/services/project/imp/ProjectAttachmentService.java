@@ -6,6 +6,8 @@ import com.tnh.baseware.core.entities.doc.FileDocument;
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectAttachment;
 import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.entities.user.UserOrganization;
+import com.tnh.baseware.core.enums.project.ProjectPermission;
 import com.tnh.baseware.core.exceptions.BWCBusinessException;
 import com.tnh.baseware.core.forms.project.ProjectAttachmentEditorForm;
 import com.tnh.baseware.core.mappers.project.IProjectAttachmentMapper;
@@ -13,6 +15,8 @@ import com.tnh.baseware.core.repositories.doc.IFileDocumentRepository;
 import com.tnh.baseware.core.repositories.project.IProjectAttachmentRepository;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
+import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
+import com.tnh.baseware.core.securities.ProjectSecurityService;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.doc.IFileDocumentService;
@@ -26,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,11 +39,13 @@ import java.util.stream.Collectors;
 public class ProjectAttachmentService extends
         GenericService<ProjectAttachment, ProjectAttachmentEditorForm, ProjectAttachmentDTO, IProjectAttachmentRepository, IProjectAttachmentMapper, UUID>
         implements IProjectAttachmentService {
-    private final IProjectRepository projectRepository;
-    private final IFileDocumentRepository fileDocumentRepository;
-    private final GenericEntityFetcher fetcher;
+    IProjectRepository projectRepository;
+    IFileDocumentRepository fileDocumentRepository;
+    GenericEntityFetcher fetcher;
     IFileDocumentService fileDocumentService;
     IProjectMemberRepository projectMemberRepository;
+    ProjectSecurityService projectSecurityService;
+    IUserOrganizationRepository userOrganizationRepository;
 
     public ProjectAttachmentService(IProjectAttachmentRepository repository,
             IProjectAttachmentMapper mapper,
@@ -46,6 +53,8 @@ public class ProjectAttachmentService extends
             IProjectRepository projectRepository,
             IFileDocumentRepository fileDocumentRepository,
             IProjectMemberRepository projectMemberRepository,
+            ProjectSecurityService projectSecurityService,
+            IUserOrganizationRepository userOrganizationRepository,
             IFileDocumentService fileDocumentService,
             GenericEntityFetcher fetcher) {
         super(repository, mapper, messageService, ProjectAttachment.class);
@@ -54,6 +63,8 @@ public class ProjectAttachmentService extends
         this.fetcher = fetcher;
         this.fileDocumentService = fileDocumentService;
         this.projectMemberRepository = projectMemberRepository;
+        this.projectSecurityService = projectSecurityService;
+        this.userOrganizationRepository = userOrganizationRepository;
     }
 
     @Override
@@ -101,15 +112,22 @@ public class ProjectAttachmentService extends
     }
 
     @Override
-    public List<ProjectAttachmentDTO> getAttackmentByProject(UUID projectId) {
+    public List<ProjectAttachmentDTO> getAttachmentByProject(UUID projectId) {
         var curentUser = getCurrentUser();
         isUserSystem();
-        // nếu không phải user hệ thống, không phải người dùng của dự án thì không thể
-        // truy cập file
-        if (!projectMemberRepository.existsByProjectIdAndUserId(projectId, curentUser.getId()) && !isUserSystem()) {
+        var project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BWCBusinessException(messageService.getMessage("project.not.found")));
+        Set<UserOrganization> userOrgs = userOrganizationRepository.findByUserIdAndActiveTrue(curentUser.getId());
+        boolean isMemberWithPermission = projectSecurityService.checkPermission(
+                curentUser,
+                project,
+                ProjectPermission.FILE_DOWNLOAD,
+                userOrgs);
+        if (!projectMemberRepository.existsByProjectIdAndUserId(projectId, curentUser.getId()) && !isUserSystem()
+                && !isMemberWithPermission) {
             throw new BWCBusinessException(messageService.getMessage("project.member.not.exist"));
         }
-        var attachments = repository.findByProjectId(projectId);
+        var attachments = repository.findByProject_Id(projectId);
         return attachments.stream().map(mapper::entityToDTO).collect(Collectors.toList());
 
     }

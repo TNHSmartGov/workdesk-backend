@@ -132,56 +132,54 @@ public class OrganizationService extends
                 if (BasewareUtils.isBlank(forms)) {
                         return;
                 }
-
                 var organization = repository.findById(id)
                                 .orElseThrow(() -> new BWCNotFoundException(
                                                 messageService.getMessage("organization.not.found", id)));
-
                 // Nếu userId bị trùng -> lấy bản mới nhất
                 Map<UUID, AssignUserEditorForm> distinctFormsMap = forms.stream()
                                 .collect(Collectors.toMap(
                                                 AssignUserEditorForm::getUserId,
                                                 Function.identity(),
                                                 (existing, replacement) -> replacement));
-
                 Collection<AssignUserEditorForm> distinctForms = distinctFormsMap.values();
-
                 Set<UUID> userIds = distinctFormsMap.keySet();
                 Set<UUID> titleIds = distinctForms.stream()
                                 .map(AssignUserEditorForm::getTitleId)
                                 .collect(Collectors.toSet());
-
                 Map<UUID, User> userMap = userRepository.findAllById(userIds)
                                 .stream()
                                 .collect(Collectors.toMap(User::getId, Function.identity()));
-
                 if (userMap.size() != userIds.size()) {
                         throw new BWCNotFoundException(messageService.getMessage("user.not.found"));
                 }
-
                 Map<UUID, Category> titleMap = categoryRepository.findByCodeAndIdIn(
                                 CategoryCode.ORGANIZATION_TITLE, titleIds).stream()
                                 .collect(Collectors.toMap(Category::getId, Function.identity()));
-
                 if (titleMap.size() != titleIds.size()) {
                         throw new BWCNotFoundException(messageService.getMessage("title.not.found"));
                 }
-
                 List<UserOrganization> existingAssignments = userOrganizationRepository
                                 .findByOrganizationIdAndUserIdInAndActiveTrue(id, userIds);
-
                 Map<UUID, UserOrganization> existingMap = existingAssignments.stream()
                                 .collect(Collectors.toMap(uo -> uo.getUser().getId(), Function.identity()));
 
+                boolean hasUnitLeader = userOrganizationRepository.existsByOrganization_IdAndTitle_Name(
+                                id, TitleDefault.UNIT_LEADER.getValue());
                 List<UserOrganization> toSave = new ArrayList<>();
-
                 for (AssignUserEditorForm form : distinctForms) {
                         UserOrganization uo = existingMap.get(form.getUserId());
-                        // nếu phòng ban đã có trưởng đơn vị thì k thêm trưởng nữa
-                        if (userOrganizationRepository.existsByOrganization_IdAndTitle_Name(id,
-                                        TitleDefault.UNIT_LEADER.getValue())) {
-                                continue;
+
+                        Category formTitle = titleMap.get(form.getTitleId());
+
+                        if (hasUnitLeader && formTitle.getName().equals(TitleDefault.UNIT_LEADER.getValue())) {
+                                if (uo == null) {
+                                        continue;
+                                }
+                                if (!uo.getTitle().getName().equals(TitleDefault.UNIT_LEADER.getValue())) {
+                                        continue;
+                                }
                         }
+
                         if (uo == null) {
                                 uo = UserOrganization.builder()
                                                 .user(userMap.get(form.getUserId()))
@@ -198,7 +196,6 @@ public class OrganizationService extends
                                 }
                         }
                 }
-
                 if (!toSave.isEmpty()) {
                         userOrganizationRepository.saveAll(toSave);
                 }

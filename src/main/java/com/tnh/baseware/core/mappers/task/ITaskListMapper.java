@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.mappers.task;
 
 import com.tnh.baseware.core.dtos.task.TaskListDTO;
+import com.tnh.baseware.core.dtos.task.TaskListProjectDTO;
 import com.tnh.baseware.core.entities.task.TaskList;
 import com.tnh.baseware.core.forms.task.TaskListEditorForm;
 import com.tnh.baseware.core.mappers.IGenericMapper;
@@ -18,4 +19,6 @@ public interface ITaskListMapper extends IGenericMapper<TaskList, TaskListEditor
     @Override
     @Mapping(target = "project.id", source = "projectId")
     void formToEntity(TaskListEditorForm form, @org.mapstruct.MappingTarget TaskList entity);
+
+    TaskListProjectDTO toTaskListProjectDTO(TaskList taskList);
 }

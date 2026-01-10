@@ -2,6 +2,7 @@ package com.tnh.baseware.core.enums.project;
 
 import java.util.Set;
 
+import com.tnh.baseware.core.enums.base.BaseEnum;
 import com.tnh.baseware.core.exceptions.BWCGenericRuntimeException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
-public enum ProjectMemberRole {
+public enum ProjectMemberRole implements BaseEnum<String> {
     OWNER("OWNER", "owner", "Chủ trì", Set.of(ProjectPermission.values())),
     MANAGER("MANAGER", "manager", "Quản lý dự án", Set.of(
             ProjectPermission.PROJECT_VIEW,

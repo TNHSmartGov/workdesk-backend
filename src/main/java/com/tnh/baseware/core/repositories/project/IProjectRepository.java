@@ -2,9 +2,13 @@ package com.tnh.baseware.core.repositories.project;
 
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.repositories.IGenericRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,4 +25,10 @@ public interface IProjectRepository extends IGenericRepository<Project, UUID> {
         AND pm.role = 'OWNER'
       """)
   Optional<Project> findPersonalByUser(UUID userId);
+
+  Optional<Project> findByIdAndOrganizationId(UUID id, UUID organizationId);
+
+  Page<Project> findByOrganizationId(UUID organizationId, Pageable pageable);
+
+  List<Project> findByOrganizationId(UUID organizationId, Sort sort);
 }

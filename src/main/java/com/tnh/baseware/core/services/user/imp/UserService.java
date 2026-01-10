@@ -257,6 +257,10 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
         var user = repository.findByUsername(username)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", username)));
 
+        Optional<String> orgIdOpt = jwtTokenService.extractOrganizationId(token);
+
+        boolean orgSelectionRequired = orgIdOpt.isEmpty();
+
         List<Menu> menus;
         if (Boolean.TRUE.equals(user.getSuperAdmin())) {
             menus = menuRepository.findAll();
@@ -289,6 +293,8 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
                 .lockTime(user.getLockTime())
                 .accountExpiryDate(user.getAccountExpiryDate())
                 .failedLoginAttempts(user.getFailedLoginAttempts())
+                .lastActiveOrganization(orgIdOpt.map(UUID::fromString).orElse(null))
+                .orgSelectionRequired(orgSelectionRequired)
                 .superAdmin(user.getSuperAdmin())
                 .menus(menuMapper.entitiesToDTOs(menus))
                 .build();

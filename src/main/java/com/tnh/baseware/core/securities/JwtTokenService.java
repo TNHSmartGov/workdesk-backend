@@ -23,6 +23,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,7 @@ public class JwtTokenService {
     SecurityProperties securityProperties;
     JwtSecretProvider jwtSecretProvider;
     MessageService messageService;
+    HttpRequestContext httpRequestContext;
 
     public static void main(String[] args) {
         try {
@@ -55,6 +58,19 @@ public class JwtTokenService {
         } catch (Exception e) {
             log.error(LogStyleHelper.error("Error occurred while generating HS512 Secret Key"), e);
         }
+    }
+
+    public Optional<String> extractOrganizationId(String token) {
+        return extractClaim(token, claims -> Optional.ofNullable(claims.getClaim("oid")).toString());
+    }
+
+
+    public Optional<String> extractSessionIdFromContext() {
+        return httpRequestContext.currentRequest()
+                .map(req -> req.getHeader(HttpHeaders.AUTHORIZATION))
+                .filter(h -> h.startsWith("Bearer "))
+                .map(h -> h.substring(7))
+                .flatMap(this::extractSessionId);
     }
 
     public Optional<String> extractSessionId(String token) {
@@ -80,7 +96,15 @@ public class JwtTokenService {
     }
 
     public Optional<String> generateToken(CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
-        return generateToken(new HashMap<>(), userDetails, request, sessionId);
+        Map<String, Object> claims = new HashMap<>();
+
+        var organizationId = userDetails.getOrganizationId();
+        if (organizationId == null) {
+            log.warn(LogStyleHelper.warn(messageService.getMessage("organization.user.null.token")));
+            return Optional.empty();
+        }
+        claims.put("oid", organizationId.toString());
+        return generateToken(claims, userDetails, request, sessionId);
     }
 
     private Optional<String> generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
@@ -187,6 +211,13 @@ public class JwtTokenService {
                     token.setExpired(true);
                     tokenRepository.save(token);
                 });
+    }
+
+    public Optional<String> extractAccessTokenFromContext() {
+        return httpRequestContext.currentRequest()
+                .map(req -> req.getHeader(HttpHeaders.AUTHORIZATION))
+                .filter(h -> h.startsWith("Bearer "))
+                .map(h -> h.substring(7));
     }
 
     @Transactional

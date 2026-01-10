@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.entities.audit.Auditable;
 import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.enums.UserType;
@@ -101,6 +102,10 @@ public class User extends Auditable<String> implements Serializable {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<UserOrganization> organizations;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_active_org_id")
+    private Organization lastActiveOrganization;
 
     public Set<GrantedAuthority> getAuthorities() {
         return roles.stream()

@@ -3,6 +3,7 @@ package com.tnh.baseware.core.securities;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnh.baseware.core.components.BasewareCoreFilter;
 import com.tnh.baseware.core.entities.user.CustomUserDetails;
+import com.tnh.baseware.core.exceptions.BWCInvalidTokenException;
 import com.tnh.baseware.core.properties.SecurityProperties;
 import com.tnh.baseware.core.properties.SecurityUriProperties;
 import com.tnh.baseware.core.services.MessageService;
@@ -25,6 +26,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -81,6 +83,8 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
         try {
             var username = jwtTokenService.extractUsername(accessToken);
             var sessionId = jwtTokenService.extractSessionId(accessToken);
+            String orgId = jwtTokenService.extractOrganizationId(accessToken)
+                    .orElseThrow(() -> new BWCInvalidTokenException(messageService.getMessage("missing.oid")));
 
             if (username.isEmpty() || sessionId.isEmpty()) {
                 log.debug(LogStyleHelper.debug("JWT token is invalid or expired"));
@@ -89,6 +93,7 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
             }
 
             var userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username.get());
+            userDetails.setOrganizationId(UUID.fromString(orgId));
             if (!jwtTokenService.isTokenValid(accessToken, userDetails)) {
                 log.debug(LogStyleHelper.debug("JWT token is invalid or expired"));
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "error.unauthorized");

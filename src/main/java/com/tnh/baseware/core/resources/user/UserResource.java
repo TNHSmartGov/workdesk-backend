@@ -2,19 +2,18 @@ package com.tnh.baseware.core.resources.user;
 
 import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
+import com.tnh.baseware.core.dtos.user.AuthenticationDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.ApiResponseType;
-import com.tnh.baseware.core.forms.user.ChangePasswordForm;
-import com.tnh.baseware.core.forms.user.ResetPasswordForm;
-import com.tnh.baseware.core.forms.user.UserEditorForm;
-import com.tnh.baseware.core.forms.user.UserProfileForm;
+import com.tnh.baseware.core.forms.user.*;
 import com.tnh.baseware.core.properties.SystemProperties;
 import com.tnh.baseware.core.resources.GenericResource;
 import com.tnh.baseware.core.services.IGenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.user.IUserService;
+import com.tnh.baseware.core.services.user.imp.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,12 +38,15 @@ import java.util.UUID;
 public class UserResource extends GenericResource<User, UserEditorForm, UserDTO, UUID> {
 
         IUserService userService;
+        AuthenticationService authenticationService;
 
         public UserResource(IGenericService<User, UserEditorForm, UserDTO, UUID> service,
                         MessageService messageService, IUserService userService,
+                            AuthenticationService authenticationService,
                         SystemProperties systemProperties) {
                 super(service, messageService, systemProperties.getApiPrefix() + "/users");
                 this.userService = userService;
+                this.authenticationService = authenticationService;
         }
 
         @Operation(summary = "Edit user profile")
@@ -294,5 +296,23 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
                                 .message(messageService.getMessage("users.retrieved"))
                                 .code(HttpStatus.OK.value())
                                 .build());
+        }
+
+        @PostMapping("/switch-org")
+        public ResponseEntity<ApiMessageDTO<AuthenticationDTO>> switchOrg(
+                @Valid @RequestBody SwitchOrgForm request,
+                HttpServletRequest httpRequest
+        ) {
+                AuthenticationDTO dto =
+                        authenticationService.switchOrganization(request.getOrganizationId(), httpRequest);
+
+                return ResponseEntity.ok(
+                        ApiMessageDTO.<AuthenticationDTO>builder()
+                                .data(dto)
+                                .result(true)
+                                .message(messageService.getMessage("organization.switched"))
+                                .code(HttpStatus.OK.value())
+                                .build()
+                );
         }
 }

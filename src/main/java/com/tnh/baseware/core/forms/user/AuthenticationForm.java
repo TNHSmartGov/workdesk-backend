@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @Builder
@@ -25,4 +27,6 @@ public class AuthenticationForm {
             message = "{password.invalid.format}"
     )
     String password;
+
+    UUID organizationId;
 }

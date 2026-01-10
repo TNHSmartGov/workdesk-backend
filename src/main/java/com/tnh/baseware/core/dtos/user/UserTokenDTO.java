@@ -34,6 +34,8 @@ public class UserTokenDTO extends RepresentationModel<UserTokenDTO> implements I
     Instant accountExpiryDate;
     Integer failedLoginAttempts;
     Boolean superAdmin;
+    UUID lastActiveOrganization;
+    boolean orgSelectionRequired;
 
     List<MenuDTO> menus;
 }

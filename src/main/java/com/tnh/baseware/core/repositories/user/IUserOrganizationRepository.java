@@ -12,89 +12,101 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.*;
 
 public interface IUserOrganizationRepository extends IGenericRepository<UserOrganization, UUID> {
-  boolean existsByUserIdAndOrganizationId(UUID userId, UUID organizationId);
+    boolean existsByUserIdAndOrganizationId(UUID userId, UUID organizationId);
 
-  @Query("""
-          select uo.user.id
-          from UserOrganization uo
-          where uo.organization.id = :orgId
-            and uo.active = true
-      """)
-  Set<UUID> findActiveUserIdsByOrganizationId(@Param("orgId") UUID orgId);
+    @Query("""
+                select uo.user.id
+                from UserOrganization uo
+                where uo.organization.id = :orgId
+                  and uo.active = true
+            """)
+    Set<UUID> findActiveUserIdsByOrganizationId(@Param("orgId") UUID orgId);
 
-  Optional<UserOrganization> findByUserIdAndOrganizationId(
-      UUID userId,
-      UUID organizationId);
+    Optional<UserOrganization> findByUserIdAndOrganizationId(
+            UUID userId,
+            UUID organizationId);
 
-  @Query("""
-          select uo
-          from UserOrganization uo
-          join fetch uo.user u
-          left join fetch uo.title t
-          where uo.organization.id = :orgId
-            and uo.active = true
-      """)
-  List<UserOrganization> findActiveByOrganizationId(@Param("orgId") UUID orgId);
+    @Query("""
+                select uo
+                from UserOrganization uo
+                join fetch uo.user u
+                left join fetch uo.title t
+                where uo.organization.id = :orgId
+                  and uo.active = true
+            """)
+    List<UserOrganization> findActiveByOrganizationId(@Param("orgId") UUID orgId);
 
-  @Query(value = """
-          select uo
-          from UserOrganization uo
-          where uo.organization.id = :orgId
-            and uo.active = true
-      """, countQuery = """
-          select count(uo)
-          from UserOrganization uo
-          where uo.organization.id = :orgId
-            and uo.active = true
-      """)
-  Page<UserOrganization> findActiveByOrganizationId(
-      @Param("orgId") UUID orgId,
-      Pageable pageable);
+    @Query(value = """
+                select uo
+                from UserOrganization uo
+                where uo.organization.id = :orgId
+                  and uo.active = true
+            """, countQuery = """
+                select count(uo)
+                from UserOrganization uo
+                where uo.organization.id = :orgId
+                  and uo.active = true
+            """)
+    Page<UserOrganization> findActiveByOrganizationId(
+            @Param("orgId") UUID orgId,
+            Pageable pageable);
 
-  @Modifying
-  @Query("""
-          update UserOrganization uo
-          set uo.active = false
-          where uo.organization.id = :orgId
-            and uo.user.id in :userIds
-      """)
-  int deactivateUsers(
-      @Param("orgId") UUID orgId,
-      @Param("userIds") List<UUID> userIds);
+    @Modifying
+    @Query("""
+                update UserOrganization uo
+                set uo.active = false
+                where uo.organization.id = :orgId
+                  and uo.user.id in :userIds
+            """)
+    int deactivateUsers(
+            @Param("orgId") UUID orgId,
+            @Param("userIds") List<UUID> userIds);
 
-  @Modifying
-  @Query("""
-          update UserOrganization uo
-          set uo.active = true
-          where uo.organization.id = :orgId
-            and uo.user.id in :userIds
-      """)
-  int activateUsers(
-      @Param("orgId") UUID orgId,
-      @Param("userIds") List<UUID> userIds);
+    @Modifying
+    @Query("""
+                update UserOrganization uo
+                set uo.active = true
+                where uo.organization.id = :orgId
+                  and uo.user.id in :userIds
+            """)
+    int activateUsers(
+            @Param("orgId") UUID orgId,
+            @Param("userIds") List<UUID> userIds);
 
-  @Modifying
-  @Query("""
-          update UserOrganization uo
-          set uo.title = :title
-          where uo.organization.id = :orgId
-            and uo.user.id = :userId
-            and uo.active = true
-      """)
-  int updateTitle(
-      @Param("orgId") UUID orgId,
-      @Param("userId") UUID userId,
-      @Param("title") Category title);
+    @Modifying
+    @Query("""
+                update UserOrganization uo
+                set uo.title = :title
+                where uo.organization.id = :orgId
+                  and uo.user.id = :userId
+                  and uo.active = true
+            """)
+    int updateTitle(
+            @Param("orgId") UUID orgId,
+            @Param("userId") UUID userId,
+            @Param("title") Category title);
 
-  Boolean existsByOrganization_IdAndTitle_Name(UUID organizationId, String titleName);
+    Boolean existsByOrganization_IdAndTitle_Name(UUID organizationId, String titleName);
 
-  List<UserOrganization> findByOrganizationIdAndUserIdInAndActiveTrue(UUID orgId, Collection<UUID> userIds);
+    List<UserOrganization> findByOrganizationIdAndUserIdInAndActiveTrue(UUID orgId, Collection<UUID> userIds);
 
-  Page<UserOrganization> findByOrganizationIdAndActiveTrue(UUID orgId, Pageable pageable);
+    Page<UserOrganization> findByOrganizationIdAndActiveTrue(UUID orgId, Pageable pageable);
 
-  Set<UserOrganization> findByOrganizationIdAndActiveTrue(UUID orgId);
+    Set<UserOrganization> findByOrganizationIdAndActiveTrue(UUID orgId);
 
-  Optional<UserOrganization> findByUserIdAndOrganizationIdAndActiveTrue(UUID userId, UUID orgId);
+    Optional<UserOrganization> findByUserIdAndOrganizationIdAndActiveTrue(UUID userId, UUID orgId);
 
-  Set<UserOrganization> findByUserIdAndActiveTrue(UUID userId);
+    Set<UserOrganization> findByUserIdAndActiveTrue(UUID userId);
+
+    @Query("""
+                select uo
+                from UserOrganization uo
+                where uo.user.username = :username
+                  and uo.active = true
+            """)
+    List<UserOrganization> findByUsernameAndActiveTrue(String username);
+
+    boolean existsByUserIdAndOrganizationIdAndActiveTrue(
+            UUID userId, UUID organizationId
+    );
 }

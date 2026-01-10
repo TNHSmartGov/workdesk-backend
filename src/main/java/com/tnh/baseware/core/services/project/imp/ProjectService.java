@@ -113,7 +113,7 @@ public class ProjectService
 
         Project project = mapper.formToEntity(form);
         project.setOrganization(
-                organizationRepository.findById(orgId).orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")))
+                organizationRepository.findById(orgId).orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found")))
         );
         project.setStatus(ProjectStatus.DRAFT);
         project = repository.save(project);

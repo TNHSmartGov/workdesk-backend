@@ -13,9 +13,5 @@ import org.springframework.data.domain.Page;
 
 public interface IProjectService extends IGenericService<Project, ProjectEditorForm, ProjectDTO, UUID> {
     public void performAction(UUID projectId, ProjectAction action);
-
-    public List<Project> getProjectByOrganizationId(UUID organizationId);
-
-    public Page<Project> getProjectByOrganizationId(UUID organizationId, int page, int size);
     Project getOrCreatePersonalProject(UUID userId);
 }

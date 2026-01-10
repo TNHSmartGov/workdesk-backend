@@ -39,7 +39,11 @@ public final class SecurityUtils {
     }
 
     public UUID currentOrgId() {
-        return currentUserDetails().getOrganizationId();
+        UUID organizationId = currentUserDetails().getOrganizationId();
+        if (organizationId == null) {
+            throw new BWCValidationException("Current user's organization ID is null");
+        }
+        return organizationId;
     }
 
     public User currentUser() {

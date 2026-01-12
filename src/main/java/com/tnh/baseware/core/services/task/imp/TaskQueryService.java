@@ -16,29 +16,30 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID> implements ITaskQueryService {
+public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID>
+        implements ITaskQueryService {
     ITaskListRepository taskListRepository;
     ITaskMemberRepository taskMemberRepository;
     IProjectService projectService;
     ITaskRequirementRepository taskRequirementRepository;
 
     public TaskQueryService(ITaskRepository repository,
-                              ITaskMapper mapper,
-                              MessageService messageService,
-                              ITaskListRepository taskListRepository,
-                              ITaskMemberRepository taskMemberRepository,
-                              ITaskRequirementRepository taskRequirementRepository,
-                              IProjectService projectService) {
+            ITaskMapper mapper,
+            MessageService messageService,
+            ITaskListRepository taskListRepository,
+            ITaskMemberRepository taskMemberRepository,
+            ITaskRequirementRepository taskRequirementRepository,
+            IProjectService projectService) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
         this.taskMemberRepository = taskMemberRepository;
         this.taskRequirementRepository = taskRequirementRepository;
         this.projectService = projectService;
     }
-
 
 }

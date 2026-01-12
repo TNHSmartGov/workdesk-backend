@@ -61,7 +61,10 @@ public class JwtTokenService {
     }
 
     public Optional<String> extractOrganizationId(String token) {
-        return extractClaim(token, claims -> Optional.ofNullable(claims.getClaim("oid")).toString());
+        return extractClaim(token, claims -> {
+            Object oid = claims.getClaim("oid");
+            return oid != null ? oid.toString() : null;
+        });
     }
 
 

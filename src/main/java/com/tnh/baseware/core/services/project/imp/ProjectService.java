@@ -56,15 +56,15 @@ public class ProjectService
     SecurityUtils securityUtils;
 
     public ProjectService(IProjectRepository repository,
-                          IProjectMapper mapper,
-                          ProjectSecurityService projectSecurityService,
-                          MessageService messageService,
-                          IUserRepository userRepository,
-                          IUserOrganizationRepository userOrganizationRepository,
-                          IProjectMemberRepository projectMemberRepository,
-                          ITaskListRepository taskListRepository,
-                          IOrganizationRepository organizationRepository,
-                          SecurityUtils securityUtils) {
+            IProjectMapper mapper,
+            ProjectSecurityService projectSecurityService,
+            MessageService messageService,
+            IUserRepository userRepository,
+            IUserOrganizationRepository userOrganizationRepository,
+            IProjectMemberRepository projectMemberRepository,
+            ITaskListRepository taskListRepository,
+            IOrganizationRepository organizationRepository,
+            SecurityUtils securityUtils) {
         super(repository, mapper, messageService, Project.class);
         this.taskListRepository = taskListRepository;
         this.projectSecurityService = projectSecurityService;
@@ -99,8 +99,13 @@ public class ProjectService
     @Override
     @Transactional(readOnly = true)
     public Page<ProjectDTO> findAll(Pageable pageable) {
-        UUID orgId = securityUtils.currentOrgId();
 
+        Boolean isSystem = isUserSystem();
+        if (isSystem) {
+            return repository.findAll(pageable)
+                    .map(mapper::entityToDTO);
+        }
+        UUID orgId = securityUtils.currentOrgId();
         return repository.findByOrganizationId(orgId, pageable)
                 .map(mapper::entityToDTO);
     }
@@ -112,8 +117,8 @@ public class ProjectService
 
         Project project = mapper.formToEntity(form);
         project.setOrganization(
-                organizationRepository.findById(orgId).orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found")))
-        );
+                organizationRepository.findById(orgId).orElseThrow(
+                        () -> new BWCNotFoundException(messageService.getMessage("organization.not.found"))));
         project.setStatus(ProjectStatus.DRAFT);
         project = repository.save(project);
 

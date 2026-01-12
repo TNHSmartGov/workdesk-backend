@@ -78,6 +78,12 @@ public class ProjectService
     @Override
     @Transactional(readOnly = true)
     public ProjectDTO findById(UUID id) {
+        Boolean isSystem = isUserSystem();
+        if (isSystem) {
+            return repository.findById(id)
+                    .map(mapper::entityToDTO)
+                    .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
+        }
         UUID orgId = securityUtils.currentOrgId();
 
         return repository.findByIdAndOrganizationId(id, orgId)

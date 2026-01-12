@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.services.user.imp;
 
 import com.tnh.baseware.core.dtos.user.AuthenticationDTO;
+import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.entities.user.CustomUserDetails;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
@@ -65,8 +66,8 @@ public class AuthenticationService {
 
                 var userDetails = (CustomUserDetails) customUserDetailsService
                                 .loadUserByUsername(authenticationForm.getUsername());
-
-                if (!userDetails.getUser().getSuperAdmin()) {
+                var userSuper = userDetails.getUser().getSuperAdmin();
+                if (userSuper == null || userSuper == false) {
                         UUID orgId = resolveOrganization(userDetails, authenticationForm.getOrganizationId());
 
                         userDetails.getUser().setLastActiveOrganization(
@@ -85,7 +86,12 @@ public class AuthenticationService {
                         // }
 
                         userDetails.setOrganizationId(orgId);
+                } else {
+                        Organization organization = organizationRepository.findByIsSystem(true).get();
+                        userDetails.getUser().setLastActiveOrganization(organization);
+                        userDetails.setOrganizationId(organization.getId());
                 }
+
                 final var sessionId = UUID.randomUUID();
                 var accessToken = jwtTokenService.generateToken(userDetails, request, sessionId)
                                 .orElseThrow(() -> new BWCInvalidTokenException(

@@ -1,6 +1,5 @@
 package com.tnh.baseware.core.services.user.imp;
 
-import com.tnh.baseware.core.dtos.project.MemberDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.Menu;

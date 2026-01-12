@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,7 +67,6 @@ public class JwtTokenService {
             return oid != null ? oid.toString() : null;
         });
     }
-
 
     public Optional<String> extractSessionIdFromContext() {
         return httpRequestContext.currentRequest()
@@ -117,15 +115,20 @@ public class JwtTokenService {
         return generateToken(claims, userDetails, request, sessionId);
     }
 
-    private Optional<String> generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
-        return buildToken(extraClaims, userDetails, securityProperties.getJwt().getExpiration(), TokenType.ACCESS.getValue(), request, sessionId);
+    private Optional<String> generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails,
+            HttpServletRequest request, UUID sessionId) {
+        return buildToken(extraClaims, userDetails, securityProperties.getJwt().getExpiration(),
+                TokenType.ACCESS.getValue(), request, sessionId);
     }
 
-    public Optional<String> generateRefreshToken(CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
-        return buildToken(new HashMap<>(), userDetails, securityProperties.getJwt().getRefreshExpiration(), TokenType.REFRESH.getValue(), request, sessionId);
+    public Optional<String> generateRefreshToken(CustomUserDetails userDetails, HttpServletRequest request,
+            UUID sessionId) {
+        return buildToken(new HashMap<>(), userDetails, securityProperties.getJwt().getRefreshExpiration(),
+                TokenType.REFRESH.getValue(), request, sessionId);
     }
 
-    private Optional<String> buildToken(Map<String, Object> extraClaims, CustomUserDetails userDetails, long expiration, String tokenType, HttpServletRequest request, UUID sessionId) {
+    private Optional<String> buildToken(Map<String, Object> extraClaims, CustomUserDetails userDetails, long expiration,
+            String tokenType, HttpServletRequest request, UUID sessionId) {
         try {
             var header = new JWSHeader(JWSAlgorithm.HS512);
             var ip = request.getRemoteAddr();
@@ -181,7 +184,8 @@ public class JwtTokenService {
             var jti = claims.getJWTID();
 
             if (!Objects.equals(userDetails.getUsername(), username)) {
-                log.debug(LogStyleHelper.debug("JWT username mismatch: expected '{}', found '{}'"), userDetails.getUsername(), username);
+                log.debug(LogStyleHelper.debug("JWT username mismatch: expected '{}', found '{}'"),
+                        userDetails.getUsername(), username);
                 return false;
             }
 
@@ -232,8 +236,8 @@ public class JwtTokenService {
 
     @Transactional
     public void revokeAllValidTokensByUser(UUID userId) {
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
 
         tokenRepository.findAllByUserAndRevokedFalseAndExpiredFalse(user)
                 .forEach(token -> {
@@ -245,8 +249,8 @@ public class JwtTokenService {
 
     @Transactional
     public void revokeAllValidAccessTokensByUser(UUID userId) {
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
 
         tokenRepository.findAllByUserAndRevokedFalseAndExpiredFalse(user)
                 .stream()
@@ -272,8 +276,8 @@ public class JwtTokenService {
 
     @Transactional
     public void revokeAllValidTokensByUserAndDevice(UUID userId, String deviceId) {
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
 
         tokenRepository.findAllByUserAndDeviceId(user, deviceId)
                 .forEach(token -> {

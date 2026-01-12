@@ -6,12 +6,10 @@ import com.tnh.baseware.core.enums.project.ProjectAction;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
 import com.tnh.baseware.core.services.IGenericService;
 
-import java.util.List;
 import java.util.UUID;
-
-import org.springframework.data.domain.Page;
 
 public interface IProjectService extends IGenericService<Project, ProjectEditorForm, ProjectDTO, UUID> {
     public void performAction(UUID projectId, ProjectAction action);
+
     Project getOrCreatePersonalProject(UUID userId);
 }

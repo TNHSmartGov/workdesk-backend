@@ -39,12 +39,12 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
     SecurityProperties securityProperties;
 
     public JwtAuthenticationFilter(SecurityUriProperties securityUriProperties,
-                                   MessageService messageService,
-                                   ObjectMapper objectMapper,
-                                   PrivilegeCacheService privilegeCacheService,
-                                   UserDetailsService userDetailsService,
-                                   JwtTokenService jwtTokenService,
-                                   SecurityProperties securityProperties) {
+            MessageService messageService,
+            ObjectMapper objectMapper,
+            PrivilegeCacheService privilegeCacheService,
+            UserDetailsService userDetailsService,
+            JwtTokenService jwtTokenService,
+            SecurityProperties securityProperties) {
         super(securityUriProperties, messageService, objectMapper, privilegeCacheService);
         this.userDetailsService = userDetailsService;
         this.jwtTokenService = jwtTokenService;
@@ -110,7 +110,8 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
                     .map(GrantedAuthority::getAuthority).toList();
 
             if (securityProperties.getJwt().isAllowMultipleDevices()) {
-                privilegeCacheService.cachePrivileges(String.valueOf(userDetails.getUser().getId()), sessionId.get(), privileges);
+                privilegeCacheService.cachePrivileges(String.valueOf(userDetails.getUser().getId()), sessionId.get(),
+                        privileges);
             } else {
                 privilegeCacheService.cachePrivileges(String.valueOf(userDetails.getUser().getId()), privileges);
             }

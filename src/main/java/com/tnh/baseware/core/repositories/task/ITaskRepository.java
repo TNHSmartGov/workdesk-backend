@@ -23,4 +23,5 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
             """)
     Optional<UserTaskPermissionDTO> findUserPermissions(@Param("taskId") UUID taskId,
             @Param("userId") UUID userId);
+
 }

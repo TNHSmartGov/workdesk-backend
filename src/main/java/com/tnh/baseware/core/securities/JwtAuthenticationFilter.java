@@ -83,8 +83,7 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
         try {
             var username = jwtTokenService.extractUsername(accessToken);
             var sessionId = jwtTokenService.extractSessionId(accessToken);
-            String orgId = jwtTokenService.extractOrganizationId(accessToken)
-                    .orElseThrow(() -> new BWCInvalidTokenException(messageService.getMessage("missing.oid")));
+            String orgId = jwtTokenService.extractOrganizationId(accessToken).orElse("NONE");
 
             if (username.isEmpty() || sessionId.isEmpty()) {
                 log.debug(LogStyleHelper.debug("JWT token is invalid or expired"));
@@ -93,7 +92,13 @@ public class JwtAuthenticationFilter extends BasewareCoreFilter {
             }
 
             var userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username.get());
-            userDetails.setOrganizationId(UUID.fromString(orgId));
+
+            if ("SUPER_ADMIN".equals(orgId) || "NONE".equals(orgId)) {
+                userDetails.setOrganizationId(null);
+            } else {
+                userDetails.setOrganizationId(UUID.fromString(orgId));
+            }
+
             if (!jwtTokenService.isTokenValid(accessToken, userDetails)) {
                 log.debug(LogStyleHelper.debug("JWT token is invalid or expired"));
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "error.unauthorized");

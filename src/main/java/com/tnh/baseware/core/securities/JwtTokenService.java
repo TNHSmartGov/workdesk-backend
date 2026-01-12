@@ -18,6 +18,7 @@ import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.utils.BasewareUtils;
 import com.tnh.baseware.core.utils.LogStyleHelper;
+import com.tnh.baseware.core.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class JwtTokenService {
     JwtSecretProvider jwtSecretProvider;
     MessageService messageService;
     HttpRequestContext httpRequestContext;
+    SecurityUtils securityUtils;
 
     public static void main(String[] args) {
         try {
@@ -102,11 +104,16 @@ public class JwtTokenService {
         Map<String, Object> claims = new HashMap<>();
 
         var organizationId = userDetails.getOrganizationId();
-        if (organizationId == null) {
-            log.warn(LogStyleHelper.warn(messageService.getMessage("organization.user.null.token")));
-            return Optional.empty();
+
+        if (organizationId != null) {
+            claims.put("oid", organizationId.toString());
+        } else if (securityUtils.checkIsSuperAdmin()) {
+            claims.put("oid", "SUPER_ADMIN");
+        } else {
+            claims.put("oid", "NONE");
+            log.info("Generating non-organization token for non-admin user: {}", userDetails.getUsername());
         }
-        claims.put("oid", organizationId.toString());
+
         return generateToken(claims, userDetails, request, sessionId);
     }
 

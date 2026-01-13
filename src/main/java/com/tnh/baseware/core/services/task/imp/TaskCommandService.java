@@ -254,7 +254,13 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         }
 
         if (task.getStartDate() == null) {
-            task.setStartDate(Instant.now());
+            Instant now = Instant.now();
+            if (task.getDueDate() != null && now.isAfter(task.getDueDate())) {
+                throw new BWCValidationException(MessageConstant.VALIDATE_START_ACTION);
+            }
+            task.setStartDate(now);
+        } else if (task.getDueDate() != null && task.getStartDate().isAfter(task.getDueDate())) {
+            throw new BWCValidationException(MessageConstant.VALIDATE_START_ACTION);
         }
 
         task.setStatus(TaskStatus.IN_PROGRESS);

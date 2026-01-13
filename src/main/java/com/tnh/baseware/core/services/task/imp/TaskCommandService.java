@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,6 +66,7 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
     @Override
     @Transactional
     public TaskDTO create(TaskEditorForm form) {
+        validateDates(form);
         TaskList taskList;
 
         if (form.getTaskListId() != null) {
@@ -250,6 +252,17 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         if (task.getStatus() != TaskStatus.TODO) {
             throw new BWCValidationException(MessageConstant.VALIDATE_START_ACTION);
         }
+
+        if (task.getStartDate() == null) {
+            Instant now = Instant.now();
+            if (task.getDueDate() != null && now.isAfter(task.getDueDate())) {
+                throw new BWCValidationException(MessageConstant.VALIDATE_START_ACTION);
+            }
+            task.setStartDate(now);
+        } else if (task.getDueDate() != null && task.getStartDate().isAfter(task.getDueDate())) {
+            throw new BWCValidationException(MessageConstant.VALIDATE_START_ACTION);
+        }
+
         task.setStatus(TaskStatus.IN_PROGRESS);
     }
 
@@ -358,5 +371,13 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
             case 100 -> MemberStatus.COMPLETED;
             default -> MemberStatus.IN_PROGRESS;
         };
+    }
+
+    private void validateDates(TaskEditorForm form) {
+        if (form.getStartDate() != null && form.getDueDate() != null) {
+            if (form.getStartDate().isAfter(form.getDueDate())) {
+                throw new BWCValidationException("Start date must be before or equal to due date");
+            }
+        }
     }
 }

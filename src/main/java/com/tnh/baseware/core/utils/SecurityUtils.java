@@ -49,4 +49,8 @@ public final class SecurityUtils {
     public User currentUser() {
         return currentUserDetails().getUser();
     }
+
+    public Boolean checkIsSuperAdmin() {
+       return currentUserDetails().getUser().getSuperAdmin();
+    }
 }

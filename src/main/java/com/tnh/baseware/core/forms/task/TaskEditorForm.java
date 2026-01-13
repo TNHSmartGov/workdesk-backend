@@ -26,6 +26,8 @@ public class TaskEditorForm {
 
     String description;
 
+    Instant startDate;
+
     Instant dueDate;
 
     @NotNull(message = "{priority.not.null}")

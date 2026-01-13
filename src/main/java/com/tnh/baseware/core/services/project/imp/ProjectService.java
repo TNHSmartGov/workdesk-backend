@@ -94,6 +94,14 @@ public class ProjectService
     @Override
     @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
+        Boolean isSystem = isUserSystem();
+        if (isSystem) {
+            return repository.findAll()
+                    .stream()
+                    .map(mapper::entityToDTO)
+                    .toList();
+        }
+
         UUID orgId = securityUtils.currentOrgId();
 
         return repository.findByOrganizationId(orgId, Sort.by(Sort.Order.desc("createdDate")))

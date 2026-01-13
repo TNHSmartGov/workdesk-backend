@@ -62,4 +62,9 @@ public class Task extends Auditable<String> {
     @Min(0)
     @Max(100)
     Integer progress = 0;
+
+    // bổ sung phân loại task
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_category_id")
+    TaskCategory taskCategory;
 }

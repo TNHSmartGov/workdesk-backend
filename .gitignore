@@ -138,3 +138,7 @@ classes
 /logs/
 /logs/**
 *.log
+README.md
+.docs/API_CODING_RULES.md
+.docs/API_ARCHITECTURE_GUIDE.md
+README.md

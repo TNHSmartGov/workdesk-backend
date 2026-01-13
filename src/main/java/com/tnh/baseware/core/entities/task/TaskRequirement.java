@@ -28,6 +28,7 @@ public class TaskRequirement extends Auditable<String> {
     String content;
 
     @Column(nullable = false)
+    @Builder.Default
     Boolean isCompleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,9 +36,10 @@ public class TaskRequirement extends Auditable<String> {
     User assignee;
 
     @Column(nullable = false)
+    @Builder.Default
     Integer weight = 1;
 
     @Column(nullable = false)
-    Integer sortOrder;
+    @Builder.Default
+    Integer sortOrder = 1;
 }
-

@@ -23,31 +23,31 @@ public class Project extends Auditable<String> {
 
         @Id
         @GeneratedValue(strategy = GenerationType.UUID)
-        private UUID id;
+        UUID id;
 
         @Column(nullable = false, length = 50)
-        private String code;
+        String code;
 
         @Column(nullable = false)
-        private String name;
+        String name;
 
         @Column(columnDefinition = "text")
-        private String description;
+        String description;
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "organization_id")
-        private Organization organization;
+        Organization organization;
 
-        private Instant startDate;
-        private Instant endDate;
+        Instant startDate;
+        Instant endDate;
 
-        private Instant archivedAt;
+        Instant archivedAt;
 
         @Enumerated(EnumType.STRING)
         @Column(nullable = true)
-        private ProjectType type;
+        ProjectType type;
 
         @Enumerated(EnumType.STRING)
         @Column(nullable = false)
-        private ProjectStatus status;
+        ProjectStatus status;
 }

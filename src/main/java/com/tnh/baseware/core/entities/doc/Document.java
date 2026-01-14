@@ -1,7 +1,6 @@
 package com.tnh.baseware.core.entities.doc;
 
 import com.tnh.baseware.core.entities.audit.Auditable;
-import com.tnh.baseware.core.enums.doc.DocumentType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,34 +13,30 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"external_source", "external_id"})
-        }
-)
+@Table(uniqueConstraints = {
+                @UniqueConstraint(columnNames = { "external_source", "external_id" })
+})
 public class Document extends Auditable<String> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.UUID)
+        UUID id;
 
-    @Column(nullable = false)
-    String documentNumber;   // số văn bản
+        @Column(nullable = false)
+        String documentNumber; // số văn bản
 
-    @Column(columnDefinition = "text")
-    String summary;          // trích yếu
+        @Column(columnDefinition = "text")
+        String summary; // trích yếu
 
-    Instant issuedDate; // ngày ban hành
+        Instant issuedDate; // ngày ban hành
 
-    @Column(nullable = false)
-    String issuedBy;    // cơ quan ban hành
+        @Column(nullable = false)
+        String issuedBy; // cơ quan ban hành
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    DocumentType documentType;
+        @Column(nullable = false)
+        String documentType;
 
-    // Integration
-    String externalSource;   // EOFFICE, iGate,..
-    String externalId;       // id bên eOffice
+        // Integration
+        String externalSource; // EOFFICE, iGate,..
+        String externalId; // id bên eOffice
 }
-

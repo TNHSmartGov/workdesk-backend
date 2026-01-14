@@ -18,7 +18,9 @@ import com.tnh.baseware.core.exceptions.BWCAccessDeniedException;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.task.TaskEditorForm;
+import com.tnh.baseware.core.components.GenericEntityFetcher;
 import com.tnh.baseware.core.mappers.task.ITaskMapper;
+import com.tnh.baseware.core.repositories.task.ITaskCategoryRepository;
 import com.tnh.baseware.core.repositories.task.ITaskListRepository;
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
@@ -40,26 +42,34 @@ import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class TaskCommandService extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID> implements ITaskCommandService {
+public class TaskCommandService
+        extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID>
+        implements ITaskCommandService {
     ITaskListRepository taskListRepository;
+    ITaskCategoryRepository taskCategoryRepository;
     ITaskMemberRepository taskMemberRepository;
     IProjectService projectService;
     ITaskRequirementRepository taskRequirementRepository;
+    GenericEntityFetcher fetcher;
     ApplicationEventPublisher eventPublisher;
 
     public TaskCommandService(ITaskRepository repository,
-                              ITaskMapper mapper,
-                              MessageService messageService,
-                              ITaskListRepository taskListRepository,
-                              ITaskMemberRepository taskMemberRepository,
-                              ITaskRequirementRepository taskRequirementRepository,
-                              IProjectService projectService,
-                              ApplicationEventPublisher eventPublisher) {
+            ITaskMapper mapper,
+            MessageService messageService,
+            ITaskListRepository taskListRepository,
+            ITaskCategoryRepository taskCategoryRepository,
+            ITaskMemberRepository taskMemberRepository,
+            ITaskRequirementRepository taskRequirementRepository,
+            IProjectService projectService,
+            GenericEntityFetcher fetcher,
+            ApplicationEventPublisher eventPublisher) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
+        this.taskCategoryRepository = taskCategoryRepository;
         this.taskMemberRepository = taskMemberRepository;
         this.taskRequirementRepository = taskRequirementRepository;
         this.projectService = projectService;
+        this.fetcher = fetcher;
         this.eventPublisher = eventPublisher;
     }
 
@@ -75,13 +85,18 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         } else {
             Project personalProject = projectService.getOrCreatePersonalProject(getCurrentUser().getId());
             taskList = taskListRepository.findDefaultByProjectId(personalProject.getId())
-                    .orElseThrow(() -> new BWCValidationException(MessageConstant.ERROR_CREATE_PROJECT_WITH_DEFAULT_TASK_LIST));
+                    .orElseThrow(() -> new BWCValidationException(
+                            MessageConstant.ERROR_CREATE_PROJECT_WITH_DEFAULT_TASK_LIST));
         }
 
         Task task = mapper.formToEntity(form);
         task.setTaskList(taskList);
         task.setProject(taskList.getProject());
         task.setStatus(TaskStatus.TODO);
+        if (form.getTaskCategoryId() != null) {
+            task.setTaskCategory(taskCategoryRepository.findById(form.getTaskCategoryId())
+                    .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("task_category.not_found"))));
+        }
 
         Task savedTask = repository.save(task);
 
@@ -94,8 +109,7 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         }
 
         eventPublisher.publishEvent(
-                TaskActivityEventFactory.created(savedTask, getCurrentUser().getUsername())
-        );
+                TaskActivityEventFactory.created(savedTask, getCurrentUser().getUsername()));
 
         return mapper.entityToDTO(savedTask);
     }
@@ -115,7 +129,7 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
 
         TaskSnapshot before = TaskSnapshot.from(task);
 
-        mapper.formToEntity(form, task);
+        mapper.updateFromForm(form, task, fetcher, taskListRepository, taskCategoryRepository);
         Task saved = repository.save(task);
 
         TaskSnapshot after = TaskSnapshot.from(saved);
@@ -154,18 +168,18 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
                         task,
                         getCurrentUser().getUsername(),
                         TaskStatus.valueOf(oldStatus),
-                        task.getStatus()
-                )
-        );
+                        task.getStatus()));
     }
 
     @Override
     @Transactional
     public void calculateProgressFromRequirements(UUID taskId) {
-        Task task = repository.findById(taskId).orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
+        Task task = repository.findById(taskId)
+                .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
 
         List<TaskRequirement> requirements = taskRequirementRepository.findByTaskId(taskId);
-        if (requirements.isEmpty()) return;
+        if (requirements.isEmpty())
+            return;
 
         List<TaskMember> taskMembers = taskMemberRepository.findByTask(task);
 
@@ -210,16 +224,15 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
                             task,
                             "progress",
                             null,
-                            task.getProgress()
-                    )
-            );
+                            task.getProgress()));
         }
     }
 
     @Override
     @Transactional
     public void updatePersonalProgress(UUID taskId, Integer progress) {
-        if (progress < 0 || progress > 100) throw new BWCValidationException(MessageConstant.PROGRESS_VALIDATE);
+        if (progress < 0 || progress > 100)
+            throw new BWCValidationException(MessageConstant.PROGRESS_VALIDATE);
 
         if (taskRequirementRepository.existsByTaskId(taskId)) {
             throw new BWCValidationException(MessageConstant.BLOCK_UPDATE_PROGRESS_MANUAL);
@@ -243,9 +256,7 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
                         member.getTask(),
                         getCurrentUser().getUsername(),
                         oldProgress,
-                        progress
-                )
-        );
+                        progress));
     }
 
     private void start(Task task) {
@@ -322,8 +333,7 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
         if (!isAllowed) {
             throw new BWCAccessDeniedException(
                     String.format("Your role [P:%s - T:%s] is not allowed to perform action %s",
-                            projectRole, taskRole, action)
-            );
+                            projectRole, taskRole, action));
         }
     }
 
@@ -342,7 +352,8 @@ public class TaskCommandService extends GenericService<Task, TaskEditorForm, Tas
     private void updateTaskProgress(Task task) {
         List<TaskMember> members = taskMemberRepository.findByTaskId(task.getId());
 
-        if (members.isEmpty()) return;
+        if (members.isEmpty())
+            return;
 
         double totalWeightedProgress = 0;
         double totalWeight = 0;

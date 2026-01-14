@@ -39,4 +39,7 @@ public class TaskEditorForm {
     TaskType type;
 
     UUID taskListId;
+
+    @Schema(description = "Task category ID for classification")
+    UUID taskCategoryId;
 }

@@ -36,11 +36,11 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
     ITaskQueryService taskQueryService;
 
     public TaskResource(MessageService messageService,
-                        SystemProperties systemProperties,
-                        ITaskCommandService taskCommandService,
-                        ITaskQueryService taskQueryService,
-                        ITaskMemberService taskMemberService,
-                        ITaskRequirementService taskRequirementService) {
+            SystemProperties systemProperties,
+            ITaskCommandService taskCommandService,
+            ITaskQueryService taskQueryService,
+            ITaskMemberService taskMemberService,
+            ITaskRequirementService taskRequirementService) {
         super(taskCommandService, messageService, systemProperties.getApiPrefix() + "/tasks");
         this.taskCommandService = taskCommandService;
         this.taskQueryService = taskQueryService;
@@ -51,29 +51,29 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
     @Operation(summary = "Perform an action on task")
     @PostMapping(value = "/{id}/actions")
     public void performAction(@PathVariable UUID id,
-                              @RequestBody @Valid TaskActionForm form) {
+            @RequestBody @Valid TaskActionForm form) {
         taskCommandService.performAction(id, form.getAction());
     }
 
     @Operation(summary = "Update personal progress")
     @PatchMapping("/{id}/progress")
     public void updateProgress(@PathVariable UUID id,
-                               @RequestBody @Valid UpdateProgressForm form) {
+            @RequestBody @Valid UpdateProgressForm form) {
         taskCommandService.updatePersonalProgress(id, form.getProgress());
     }
 
-    @Operation(summary = "Assign member to task")
+    @Operation(summary = "Assign members to task")
     @PostMapping("/{id}/members")
-    public TaskMemberDTO assignMember(@PathVariable UUID id,
-                                      @RequestBody @Valid TaskMemberEditorForm form) {
-        return taskMemberService.assignMember(id, form);
+    public List<TaskMemberDTO> assignMembers(@PathVariable UUID id,
+            @RequestBody @Valid List<TaskMemberEditorForm> forms) {
+        return taskMemberService.assignMembers(id, forms);
     }
 
     @Operation(summary = "Update task member")
     @PutMapping("/{id}/members/{memberId}")
     public TaskMemberDTO updateMember(@PathVariable UUID id,
-                                      @PathVariable UUID memberId,
-                                      @RequestBody @Valid TaskMemberEditorForm form) {
+            @PathVariable UUID memberId,
+            @RequestBody @Valid TaskMemberEditorForm form) {
         return taskMemberService.updateMember(id, memberId, form);
     }
 
@@ -89,25 +89,25 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
         return taskMemberService.getTaskMembers(id);
     }
 
-
     @Operation(summary = "Add requirement to task")
     @PostMapping("/{id}/requirements")
     public TaskRequirementDTO addRequirement(@PathVariable UUID id,
-                                             @RequestBody @Valid TaskRequirementEditorForm form) {
+            @RequestBody @Valid TaskRequirementEditorForm form) {
         return taskRequirementService.create(id, form);
     }
 
     @Operation(summary = "Update task requirement")
     @PutMapping("/{id}/requirements/{requirementId}")
     public TaskRequirementDTO updateRequirement(@PathVariable UUID id,
-                                                @PathVariable UUID requirementId,
-                                                @RequestBody @Valid TaskRequirementEditorForm form) {
+            @PathVariable UUID requirementId,
+            @RequestBody @Valid TaskRequirementEditorForm form) {
         return taskRequirementService.update(id, requirementId, form);
     }
 
     @Operation(summary = "Delete task requirement")
     @DeleteMapping("/{id}/requirements/{requirementId}")
-    public ResponseEntity<ApiMessageDTO<Integer>> deleteRequirement(@PathVariable UUID id, @PathVariable UUID requirementId) {
+    public ResponseEntity<ApiMessageDTO<Integer>> deleteRequirement(@PathVariable UUID id,
+            @PathVariable UUID requirementId) {
         taskRequirementService.delete(id, requirementId);
         return ResponseEntity.ok(ApiMessageDTO.<Integer>builder()
                 .data(1)
@@ -120,8 +120,8 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
     @Operation(summary = "Assign task requirement to member")
     @PatchMapping("/{id}/requirements/{requirementId}/assign")
     public TaskRequirementDTO assignRequirement(@PathVariable UUID id,
-                                                @PathVariable UUID requirementId,
-                                                @RequestBody @Valid AssignRequirementForm form) {
+            @PathVariable UUID requirementId,
+            @RequestBody @Valid AssignRequirementForm form) {
         return taskRequirementService.assignToMember(id, requirementId, form);
     }
 

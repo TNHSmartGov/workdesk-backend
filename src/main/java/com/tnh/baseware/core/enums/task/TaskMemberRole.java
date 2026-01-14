@@ -1,7 +1,6 @@
 package com.tnh.baseware.core.enums.task;
 
 import com.tnh.baseware.core.enums.base.BaseEnum;
-import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.exceptions.BWCGenericRuntimeException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

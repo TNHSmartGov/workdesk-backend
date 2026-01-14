@@ -14,7 +14,8 @@ public enum CategoryCode implements BaseEnum<String> {
     MENU_TYPE("MENU_TYPE", "Menu Type", "Kiểu menu "),
     PROJECT_TYPE("PROJECT_TYPE", "Project Type", "Kiểu dự án"),
     ORGANIZATION_TITLE("ORGANIZATION_TITLE", "Organization Title", "Chức danh tổ chức"),
-    TASK_CATEGORY("TASK_CATEGORY", "Task Category", "Phân Nhóm Công Việc");
+    TASK_CATEGORY("TASK_CATEGORY", "Task Category", "Phân Nhóm Công Việc"),
+    DOCUMENT_TYPE("DOCUMENT_TYPE", "Document Type", "Loại văn bản");
 
     String value;
     String name;

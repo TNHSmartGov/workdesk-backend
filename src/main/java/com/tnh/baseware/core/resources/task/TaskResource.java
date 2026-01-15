@@ -5,7 +5,6 @@ import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.dtos.task.TaskMemberDTO;
 import com.tnh.baseware.core.dtos.task.TaskRequirementDTO;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
-import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.enums.task.TaskStatus;

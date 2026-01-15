@@ -110,15 +110,16 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
     @Override
     @Transactional(readOnly = true)
     public List<TaskDTO> findByStatus(TaskStatus status) {
-        return repository.findByStatus(status).stream()
+        UUID orgId = securityUtils.currentOrgId();
+        return repository.findByStatusAndOrgId(status, orgId).stream()
                 .map(mapper::entityToDTO)
                 .toList();
     }
-
     @Override
     @Transactional(readOnly = true)
     public Page<TaskDTO> findByStatus(TaskStatus status, Pageable pageable) {
-        return repository.findByStatus(status, pageable)
+        UUID orgId = securityUtils.currentOrgId();
+        return repository.findByStatusAndOrgId(status, orgId, pageable)
                 .map(mapper::entityToDTO);
     }
 

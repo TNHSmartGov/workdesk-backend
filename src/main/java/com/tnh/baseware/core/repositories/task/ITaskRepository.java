@@ -68,17 +68,6 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
             """)
     Page<Task> findAccessibleByUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId, Pageable pageable);
 
-    @Query("""
-            SELECT t FROM Task t
-            WHERE t.id = :taskId
-            AND t.project.organization.id = :orgId
-            AND (
-                EXISTS (SELECT 1 FROM ProjectMember pm WHERE pm.project.id = t.project.id AND pm.user.id = :userId)
-                OR EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-            )
-            """)
-    Optional<Task> findByIdAndAccessible(@Param("taskId") UUID taskId, @Param("orgId") UUID orgId, @Param("userId") UUID userId);
-
     @Query("SELECT t FROM Task t WHERE t.id = :taskId AND t.project.organization.id = :orgId")
     Optional<Task> findByIdAndOrganizationId(@Param("taskId") UUID taskId, @Param("orgId") UUID orgId);
 
@@ -89,8 +78,10 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
     List<Task> findByTaskListId(UUID taskListId);
 
     Page<Task> findByTaskListId(UUID taskListId, Pageable pageable);
-    List<Task> findByStatus(TaskStatus status);
-    Page<Task> findByStatus(TaskStatus status, Pageable pageable);
+    @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
+    List<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId);
+    @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
+    Page<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId, Pageable pageable);
 
     @Query("""
     SELECT t FROM Task t 

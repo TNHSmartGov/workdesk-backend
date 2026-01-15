@@ -2,17 +2,14 @@ package com.tnh.baseware.core.forms.task;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.tnh.baseware.core.enums.task.MemberStatus;
 import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -36,5 +33,6 @@ public class TaskMemberEditorForm {
 
     @Min(value = 1, message = "{weight.min}")
     @Max(value = 100, message = "{weight.max}")
+    @Builder.Default
     Integer weight = 1;
 }

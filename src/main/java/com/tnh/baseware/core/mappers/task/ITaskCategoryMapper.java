@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.mappers.task;
 
 import com.tnh.baseware.core.components.GenericEntityFetcher;
+import com.tnh.baseware.core.dtos.basic.BasicTaskCategoryDTO;
 import com.tnh.baseware.core.dtos.task.TaskCategoryDTO;
 import com.tnh.baseware.core.entities.task.TaskCategory;
 import com.tnh.baseware.core.forms.task.TaskCategoryEditorForm;
@@ -21,6 +22,8 @@ public interface ITaskCategoryMapper extends IGenericMapper<TaskCategory, TaskCa
         TaskCategory formToEntity(TaskCategoryEditorForm form,
                         @Context GenericEntityFetcher fetcher,
                         @Context ITaskCategoryRepository repository);
+
+        BasicTaskCategoryDTO entityToBasicDTO(TaskCategory entity);
 
         // Form → Entity (for UPDATE)
         @Mapping(target = "parent", expression = "java(form.getParentId() != null ? fetcher.formToEntity(repository, form.getParentId()) : null)")
@@ -75,4 +78,5 @@ public interface ITaskCategoryMapper extends IGenericMapper<TaskCategory, TaskCa
 
                 return dto;
         }
+
 }

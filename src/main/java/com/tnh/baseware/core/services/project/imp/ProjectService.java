@@ -271,7 +271,8 @@ public class ProjectService
         // 1. Get all task lists for this project
         List<TaskList> taskLists = taskListRepository.findByProjectIdOrderByOrderIndexAsc(id);
 
-        // 2. For each task list, delete all tasks and their related data
+        // 2. For each task list, delete all tasks and their related data, then delete
+        // the task list
         for (TaskList taskList : taskLists) {
             // Get all tasks in this task list
             List<Task> tasks = taskList.getTasks();
@@ -279,9 +280,7 @@ public class ProjectService
                 for (Task task : tasks) {
                     UUID taskId = task.getId();
 
-                    // Delete task-related entities
-                    // Note: For entities without custom findBy methods, we use filter on loaded
-                    // data
+                    // Delete task-related entities in order
 
                     // Delete task comment attachments
                     taskCommentAttachmentRepository.deleteAll(
@@ -323,15 +322,15 @@ public class ProjectService
 
                     // Delete task requirements
                     taskRequirementRepository.deleteAll(taskRequirementRepository.findByTaskId(taskId));
+
+                    // Delete the task itself
+                    taskRepository.delete(task);
                 }
-
-                // Delete all tasks in this task list
-                taskRepository.deleteAll(tasks);
             }
-        }
 
-        // 3. Delete all task lists
-        taskListRepository.deleteAll(taskLists);
+            // 3. Delete the task list after all its tasks are deleted
+            taskListRepository.delete(taskList);
+        }
 
         // 4. Delete project attachments
         List<ProjectAttachment> projectAttachments = projectAttachmentRepository.findByProject_Id(id);

@@ -41,7 +41,8 @@ public class TaskMember extends Auditable<String> {
         @Column(nullable = false)
         MemberStatus status;
 
-        Instant joinedAt;
+        @Builder.Default
+        Instant joinedAt = Instant.now();
         Instant completedAt;
 
         // bổ sung cho gantt

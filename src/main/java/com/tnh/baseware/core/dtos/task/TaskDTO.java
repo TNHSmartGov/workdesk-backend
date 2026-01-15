@@ -28,4 +28,5 @@ public class TaskDTO extends RepresentationModel<TaskDTO> implements Identifiabl
     TaskPriority priority;
     TaskType type;
     TaskListDTO taskList;
+    TaskCategoryDTO taskCategory;
 }

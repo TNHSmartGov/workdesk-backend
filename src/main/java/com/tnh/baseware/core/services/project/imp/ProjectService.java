@@ -2,7 +2,9 @@ package com.tnh.baseware.core.services.project.imp;
 
 import com.tnh.baseware.core.dtos.project.ProjectDTO;
 import com.tnh.baseware.core.entities.project.Project;
+import com.tnh.baseware.core.entities.project.ProjectAttachment;
 import com.tnh.baseware.core.entities.project.ProjectMember;
+import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.entities.task.TaskList;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.project.ProjectAction;
@@ -16,9 +18,19 @@ import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
 import com.tnh.baseware.core.mappers.project.IProjectMapper;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
+import com.tnh.baseware.core.repositories.project.IProjectAttachmentRepository;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
+import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
+import com.tnh.baseware.core.repositories.task.ITaskAttachmentRepository;
+import com.tnh.baseware.core.repositories.task.ITaskCommentAttachmentRepository;
+import com.tnh.baseware.core.repositories.task.ITaskCommentRepository;
+import com.tnh.baseware.core.repositories.task.ITaskDependencyRepository;
+import com.tnh.baseware.core.repositories.task.ITaskDocumentRepository;
 import com.tnh.baseware.core.repositories.task.ITaskListRepository;
+import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
+import com.tnh.baseware.core.repositories.task.ITaskRepository;
+import com.tnh.baseware.core.repositories.task.ITaskRequirementRepository;
 import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.securities.ProjectSecurityService;
@@ -54,6 +66,16 @@ public class ProjectService
     IUserOrganizationRepository userOrganizationRepository;
     IOrganizationRepository organizationRepository;
     SecurityUtils securityUtils;
+    IProjectAttachmentRepository projectAttachmentRepository;
+    ITaskRepository taskRepository;
+    ITaskMemberRepository taskMemberRepository;
+    ITaskCommentRepository taskCommentRepository;
+    ITaskAttachmentRepository taskAttachmentRepository;
+    ITaskActivityLogRepository taskActivityLogRepository;
+    ITaskCommentAttachmentRepository taskCommentAttachmentRepository;
+    ITaskDocumentRepository taskDocumentRepository;
+    ITaskRequirementRepository taskRequirementRepository;
+    ITaskDependencyRepository taskDependencyRepository;
 
     public ProjectService(IProjectRepository repository,
             IProjectMapper mapper,
@@ -64,7 +86,17 @@ public class ProjectService
             IProjectMemberRepository projectMemberRepository,
             ITaskListRepository taskListRepository,
             IOrganizationRepository organizationRepository,
-            SecurityUtils securityUtils) {
+            SecurityUtils securityUtils,
+            IProjectAttachmentRepository projectAttachmentRepository,
+            ITaskRepository taskRepository,
+            ITaskMemberRepository taskMemberRepository,
+            ITaskCommentRepository taskCommentRepository,
+            ITaskAttachmentRepository taskAttachmentRepository,
+            ITaskActivityLogRepository taskActivityLogRepository,
+            ITaskCommentAttachmentRepository taskCommentAttachmentRepository,
+            ITaskDocumentRepository taskDocumentRepository,
+            ITaskRequirementRepository taskRequirementRepository,
+            ITaskDependencyRepository taskDependencyRepository) {
         super(repository, mapper, messageService, Project.class);
         this.taskListRepository = taskListRepository;
         this.projectSecurityService = projectSecurityService;
@@ -73,6 +105,16 @@ public class ProjectService
         this.userOrganizationRepository = userOrganizationRepository;
         this.organizationRepository = organizationRepository;
         this.securityUtils = securityUtils;
+        this.projectAttachmentRepository = projectAttachmentRepository;
+        this.taskRepository = taskRepository;
+        this.taskMemberRepository = taskMemberRepository;
+        this.taskCommentRepository = taskCommentRepository;
+        this.taskAttachmentRepository = taskAttachmentRepository;
+        this.taskActivityLogRepository = taskActivityLogRepository;
+        this.taskCommentAttachmentRepository = taskCommentAttachmentRepository;
+        this.taskDocumentRepository = taskDocumentRepository;
+        this.taskRequirementRepository = taskRequirementRepository;
+        this.taskDependencyRepository = taskDependencyRepository;
     }
 
     @Override
@@ -205,6 +247,102 @@ public class ProjectService
             throw new IllegalStateException("Only active project can be archived");
         }
         project.setStatus(ProjectStatus.ARCHIVED);
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID id) {
+        UUID orgId = securityUtils.currentOrgId();
+        var currentUser = getCurrentUser();
+
+        // Find and verify project exists and belongs to user's organization
+        var project = repository.findByIdAndOrganizationId(id, orgId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
+
+        // Check permission
+        Set<UserOrganization> userOrgs = userOrganizationRepository.findByUserIdAndActiveTrue(currentUser.getId());
+        if (userOrgs.isEmpty() || !projectSecurityService.checkPermission(currentUser, project,
+                ProjectPermission.PROJECT_DELETE, userOrgs)) {
+            throw new BWCBusinessException("You do not have permission to delete this project");
+        }
+
+        // Deep delete: Delete all related data in proper order
+
+        // 1. Get all task lists for this project
+        List<TaskList> taskLists = taskListRepository.findByProjectIdOrderByOrderIndexAsc(id);
+
+        // 2. For each task list, delete all tasks and their related data
+        for (TaskList taskList : taskLists) {
+            // Get all tasks in this task list
+            List<Task> tasks = taskList.getTasks();
+            if (tasks != null && !tasks.isEmpty()) {
+                for (Task task : tasks) {
+                    UUID taskId = task.getId();
+
+                    // Delete task-related entities
+                    // Note: For entities without custom findBy methods, we use filter on loaded
+                    // data
+
+                    // Delete task comment attachments
+                    taskCommentAttachmentRepository.deleteAll(
+                            taskCommentAttachmentRepository.findAll().stream()
+                                    .filter(tca -> tca.getComment() != null
+                                            && taskId.equals(tca.getComment().getTask().getId()))
+                                    .toList());
+
+                    // Delete task comments
+                    taskCommentRepository.deleteAll(
+                            taskCommentRepository.findAll().stream()
+                                    .filter(tc -> taskId.equals(tc.getTask().getId()))
+                                    .toList());
+
+                    // Delete task attachments
+                    taskAttachmentRepository.deleteAll(
+                            taskAttachmentRepository.findAll().stream()
+                                    .filter(ta -> taskId.equals(ta.getTask().getId()))
+                                    .toList());
+
+                    // Delete task members
+                    taskMemberRepository.deleteAll(taskMemberRepository.findByTaskId(taskId));
+
+                    // Delete task activity logs
+                    taskActivityLogRepository.deleteAll(
+                            taskActivityLogRepository.findAll().stream()
+                                    .filter(tal -> taskId.equals(tal.getTask().getId()))
+                                    .toList());
+
+                    // Delete task documents
+                    taskDocumentRepository.deleteAll(taskDocumentRepository.findAllByTask_Id(taskId));
+
+                    // Delete task dependencies (both as fromTask and toTask)
+                    taskDependencyRepository.deleteAll(
+                            taskDependencyRepository.findAll().stream()
+                                    .filter(tdep -> taskId.equals(tdep.getFromTask().getId())
+                                            || taskId.equals(tdep.getToTask().getId()))
+                                    .toList());
+
+                    // Delete task requirements
+                    taskRequirementRepository.deleteAll(taskRequirementRepository.findByTaskId(taskId));
+                }
+
+                // Delete all tasks in this task list
+                taskRepository.deleteAll(tasks);
+            }
+        }
+
+        // 3. Delete all task lists
+        taskListRepository.deleteAll(taskLists);
+
+        // 4. Delete project attachments
+        List<ProjectAttachment> projectAttachments = projectAttachmentRepository.findByProject_Id(id);
+        projectAttachmentRepository.deleteAll(projectAttachments);
+
+        // 5. Delete project members
+        List<ProjectMember> projectMembers = projectMemberRepository.findDistinctByProject_Id(id);
+        projectMemberRepository.deleteAll(projectMembers);
+
+        // 6. Finally, delete the project itself
+        repository.delete(project);
     }
 
     @Deprecated(forRemoval = false)

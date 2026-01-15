@@ -65,7 +65,7 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
     @Operation(summary = "Assign members to task")
     @PostMapping("/{id}/members")
     public List<TaskMemberDTO> assignMembers(@PathVariable UUID id,
-            @RequestBody @Valid List<TaskMemberEditorForm> forms) {
+            @RequestBody List<TaskMemberEditorForm> forms) {
         return taskMemberService.assignMembers(id, forms);
     }
 

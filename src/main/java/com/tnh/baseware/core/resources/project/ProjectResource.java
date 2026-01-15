@@ -43,5 +43,4 @@ public class ProjectResource extends GenericResource<Project, ProjectEditorForm,
             @RequestBody @Valid ProjectActionForm form) {
         projectService.performAction(id, form.getAction());
     }
-
 }

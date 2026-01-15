@@ -71,13 +71,15 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
     @Query("SELECT t FROM Task t WHERE t.id = :taskId AND t.project.organization.id = :orgId")
     Optional<Task> findByIdAndOrganizationId(@Param("taskId") UUID taskId, @Param("orgId") UUID orgId);
 
-    List<Task> findByProjectId(UUID projectId);
+    @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
+    List<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId);
+    @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId")
+    Page<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId, Pageable pageable);
 
-    Page<Task> findByProjectId(UUID projectId, Pageable pageable);
-
-    List<Task> findByTaskListId(UUID taskListId);
-
-    Page<Task> findByTaskListId(UUID taskListId, Pageable pageable);
+    @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
+    List<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId);
+    @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId")
+    Page<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId, Pageable pageable);
     @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
     List<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId);
     @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")

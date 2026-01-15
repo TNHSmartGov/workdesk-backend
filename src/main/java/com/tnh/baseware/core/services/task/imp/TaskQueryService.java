@@ -59,30 +59,31 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
     @Override
     @Transactional(readOnly = true)
     public List<TaskDTO> findByProjectId(UUID projectId) {
-        return repository.findByProjectId(projectId).stream()
+        UUID orgId = securityUtils.currentOrgId();
+        return repository.findByProjectIdAndOrgId(projectId, orgId).stream()
                 .map(mapper::entityToDTO)
                 .toList();
     }
-
     @Override
     @Transactional(readOnly = true)
     public Page<TaskDTO> findByProjectId(UUID projectId, Pageable pageable) {
-        return repository.findByProjectId(projectId, pageable)
+        UUID orgId = securityUtils.currentOrgId();
+        return repository.findByProjectIdAndOrgId(projectId, orgId, pageable)
                 .map(mapper::entityToDTO);
     }
-
     @Override
     @Transactional(readOnly = true)
     public List<TaskDTO> findByTaskListId(UUID taskListId) {
-        return repository.findByTaskListId(taskListId).stream()
+        UUID orgId = securityUtils.currentOrgId();
+        return repository.findByTaskListIdAndOrgId(taskListId, orgId).stream()
                 .map(mapper::entityToDTO)
                 .toList();
     }
-
     @Override
     @Transactional(readOnly = true)
     public Page<TaskDTO> findByTaskListId(UUID taskListId, Pageable pageable) {
-        return repository.findByTaskListId(taskListId, pageable)
+        UUID orgId = securityUtils.currentOrgId();
+        return repository.findByTaskListIdAndOrgId(taskListId, orgId, pageable)
                 .map(mapper::entityToDTO);
     }
 
@@ -129,51 +130,59 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         User currentUser = getCurrentUser();
         UUID orgId = securityUtils.currentOrgId();
 
-        if (searchRequest == null) {
-            searchRequest = SearchRequest.builder().build();
+        List<FilterRequest> filters = new ArrayList<>();
+        if (searchRequest != null && searchRequest.getFilters() != null) {
+            filters.addAll(searchRequest.getFilters());
         }
-        if (searchRequest.getFilters() == null) {
-            searchRequest.setFilters(new ArrayList<>());
-        }
-        searchRequest.getFilters().add(FilterRequest.builder()
+
+        filters.add(FilterRequest.builder()
                 .key("createdBy")
                 .operator(Operator.EQUAL)
                 .fieldType(FieldType.STRING)
-                .value(currentUser.getId())
+                .value(currentUser.getId().toString())
                 .build());
-        searchRequest.getFilters().add(FilterRequest.builder()
+        filters.add(FilterRequest.builder()
                 .key("project.organization.id")
                 .operator(Operator.EQUAL)
                 .fieldType(FieldType.UUID)
                 .value(orgId.toString())
                 .build());
-        var specification = new GenericSpecification<Task>(searchRequest);
-        var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
+
+        SearchRequest securedRequest = SearchRequest.builder()
+                .filters(filters)
+                .sorts(searchRequest != null ? searchRequest.getSorts() : null)
+                .page(searchRequest != null ? searchRequest.getPage() : null)
+                .size(searchRequest != null ? searchRequest.getSize() : null)
+                .build();
+        var specification = new GenericSpecification<Task>(securedRequest);
+        var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
         return repository.findAll(specification, pageable).map(mapper::entityToDTO);
     }
-
     @Override
     @Transactional(readOnly = true)
     public Page<TaskDTO> searchTasksAssignedToMe(SearchRequest searchRequest) {
         User currentUser = getCurrentUser();
         UUID orgId = securityUtils.currentOrgId();
 
-        if (searchRequest == null) {
-            searchRequest = SearchRequest.builder().build();
-        }
-        if (searchRequest.getFilters() == null) {
-            searchRequest.setFilters(new ArrayList<>());
+        List<FilterRequest> filters = new ArrayList<>();
+        if (searchRequest != null && searchRequest.getFilters() != null) {
+            filters.addAll(searchRequest.getFilters());
         }
 
-        searchRequest.getFilters().add(FilterRequest.builder()
+        filters.add(FilterRequest.builder()
                 .key("project.organization.id")
                 .operator(Operator.EQUAL)
                 .fieldType(FieldType.UUID)
                 .value(orgId.toString())
                 .build());
 
-        var baseSpec = new GenericSpecification<Task>(searchRequest);
-
+        SearchRequest securedRequest = SearchRequest.builder()
+                .filters(filters)
+                .sorts(searchRequest != null ? searchRequest.getSorts() : null)
+                .page(searchRequest != null ? searchRequest.getPage() : null)
+                .size(searchRequest != null ? searchRequest.getSize() : null)
+                .build();
+        var baseSpec = new GenericSpecification<Task>(securedRequest);
         Specification<Task> assignedToMeSpec = (root, query, cb) -> {
             var subquery = query.subquery(UUID.class);
             var taskMember = subquery.from(TaskMember.class);
@@ -185,7 +194,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
             return root.get("id").in(subquery);
         };
         var combinedSpec = baseSpec.and(assignedToMeSpec);
-        var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
+        var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
         return repository.findAll(combinedSpec, pageable).map(mapper::entityToDTO);
     }
 }

@@ -20,7 +20,6 @@ public interface ITaskMemberMapper
 
     @Override
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "task", ignore = true)
     @Mapping(target = "user", ignore = true)
     TaskMember formToEntity(TaskMemberEditorForm form);
 }

@@ -10,7 +10,12 @@ import java.util.UUID;
 
 public interface ITaskMemberService extends IGenericService<TaskMember, TaskMemberEditorForm, TaskMemberDTO, UUID> {
     TaskMemberDTO assignMember(UUID taskId, TaskMemberEditorForm form);
+
     TaskMemberDTO updateMember(UUID taskId, UUID memberId, TaskMemberEditorForm form);
+
     void removeMember(UUID taskId, UUID memberId);
+
     List<TaskMemberDTO> getTaskMembers(UUID taskId);
+
+    List<TaskMemberDTO> assignMembers(UUID taskId, List<TaskMemberEditorForm> forms);
 }

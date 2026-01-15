@@ -13,15 +13,10 @@ import com.tnh.baseware.core.services.IGenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -49,34 +44,4 @@ public class ProjectResource extends GenericResource<Project, ProjectEditorForm,
         projectService.performAction(id, form.getAction());
     }
 
-    @Operation(summary = "Create a new entity")
-    @ApiResponse(responseCode = "200", description = "Entity created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
-    @Override
-    @PostMapping
-    @JsonView(Views.Create.class)
-    public ResponseEntity<ApiMessageDTO<ProjectDTO>> create(@Valid @RequestBody ProjectEditorForm f) {
-        var created = projectService.create(f);
-        return ResponseEntity.ok(ApiMessageDTO.<ProjectDTO>builder()
-                .data(created)
-                .result(true)
-                .message(messageService.getMessage("entity.created"))
-                .code(HttpStatus.CREATED.value())
-                .build());
-    }
-
-    @Operation(summary = "Update an existing project by ID")
-    @ApiResponse(responseCode = "200", description = "Entity updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
-    @Override
-    @PutMapping("/{id}")
-    @JsonView(Views.Common.class)
-    public ResponseEntity<ApiMessageDTO<ProjectDTO>> update(@PathVariable UUID id,
-            @Valid @RequestBody ProjectEditorForm f) {
-        var updated = projectService.update(id, f);
-        return ResponseEntity.ok(ApiMessageDTO.<ProjectDTO>builder()
-                .data(updated)
-                .result(true)
-                .message(messageService.getMessage("entity.updated"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
 }

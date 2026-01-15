@@ -20,10 +20,6 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TaskMemberEditorForm {
-
-    @NotNull(message = "{task.id.not.null}")
-    UUID taskId;
-
     @NotNull(message = "{user.id.not.null}")
     UUID userId;
 

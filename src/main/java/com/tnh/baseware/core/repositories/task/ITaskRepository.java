@@ -73,47 +73,16 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
 
     @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
     List<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId);
-    @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId")
+    @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
     Page<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId, Pageable pageable);
 
     @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
     List<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId);
-    @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId")
+    @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
     Page<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId, Pageable pageable);
     @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
     List<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId);
     @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
     Page<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId, Pageable pageable);
-
-    @Query("""
-    SELECT t FROM Task t 
-    WHERE t.createdBy = :userId 
-    AND t.project.organization.id = :orgId
-    ORDER BY t.createdDate DESC
-""")
-    List<Task> findTasksCreatedByUser(@Param("orgId") UUID orgId, @Param("userId") String userId);
-    @Query("""
-    SELECT t FROM Task t 
-    WHERE t.createdBy = :userId 
-    AND t.project.organization.id = :orgId
-""")
-    Page<Task> findTasksCreatedByUser(@Param("orgId") UUID orgId, @Param("userId") String userId, Pageable pageable);
-    @Query("""
-    SELECT DISTINCT t FROM Task t 
-    JOIN TaskMember tm ON tm.task.id = t.id 
-    WHERE tm.user.id = :userId 
-    AND tm.role IN ('ASSIGNEE', 'LEAD')
-    AND t.project.organization.id = :orgId
-    ORDER BY t.createdDate DESC
-""")
-    List<Task> findTasksAssignedToUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId);
-    @Query("""
-    SELECT DISTINCT t FROM Task t 
-    JOIN TaskMember tm ON tm.task.id = t.id 
-    WHERE tm.user.id = :userId 
-    AND tm.role IN ('ASSIGNEE', 'LEAD')
-    AND t.project.organization.id = :orgId
-""")
-    Page<Task> findTasksAssignedToUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId, Pageable pageable);
 
 }

@@ -249,23 +249,27 @@ public class ProjectService
         project.setStatus(ProjectStatus.ARCHIVED);
     }
 
+    // trường hợp được xóa hoàn toàn dự án khi người dùng là superadmin , hoặc người
+    // dùng
+    // quyền hệ thống , trường hợp chuyển về lưu trữ archive mới cho phép xóa
     @Override
     @Transactional
     public void delete(UUID id) {
         UUID orgId = securityUtils.currentOrgId();
         var currentUser = getCurrentUser();
-
-        // Find and verify project exists and belongs to user's organization
-        var project = repository.findByIdAndOrganizationId(id, orgId)
-                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
-
-        // Check permission
-        Set<UserOrganization> userOrgs = userOrganizationRepository.findByUserIdAndActiveTrue(currentUser.getId());
-        if (userOrgs.isEmpty() || !projectSecurityService.checkPermission(currentUser, project,
-                ProjectPermission.PROJECT_DELETE, userOrgs)) {
-            throw new BWCBusinessException("You do not have permission to delete this project");
+        if (!isUserSystem()) {
+            // Find and verify project exists and belongs to user's organization
+            var project = repository.findByIdAndOrganizationId(id, orgId)
+                    .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
+            // Check permission
+            Set<UserOrganization> userOrgs = userOrganizationRepository.findByUserIdAndActiveTrue(currentUser.getId());
+            if (userOrgs.isEmpty() || !projectSecurityService.checkPermission(currentUser, project,
+                    ProjectPermission.PROJECT_DELETE, userOrgs)) {
+                throw new BWCBusinessException("You do not have permission to delete this project");
+            }
         }
-
+        var project = repository.findById(id)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
         // Deep delete: Delete all related data in proper order
 
         // 1. Get all task lists for this project

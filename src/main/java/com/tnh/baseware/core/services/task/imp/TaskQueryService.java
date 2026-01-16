@@ -143,7 +143,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 .key("createdBy")
                 .operator(Operator.EQUAL)
                 .fieldType(FieldType.STRING)
-                .value(currentUser.getId().toString())
+                .value(currentUser.getUsername())
                 .build());
         filters.add(FilterRequest.builder()
                 .key("project.organization.id")

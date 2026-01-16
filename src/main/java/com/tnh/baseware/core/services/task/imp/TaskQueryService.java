@@ -41,13 +41,13 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
     SecurityUtils securityUtils;
 
     public TaskQueryService(ITaskRepository repository,
-                            ITaskMapper mapper,
-                            MessageService messageService,
-                            ITaskListRepository taskListRepository,
-                            ITaskMemberRepository taskMemberRepository,
-                            ITaskRequirementRepository taskRequirementRepository,
-                            IProjectService projectService,
-                            SecurityUtils securityUtils) {
+            ITaskMapper mapper,
+            MessageService messageService,
+            ITaskListRepository taskListRepository,
+            ITaskMemberRepository taskMemberRepository,
+            ITaskRequirementRepository taskRequirementRepository,
+            IProjectService projectService,
+            SecurityUtils securityUtils) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
         this.taskMemberRepository = taskMemberRepository;
@@ -64,6 +64,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 .map(mapper::entityToDTO)
                 .toList();
     }
+
     @Override
     @Transactional(readOnly = true)
     public Page<TaskDTO> findByProjectId(UUID projectId, Pageable pageable) {
@@ -71,6 +72,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         return repository.findByProjectIdAndOrgId(projectId, orgId, pageable)
                 .map(mapper::entityToDTO);
     }
+
     @Override
     @Transactional(readOnly = true)
     public List<TaskDTO> findByTaskListId(UUID taskListId) {
@@ -79,6 +81,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 .map(mapper::entityToDTO)
                 .toList();
     }
+
     @Override
     @Transactional(readOnly = true)
     public Page<TaskDTO> findByTaskListId(UUID taskListId, Pageable pageable) {
@@ -116,6 +119,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 .map(mapper::entityToDTO)
                 .toList();
     }
+
     @Override
     @Transactional(readOnly = true)
     public Page<TaskDTO> findByStatus(TaskStatus status, Pageable pageable) {
@@ -158,6 +162,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
         return repository.findAll(specification, pageable).map(mapper::entityToDTO);
     }
+
     @Override
     @Transactional(readOnly = true)
     public Page<TaskDTO> searchTasksAssignedToMe(SearchRequest searchRequest) {
@@ -189,12 +194,24 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
             subquery.select(taskMember.get("task").get("id"))
                     .where(
                             cb.equal(taskMember.get("user").get("id"), currentUser.getId()),
-                            taskMember.get("role").in(TaskMemberRole.ASSIGNEE, TaskMemberRole.LEAD)
-                    );
+                            taskMember.get("role").in(TaskMemberRole.ASSIGNEE, TaskMemberRole.LEAD));
             return root.get("id").in(subquery);
         };
         var combinedSpec = baseSpec.and(assignedToMeSpec);
         var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
         return repository.findAll(combinedSpec, pageable).map(mapper::entityToDTO);
     }
+
+    public TaskDTO create(TaskEditorForm form) {
+        var currentUser = getCurrentUser();
+        var task = repository.save(mapper.formToEntity(form));
+        var taskMember = TaskMember.builder()
+                .task(task)
+                .user(currentUser)
+                .role(TaskMemberRole.OWNER)
+                .build();
+        taskMemberRepository.save(taskMember);
+        return mapper.entityToDTO(task);
+    }
+
 }

@@ -14,7 +14,8 @@ public enum TaskMemberRole implements BaseEnum<String> {
     LEAD("LEAD", "lead", "Chủ trì"),
     ASSIGNEE("ASSIGNEE", "assignee", "Người thực hiện"),
     REVIEWER("REVIEWER", "reviewer", "Người kiểm duyệt"),
-    WATCHER("WATCHER", "watcher", "Người theo dõi");
+    WATCHER("WATCHER", "watcher", "Người theo dõi"),
+    OWNER("OWNER", "owner", "Người sở hữu");
 
     String value;
     String name;

@@ -131,6 +131,15 @@ public class AuthenticationService {
                                                 messageService.getMessage("jwt.token.invalid")));
 
                 var userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(username);
+
+                String orgId = jwtTokenService.extractOrganizationId(refreshToken).orElse(null);
+                if (orgId != null && !orgId.equals("NONE") && !orgId.equals("SUPER_ADMIN")) {
+                        try {
+                                userDetails.setOrganizationId(UUID.fromString(orgId));
+                        } catch (BWCInvalidTokenException ignored) {
+                        }
+                }
+
                 if (!jwtTokenService.isTokenValid(refreshToken, userDetails)) {
                         log.debug(LogStyleHelper.debug("Invalid token for user {}"), username);
                         throw new BWCInvalidTokenException(messageService.getMessage("jwt.token.invalid"));

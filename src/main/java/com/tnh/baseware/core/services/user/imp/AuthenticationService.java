@@ -161,7 +161,6 @@ public class AuthenticationService {
                         privilegeCacheService.clearUserPrivilegeAsync(String.valueOf(userDetails.getUser().getId()));
                 }
 
-                // Generate new Access Token
                 var newAccessToken = jwtTokenService
                                 .generateToken(userDetails, request, UUID.fromString(sessionId))
                                 .orElseThrow(() -> new BWCInvalidTokenException(

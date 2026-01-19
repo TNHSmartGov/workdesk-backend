@@ -15,7 +15,6 @@ public interface ITaskMemberMapper
     @Override
     @Mapping(target = "id", source = "id")
     @Mapping(target = "taskId", source = "task.id")
-    @Mapping(target = "userId", source = "user.id")
     TaskMemberDTO entityToDTO(TaskMember entity);
 
     @Override

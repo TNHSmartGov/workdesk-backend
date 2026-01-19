@@ -1,5 +1,6 @@
 package com.tnh.baseware.core.dtos.task;
 
+import com.tnh.baseware.core.dtos.basic.BasicUserDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,4 +22,5 @@ public class TaskRequirementDTO extends RepresentationModel<TaskRequirementDTO> 
     String content;
     Boolean isCompleted;
     Integer sortOrder;
+    BasicUserDTO assignee;
 }

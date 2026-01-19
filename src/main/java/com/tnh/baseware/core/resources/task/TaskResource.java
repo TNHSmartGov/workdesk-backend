@@ -42,7 +42,8 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
     ITaskCommandService taskCommandService;
     ITaskQueryService taskQueryService;
 
-    public TaskResource(MessageService messageService,
+    public TaskResource(
+            MessageService messageService,
             SystemProperties systemProperties,
             ITaskCommandService taskCommandService,
             ITaskQueryService taskQueryService,

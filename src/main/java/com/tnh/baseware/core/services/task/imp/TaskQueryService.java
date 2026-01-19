@@ -202,6 +202,8 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         return repository.findAll(combinedSpec, pageable).map(mapper::entityToDTO);
     }
 
+    @Override
+    @Transactional
     public TaskDTO create(TaskEditorForm form) {
         var currentUser = getCurrentUser();
         var task = repository.save(mapper.formToEntity(form));

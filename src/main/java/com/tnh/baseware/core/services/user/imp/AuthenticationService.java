@@ -138,7 +138,7 @@ public class AuthenticationService {
                                 userDetails.setOrganizationId(UUID.fromString(orgId));
                                 userDetails.getUser().setLastActiveOrganization(
                                                 organizationRepository.findById(UUID.fromString(orgId)).orElse(null));
-                        } catch (BWCInvalidTokenException e) {
+                        } catch (IllegalArgumentException e) {
                                 log.warn("Invalid Organization ID in refresh token: {}", orgId);
                         }
                 }
@@ -166,12 +166,6 @@ public class AuthenticationService {
                                 .orElseThrow(() -> new BWCInvalidTokenException(
                                                 messageService.getMessage("jwt.token.invalid")));
 
-                // Generate new Refresh Token (Rotation)
-                var newRefreshToken = jwtTokenService
-                                .generateRefreshToken(userDetails, request, UUID.fromString(sessionId))
-                                .orElseThrow(() -> new BWCInvalidTokenException(
-                                                messageService.getMessage("jwt.token.invalid")));
-
                 privilegeCacheService.clearUserCache(String.valueOf(userDetails.getUser().getId()));
                 log.debug(LogStyleHelper.debug("Token refreshed for user {}"), username);
 
@@ -182,7 +176,7 @@ public class AuthenticationService {
 
                 return AuthenticationDTO.builder()
                                 .accessToken(newAccessToken)
-                                .refreshToken(newRefreshToken)
+                                .refreshToken(refreshToken)
                                 .build();
         }
 

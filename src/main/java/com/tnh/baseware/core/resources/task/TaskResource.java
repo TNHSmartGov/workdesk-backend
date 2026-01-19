@@ -42,7 +42,8 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
     ITaskCommandService taskCommandService;
     ITaskQueryService taskQueryService;
 
-    public TaskResource(MessageService messageService,
+    public TaskResource(
+            MessageService messageService,
             SystemProperties systemProperties,
             ITaskCommandService taskCommandService,
             ITaskQueryService taskQueryService,
@@ -92,8 +93,14 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
 
     @Operation(summary = "Get task members")
     @GetMapping("/{id}/members")
-    public List<TaskMemberDTO> getMembers(@PathVariable UUID id) {
-        return taskMemberService.getTaskMembers(id);
+    public ResponseEntity<ApiMessageDTO<List<TaskMemberDTO>>> getMembers(@PathVariable UUID id) {
+        var members = taskMemberService.getTaskMembers(id);
+        return ResponseEntity.ok(ApiMessageDTO.<List<TaskMemberDTO>>builder()
+                .data(members)
+                .result(true)
+                .message(messageService.getMessage("members.found"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Add requirement to task")
@@ -140,8 +147,14 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
 
     @Operation(summary = "Get task requirements")
     @GetMapping("/{id}/requirements")
-    public List<TaskRequirementDTO> getRequirements(@PathVariable UUID id) {
-        return taskRequirementService.getByTaskId(id);
+    public ResponseEntity<ApiMessageDTO<List<TaskRequirementDTO>>> getRequirements(@PathVariable UUID id) {
+        var requirements = taskRequirementService.getByTaskId(id);
+        return ResponseEntity.ok(ApiMessageDTO.<List<TaskRequirementDTO>>builder()
+                .data(requirements)
+                .result(true)
+                .message(messageService.getMessage("requirements.found"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Find tasks by project ID")
@@ -278,6 +291,7 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                 .code(HttpStatus.OK.value())
                 .build());
     }
+
     @Operation(summary = "Search tasks assigned to current user")
     @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
     @PostMapping("/assigned-to-me/search")

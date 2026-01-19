@@ -5,6 +5,7 @@ import com.tnh.baseware.core.dtos.task.TaskRequirementDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.entities.task.TaskRequirement;
 import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.events.factory.TaskActivityEventFactory;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
@@ -30,7 +31,9 @@ import java.util.UUID;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class TaskRequirementService extends GenericService<TaskRequirement, TaskRequirementEditorForm, TaskRequirementDTO, ITaskRequirementRepository, ITaskRequirementMapper, UUID> implements ITaskRequirementService {
+public class TaskRequirementService extends
+        GenericService<TaskRequirement, TaskRequirementEditorForm, TaskRequirementDTO, ITaskRequirementRepository, ITaskRequirementMapper, UUID>
+        implements ITaskRequirementService {
     ITaskRepository taskRepository;
     ITaskMemberRepository taskMemberRepository;
     IUserRepository userRepository;
@@ -38,13 +41,13 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
     ApplicationEventPublisher eventPublisher;
 
     public TaskRequirementService(ITaskRequirementRepository repository,
-                                  ITaskRequirementMapper mapper,
-                                  MessageService messageService,
-                                  ITaskRepository taskRepository,
-                                  IUserRepository userRepository,
-                                  ITaskMemberRepository taskMemberRepository,
-                                  ITaskCommandService taskCommandService,
-                                  ApplicationEventPublisher eventPublisher) {
+            ITaskRequirementMapper mapper,
+            MessageService messageService,
+            ITaskRepository taskRepository,
+            IUserRepository userRepository,
+            ITaskMemberRepository taskMemberRepository,
+            ITaskCommandService taskCommandService,
+            ApplicationEventPublisher eventPublisher) {
         super(repository, mapper, messageService, TaskRequirement.class);
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
@@ -57,6 +60,7 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
     @Transactional
     public TaskRequirementDTO create(UUID taskId, TaskRequirementEditorForm form) {
         Task task = getTask(taskId);
+        validateUpdatePermission(task);
 
         if (form.getAssigneeId() != null) {
             validateAssigneeIsMember(taskId, form.getAssigneeId());
@@ -84,9 +88,7 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
                 TaskActivityEventFactory.requirementAdded(
                         task,
                         getCurrentUser().getUsername(),
-                        form.getContent()
-                )
-        );
+                        form.getContent()));
 
         return mapper.entityToDTO(saved);
     }
@@ -95,6 +97,7 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
     @Transactional
     public TaskRequirementDTO update(UUID taskId, UUID requirementId, TaskRequirementEditorForm form) {
         TaskRequirement requirement = getRequirement(taskId, requirementId);
+        validateUpdatePermission(requirement.getTask());
 
         if (form.getAssigneeId() != null) {
             validateAssigneeIsMember(taskId, form.getAssigneeId());
@@ -118,6 +121,7 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
     @Transactional
     public void delete(UUID taskId, UUID requirementId) {
         TaskRequirement requirement = getRequirement(taskId, requirementId);
+        validateUpdatePermission(requirement.getTask());
         repository.delete(requirement);
         taskCommandService.calculateProgressFromRequirements(taskId);
     }
@@ -126,6 +130,7 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
     @Transactional
     public TaskRequirementDTO assignToMember(UUID taskId, UUID requirementId, AssignRequirementForm form) {
         TaskRequirement requirement = getRequirement(taskId, requirementId);
+        validateUpdatePermission(requirement.getTask());
 
         validateAssigneeIsMember(taskId, form.getAssigneeId());
 
@@ -142,9 +147,7 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
                         getCurrentUser().getUsername(),
                         requirement.getContent(),
                         oldAssignee,
-                        newAssignee
-                )
-        );
+                        newAssignee));
 
         if (requirement.getIsCompleted()) {
             taskCommandService.calculateProgressFromRequirements(taskId);
@@ -157,6 +160,7 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
     @Transactional
     public void toggleComplete(UUID taskId, UUID requirementId) {
         TaskRequirement requirement = getRequirement(taskId, requirementId);
+        validateTogglePermission(requirement);
 
         boolean newValue = !requirement.getIsCompleted();
         requirement.setIsCompleted(newValue);
@@ -168,15 +172,15 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
                         requirement.getTask(),
                         getCurrentUser().getUsername(),
                         requirement.getContent(),
-                        newValue
-                )
-        );
+                        newValue));
 
         taskCommandService.calculateProgressFromRequirements(taskId);
     }
 
     @Override
     public List<TaskRequirementDTO> getByTaskId(UUID taskId) {
+        // Only task members can view requirements (Optional: add validateMember check
+        // here)
         return repository.findByTaskIdOrderBySortOrder(taskId).stream()
                 .map(mapper::entityToDTO)
                 .toList();
@@ -202,5 +206,66 @@ public class TaskRequirementService extends GenericService<TaskRequirement, Task
         if (!taskMemberRepository.existsByTaskIdAndUserId(taskId, userId)) {
             throw new BWCValidationException(messageService.getMessage("user.not.task.member"));
         }
+    }
+
+    /**
+     * Check if current user has permission to update/create/delete requirements.
+     * Allowed: Task OWNER/LEAD, Task Author.
+     * Updated: Removed Project level checks to keep Task independent.
+     */
+    private void validateUpdatePermission(Task task) {
+        User currentUser = getCurrentUser();
+        UUID userId = currentUser.getId();
+
+        // 1. Check if user is task author
+        if (task.getCreatedBy().equals(currentUser.getUsername())) {
+            return;
+        }
+
+        // 2. Check task level permission (OWNER or LEAD)
+        var taskMember = taskMemberRepository.findByTaskIdAndUserId(task.getId(), userId);
+        if (taskMember.isPresent()) {
+            var role = taskMember.get().getRole();
+            if (role == TaskMemberRole.OWNER ||
+                    role == TaskMemberRole.LEAD) {
+                return;
+            }
+        }
+
+        throw new BWCValidationException(messageService.getMessage("user.not.authorized"));
+    }
+
+    /**
+     * Check if current user has permission to toggle complete status.
+     * Allowed: Update permission (Owner/Lead/Author) OR Task ASSIGNEE OR
+     * Requirement Assignee.
+     */
+    private void validateTogglePermission(TaskRequirement requirement) {
+        try {
+            validateUpdatePermission(requirement.getTask());
+            return;
+        } catch (BWCValidationException e) {
+            // Continue checks if update permission failed
+        }
+
+        User currentUser = getCurrentUser();
+        UUID userId = currentUser.getId();
+        Task task = requirement.getTask();
+
+        // 1. Check if user is requirement specific assignee
+        if (requirement.getAssignee() != null && requirement.getAssignee().getId().equals(userId)) {
+            return;
+        }
+
+        // 2. Check if user is task assignee
+        var taskMember = taskMemberRepository.findByTaskIdAndUserId(task.getId(), userId);
+        if (taskMember.isPresent()) {
+            var role = taskMember.get().getRole();
+            if (role == TaskMemberRole.ASSIGNEE) {
+                return;
+            }
+        }
+
+        throw new BWCValidationException(messageService.getMessage("user.not.authorized"));
     }
 }

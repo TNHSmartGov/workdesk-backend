@@ -136,7 +136,10 @@ public class AuthenticationService {
                 if (orgId != null && !orgId.equals("NONE") && !orgId.equals("SUPER_ADMIN")) {
                         try {
                                 userDetails.setOrganizationId(UUID.fromString(orgId));
-                        } catch (BWCInvalidTokenException ignored) {
+                                userDetails.getUser().setLastActiveOrganization(
+                                                organizationRepository.findById(UUID.fromString(orgId)).orElse(null));
+                        } catch (BWCInvalidTokenException e) {
+                                log.warn("Invalid Organization ID in refresh token: {}", orgId);
                         }
                 }
 
@@ -158,8 +161,15 @@ public class AuthenticationService {
                         privilegeCacheService.clearUserPrivilegeAsync(String.valueOf(userDetails.getUser().getId()));
                 }
 
+                // Generate new Access Token
                 var newAccessToken = jwtTokenService
                                 .generateToken(userDetails, request, UUID.fromString(sessionId))
+                                .orElseThrow(() -> new BWCInvalidTokenException(
+                                                messageService.getMessage("jwt.token.invalid")));
+
+                // Generate new Refresh Token (Rotation)
+                var newRefreshToken = jwtTokenService
+                                .generateRefreshToken(userDetails, request, UUID.fromString(sessionId))
                                 .orElseThrow(() -> new BWCInvalidTokenException(
                                                 messageService.getMessage("jwt.token.invalid")));
 
@@ -173,7 +183,7 @@ public class AuthenticationService {
 
                 return AuthenticationDTO.builder()
                                 .accessToken(newAccessToken)
-                                .refreshToken(refreshToken)
+                                .refreshToken(newRefreshToken)
                                 .build();
         }
 

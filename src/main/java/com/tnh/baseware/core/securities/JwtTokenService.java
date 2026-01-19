@@ -99,6 +99,24 @@ public class JwtTokenService {
     }
 
     public Optional<String> generateToken(CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
+        Map<String, Object> claims = generateClaims(userDetails);
+        return generateToken(claims, userDetails, request, sessionId);
+    }
+
+    private Optional<String> generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails,
+            HttpServletRequest request, UUID sessionId) {
+        return buildToken(extraClaims, userDetails, securityProperties.getJwt().getExpiration(),
+                TokenType.ACCESS.getValue(), request, sessionId);
+    }
+
+    public Optional<String> generateRefreshToken(CustomUserDetails userDetails, HttpServletRequest request,
+            UUID sessionId) {
+        Map<String, Object> claims = generateClaims(userDetails);
+        return buildToken(claims, userDetails, securityProperties.getJwt().getRefreshExpiration(),
+                TokenType.REFRESH.getValue(), request, sessionId);
+    }
+
+    private Map<String, Object> generateClaims(CustomUserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
         var organizationId = userDetails.getOrganizationId();
@@ -111,20 +129,7 @@ public class JwtTokenService {
             claims.put("oid", "NONE");
             log.info("Generating non-organization token for non-admin user: {}", userDetails.getUsername());
         }
-
-        return generateToken(claims, userDetails, request, sessionId);
-    }
-
-    private Optional<String> generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails,
-            HttpServletRequest request, UUID sessionId) {
-        return buildToken(extraClaims, userDetails, securityProperties.getJwt().getExpiration(),
-                TokenType.ACCESS.getValue(), request, sessionId);
-    }
-
-    public Optional<String> generateRefreshToken(CustomUserDetails userDetails, HttpServletRequest request,
-            UUID sessionId) {
-        return buildToken(new HashMap<>(), userDetails, securityProperties.getJwt().getRefreshExpiration(),
-                TokenType.REFRESH.getValue(), request, sessionId);
+        return claims;
     }
 
     private Optional<String> buildToken(Map<String, Object> extraClaims, CustomUserDetails userDetails, long expiration,

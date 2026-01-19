@@ -24,5 +24,5 @@ public class BasicUserDTO implements Identifiable<UUID> {
     String fullName;
     String email;
     String phone;
-    String avatar;
+    String avatarUrl;
 }

@@ -57,91 +57,168 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
 
     @Operation(summary = "Perform an action on task")
     @PostMapping(value = "/{id}/actions")
-    public void performAction(@PathVariable UUID id,
+    public ResponseEntity<ApiMessageDTO<String>> performAction(@PathVariable UUID id,
             @RequestBody @Valid TaskActionForm form) {
         taskCommandService.performAction(id, form.getAction());
+        return ResponseEntity.ok(ApiMessageDTO.<String>builder()
+                .data("Action performed successfully")
+                .result(true)
+                .message(messageService.getMessage("task.action.performed"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Update personal progress")
     @PatchMapping("/{id}/progress")
-    public void updateProgress(@PathVariable UUID id,
+    public ResponseEntity<ApiMessageDTO<String>> updateProgress(@PathVariable UUID id,
             @RequestBody @Valid UpdateProgressForm form) {
         taskCommandService.updatePersonalProgress(id, form.getProgress());
+        return ResponseEntity.ok(ApiMessageDTO.<String>builder()
+                .data("Progress updated successfully")
+                .result(true)
+                .message(messageService.getMessage("task.progress.updated"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Assign members to task")
     @PostMapping("/{id}/members")
-    public List<TaskMemberDTO> assignMembers(@PathVariable UUID id,
+    @ApiOkResponse(value = TaskMemberDTO.class)
+    public ResponseEntity<ApiMessageDTO<List<TaskMemberDTO>>> assignMembers(@PathVariable UUID id,
             @RequestBody List<TaskMemberEditorForm> forms) {
-        return taskMemberService.assignMembers(id, forms);
+        var members = taskMemberService.assignMembers(id, forms);
+        return ResponseEntity.ok(ApiMessageDTO.<List<TaskMemberDTO>>builder()
+                .data(members)
+                .result(true)
+                .message(messageService.getMessage("task.members.assigned"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Update task member")
     @PutMapping("/{id}/members/{memberId}")
-    public TaskMemberDTO updateMember(@PathVariable UUID id,
+    @ApiOkResponse(value = TaskMemberDTO.class, type = ApiResponseType.OBJECT)
+    public ResponseEntity<ApiMessageDTO<TaskMemberDTO>> updateMember(@PathVariable UUID id,
             @PathVariable UUID memberId,
             @RequestBody @Valid TaskMemberEditorForm form) {
-        return taskMemberService.updateMember(id, memberId, form);
+        var member = taskMemberService.updateMember(id, memberId, form);
+        return ResponseEntity.ok(ApiMessageDTO.<TaskMemberDTO>builder()
+                .data(member)
+                .result(true)
+                .message(messageService.getMessage("task.member.updated"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Remove member from task")
     @DeleteMapping("/{id}/members/{memberId}")
-    public void removeMember(@PathVariable UUID id, @PathVariable UUID memberId) {
+    @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
+    public ResponseEntity<ApiMessageDTO<Integer>> removeMember(@PathVariable UUID id, @PathVariable UUID memberId) {
         taskMemberService.removeMember(id, memberId);
+        return ResponseEntity.ok(ApiMessageDTO.<Integer>builder()
+                .data(1)
+                .result(true)
+                .message(messageService.getMessage("task.member.removed"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Get task members")
     @GetMapping("/{id}/members")
-    public List<TaskMemberDTO> getMembers(@PathVariable UUID id) {
-        return taskMemberService.getTaskMembers(id);
+    @ApiOkResponse(value = TaskMemberDTO.class)
+    public ResponseEntity<ApiMessageDTO<List<TaskMemberDTO>>> getMembers(@PathVariable UUID id) {
+        var members = taskMemberService.getTaskMembers(id);
+        return ResponseEntity.ok(ApiMessageDTO.<List<TaskMemberDTO>>builder()
+                .data(members)
+                .result(true)
+                .message(messageService.getMessage("task.members.retrieved"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Add requirement to task")
     @PostMapping("/{id}/requirements")
-    public TaskRequirementDTO addRequirement(@PathVariable UUID id,
+    @ApiOkResponse(value = TaskRequirementDTO.class, type = ApiResponseType.OBJECT)
+    public ResponseEntity<ApiMessageDTO<TaskRequirementDTO>> addRequirement(@PathVariable UUID id,
             @RequestBody @Valid TaskRequirementEditorForm form) {
-        return taskRequirementService.create(id, form);
+        var requirement = taskRequirementService.create(id, form);
+        return ResponseEntity.ok(ApiMessageDTO.<TaskRequirementDTO>builder()
+                .data(requirement)
+                .result(true)
+                .message(messageService.getMessage("task.requirement.added"))
+                .code(HttpStatus.CREATED.value())
+                .build());
     }
 
     @Operation(summary = "Update task requirement")
     @PutMapping("/{id}/requirements/{requirementId}")
-    public TaskRequirementDTO updateRequirement(@PathVariable UUID id,
+    @ApiOkResponse(value = TaskRequirementDTO.class, type = ApiResponseType.OBJECT)
+    public ResponseEntity<ApiMessageDTO<TaskRequirementDTO>> updateRequirement(@PathVariable UUID id,
             @PathVariable UUID requirementId,
             @RequestBody @Valid TaskRequirementEditorForm form) {
-        return taskRequirementService.update(id, requirementId, form);
+        var requirement = taskRequirementService.update(id, requirementId, form);
+        return ResponseEntity.ok(ApiMessageDTO.<TaskRequirementDTO>builder()
+                .data(requirement)
+                .result(true)
+                .message(messageService.getMessage("task.requirement.updated"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Delete task requirement")
     @DeleteMapping("/{id}/requirements/{requirementId}")
+    @ApiOkResponse(value = Integer.class, type = ApiResponseType.OBJECT)
     public ResponseEntity<ApiMessageDTO<Integer>> deleteRequirement(@PathVariable UUID id,
             @PathVariable UUID requirementId) {
         taskRequirementService.delete(id, requirementId);
         return ResponseEntity.ok(ApiMessageDTO.<Integer>builder()
                 .data(1)
                 .result(true)
-                .message(messageService.getMessage("requirement.deleted"))
+                .message(messageService.getMessage("task.requirement.deleted"))
                 .code(HttpStatus.OK.value())
                 .build());
     }
 
     @Operation(summary = "Assign task requirement to member")
     @PatchMapping("/{id}/requirements/{requirementId}/assign")
-    public TaskRequirementDTO assignRequirement(@PathVariable UUID id,
+    @ApiOkResponse(value = TaskRequirementDTO.class, type = ApiResponseType.OBJECT)
+    public ResponseEntity<ApiMessageDTO<TaskRequirementDTO>> assignRequirement(@PathVariable UUID id,
             @PathVariable UUID requirementId,
             @RequestBody @Valid AssignRequirementForm form) {
-        return taskRequirementService.assignToMember(id, requirementId, form);
+        var requirement = taskRequirementService.assignToMember(id, requirementId, form);
+        return ResponseEntity.ok(ApiMessageDTO.<TaskRequirementDTO>builder()
+                .data(requirement)
+                .result(true)
+                .message(messageService.getMessage("task.requirement.assigned"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Toggle task requirement complete status")
     @PatchMapping("/{id}/requirements/{requirementId}/toggle")
-    public void toggleRequirement(@PathVariable UUID id, @PathVariable UUID requirementId) {
+    @ApiOkResponse(value = String.class, type = ApiResponseType.OBJECT)
+    public ResponseEntity<ApiMessageDTO<String>> toggleRequirement(@PathVariable UUID id,
+            @PathVariable UUID requirementId) {
         taskRequirementService.toggleComplete(id, requirementId);
+        return ResponseEntity.ok(ApiMessageDTO.<String>builder()
+                .data("Requirement toggled successfully")
+                .result(true)
+                .message(messageService.getMessage("task.requirement.toggled"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Get task requirements")
     @GetMapping("/{id}/requirements")
-    public List<TaskRequirementDTO> getRequirements(@PathVariable UUID id) {
-        return taskRequirementService.getByTaskId(id);
+    @ApiOkResponse(value = TaskRequirementDTO.class)
+    public ResponseEntity<ApiMessageDTO<List<TaskRequirementDTO>>> getRequirements(@PathVariable UUID id) {
+        var requirements = taskRequirementService.getByTaskId(id);
+        return ResponseEntity.ok(ApiMessageDTO.<List<TaskRequirementDTO>>builder()
+                .data(requirements)
+                .result(true)
+                .message(messageService.getMessage("task.requirements.retrieved"))
+                .code(HttpStatus.OK.value())
+                .build());
     }
 
     @Operation(summary = "Find tasks by project ID")
@@ -278,6 +355,7 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                 .code(HttpStatus.OK.value())
                 .build());
     }
+
     @Operation(summary = "Search tasks assigned to current user")
     @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
     @PostMapping("/assigned-to-me/search")

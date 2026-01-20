@@ -23,15 +23,6 @@ public interface IProjectMemberMapper extends IGenericMapper<ProjectMember, Proj
     @Mapping(source = "userId", target = "user.id")
     void formToEntity(ProjectMemberEditorForm form, @org.mapstruct.MappingTarget ProjectMember entity);
 
-    // MemberDTO userToMemberDTO(User user);
-
-    @Mapping(source = "user.id", target = "id")
-    @Mapping(source = "user.username", target = "username")
-    @Mapping(source = "user.fullName", target = "fullName")
-    @Mapping(source = "user.email", target = "email")
-    @Mapping(source = "user.phone", target = "phone")
-    @Mapping(source = "user.avatarUrl", target = "avatar")
-    @Mapping(source = "role", target = "role")
     MemberDTO entityToMemberDTO(ProjectMember entity);
 
 }

@@ -136,7 +136,10 @@ public class AuthenticationService {
                 if (orgId != null && !orgId.equals("NONE") && !orgId.equals("SUPER_ADMIN")) {
                         try {
                                 userDetails.setOrganizationId(UUID.fromString(orgId));
-                        } catch (BWCInvalidTokenException ignored) {
+                                userDetails.getUser().setLastActiveOrganization(
+                                                organizationRepository.findById(UUID.fromString(orgId)).orElse(null));
+                        } catch (IllegalArgumentException e) {
+                                log.warn("Invalid Organization ID in refresh token: {}", orgId);
                         }
                 }
 

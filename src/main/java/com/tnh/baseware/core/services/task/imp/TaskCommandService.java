@@ -30,6 +30,12 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
 import com.tnh.baseware.core.services.task.ITaskCommandService;
 import com.tnh.baseware.core.utils.DiffUtil;
+import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
+import com.tnh.baseware.core.repositories.task.ITaskAttachmentRepository;
+import com.tnh.baseware.core.repositories.task.ITaskCommentAttachmentRepository;
+import com.tnh.baseware.core.repositories.task.ITaskCommentRepository;
+import com.tnh.baseware.core.repositories.task.ITaskDependencyRepository;
+import com.tnh.baseware.core.repositories.task.ITaskDocumentRepository;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,6 +59,13 @@ public class TaskCommandService
     GenericEntityFetcher fetcher;
     ApplicationEventPublisher eventPublisher;
 
+    ITaskCommentAttachmentRepository taskCommentAttachmentRepository;
+    ITaskCommentRepository taskCommentRepository;
+    ITaskAttachmentRepository taskAttachmentRepository;
+    ITaskActivityLogRepository taskActivityLogRepository;
+    ITaskDocumentRepository taskDocumentRepository;
+    ITaskDependencyRepository taskDependencyRepository;
+
     public TaskCommandService(ITaskRepository repository,
             ITaskMapper mapper,
             MessageService messageService,
@@ -62,7 +75,13 @@ public class TaskCommandService
             ITaskRequirementRepository taskRequirementRepository,
             IProjectService projectService,
             GenericEntityFetcher fetcher,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            ITaskCommentAttachmentRepository taskCommentAttachmentRepository,
+            ITaskCommentRepository taskCommentRepository,
+            ITaskAttachmentRepository taskAttachmentRepository,
+            ITaskActivityLogRepository taskActivityLogRepository,
+            ITaskDocumentRepository taskDocumentRepository,
+            ITaskDependencyRepository taskDependencyRepository) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
         this.taskCategoryRepository = taskCategoryRepository;
@@ -71,6 +90,12 @@ public class TaskCommandService
         this.projectService = projectService;
         this.fetcher = fetcher;
         this.eventPublisher = eventPublisher;
+        this.taskCommentAttachmentRepository = taskCommentAttachmentRepository;
+        this.taskCommentRepository = taskCommentRepository;
+        this.taskAttachmentRepository = taskAttachmentRepository;
+        this.taskActivityLogRepository = taskActivityLogRepository;
+        this.taskDocumentRepository = taskDocumentRepository;
+        this.taskDependencyRepository = taskDependencyRepository;
     }
 
     @Override
@@ -104,8 +129,17 @@ public class TaskCommandService
             taskMemberRepository.save(TaskMember.builder()
                     .user(getCurrentUser())
                     .task(savedTask)
+                    .status(MemberStatus.ASSIGNED)
                     .role(TaskMemberRole.ASSIGNEE)
                     .build());
+        } else {
+            var taskMember = TaskMember.builder()
+                    .task(task)
+                    .user(getCurrentUser())
+                    .role(TaskMemberRole.OWNER)
+                    .status(MemberStatus.ASSIGNED)
+                    .build();
+            taskMemberRepository.save(taskMember);
         }
 
         eventPublisher.publishEvent(
@@ -257,6 +291,63 @@ public class TaskCommandService
                         getCurrentUser().getUsername(),
                         oldProgress,
                         progress));
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID id) {
+        if (!Boolean.TRUE.equals(isUserSystem())) {
+            throw new BWCAccessDeniedException(MessageConstant.NOT_ALLOW_PERFORM_ACTION);
+        }
+
+        Task task = repository.findById(id)
+                .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
+
+        UUID taskId = task.getId();
+
+        // Delete task comment attachments
+        taskCommentAttachmentRepository.deleteAll(
+                taskCommentAttachmentRepository.findAll().stream()
+                        .filter(tca -> tca.getComment() != null
+                                && taskId.equals(tca.getComment().getTask().getId()))
+                        .toList());
+
+        // Delete task comments
+        taskCommentRepository.deleteAll(
+                taskCommentRepository.findAll().stream()
+                        .filter(tc -> taskId.equals(tc.getTask().getId()))
+                        .toList());
+
+        // Delete task attachments
+        taskAttachmentRepository.deleteAll(
+                taskAttachmentRepository.findAll().stream()
+                        .filter(ta -> taskId.equals(ta.getTask().getId()))
+                        .toList());
+
+        // Delete task members
+        taskMemberRepository.deleteAll(taskMemberRepository.findByTaskId(taskId));
+
+        // Delete task activity logs
+        taskActivityLogRepository.deleteAll(
+                taskActivityLogRepository.findAll().stream()
+                        .filter(tal -> taskId.equals(tal.getTask().getId()))
+                        .toList());
+
+        // Delete task documents
+        taskDocumentRepository.deleteAll(taskDocumentRepository.findAllByTask_Id(taskId));
+
+        // Delete task dependencies
+        taskDependencyRepository.deleteAll(
+                taskDependencyRepository.findAll().stream()
+                        .filter(tdep -> taskId.equals(tdep.getFromTask().getId())
+                                || taskId.equals(tdep.getToTask().getId()))
+                        .toList());
+
+        // Delete task requirements
+        taskRequirementRepository.deleteAll(taskRequirementRepository.findByTaskId(taskId));
+
+        // Delete the task itself
+        repository.delete(task);
     }
 
     private void start(Task task) {

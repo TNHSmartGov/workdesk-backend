@@ -4,6 +4,7 @@ import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.dtos.task.TaskMemberDTO;
 import com.tnh.baseware.core.dtos.task.TaskRequirementDTO;
+import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.enums.ApiResponseType;
@@ -261,6 +262,19 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                 .data(tasks)
                 .result(true)
                 .message(messageService.getMessage("tasks.found"))
+                .code(HttpStatus.OK.value())
+                .build());
+    }
+
+    @Operation(summary = "Get task timeline (Activity Log + Comments)")
+    @GetMapping("/{id}/timeline")
+    public ResponseEntity<ApiMessageDTO<List<TaskTimelineItemDTO>>> getTaskTimeline(
+            @PathVariable UUID id) {
+        var timeline = taskQueryService.getTaskTimeline(id);
+        return ResponseEntity.ok(ApiMessageDTO.<List<TaskTimelineItemDTO>>builder()
+                .data(timeline)
+                .result(true)
+                .message(messageService.getMessage("timeline.found"))
                 .code(HttpStatus.OK.value())
                 .build());
     }

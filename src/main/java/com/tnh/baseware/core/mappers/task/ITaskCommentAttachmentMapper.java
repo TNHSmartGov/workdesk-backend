@@ -9,8 +9,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {IFileDocumentMapper.class})
-public interface ITaskCommentAttachmentMapper extends IGenericMapper<TaskCommentAttachment, TaskCommentAttachmentEditorForm, TaskCommentAttachmentDTO> {
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = { IFileDocumentMapper.class })
+public interface ITaskCommentAttachmentMapper
+        extends IGenericMapper<TaskCommentAttachment, TaskCommentAttachmentEditorForm, TaskCommentAttachmentDTO> {
 
     @Override
     @Mapping(target = "commentId", source = "comment.id")

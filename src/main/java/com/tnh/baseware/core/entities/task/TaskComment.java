@@ -2,6 +2,7 @@ package com.tnh.baseware.core.entities.task;
 
 import com.tnh.baseware.core.entities.audit.Auditable;
 import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.enums.task.TaskCommentType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,11 @@ public class TaskComment extends Auditable<String> {
 
     @Column(columnDefinition = "text", nullable = false)
     String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    TaskCommentType type = TaskCommentType.NORMAL;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")

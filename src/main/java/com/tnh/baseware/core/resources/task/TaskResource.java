@@ -292,6 +292,23 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                 .build());
     }
 
+    @Operation(summary = "Find tasks by task list ID with pagination")
+    @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
+    @GetMapping("/by-task-list/{taskListId}/pagination")
+    public ResponseEntity<ApiMessageDTO<PagedModel<TaskDTO>>> findByTaskListIdPagination(
+            @PathVariable UUID taskListId,
+            Pageable pageable,
+            PagedResourcesAssembler<TaskDTO> assembler) {
+        var tasks = taskQueryService.findByTaskListId(taskListId, pageable);
+        var pagedModel = assembler.toModel(tasks, this::toModel);
+        return ResponseEntity.ok(ApiMessageDTO.<PagedModel<TaskDTO>>builder()
+                .data(pagedModel)
+                .result(true)
+                .message(messageService.getMessage("timeline.found"))
+                .code(HttpStatus.OK.value())
+                .build());
+    }
+
         @Operation(summary = "Find tasks by task list ID with pagination")
         @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
         @GetMapping("/by-task-list/{taskListId}/pagination")

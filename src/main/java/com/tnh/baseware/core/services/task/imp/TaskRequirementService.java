@@ -90,6 +90,9 @@ public class TaskRequirementService extends
                         getCurrentUser().getUsername(),
                         form.getContent()));
 
+        // Recalculate progress
+        taskCommandService.calculateProgressFromRequirements(taskId);
+
         return mapper.entityToDTO(saved);
     }
 
@@ -113,6 +116,9 @@ public class TaskRequirementService extends
         }
 
         TaskRequirement saved = repository.save(requirement);
+
+        // Recalculate progress
+        taskCommandService.calculateProgressFromRequirements(taskId);
 
         return mapper.entityToDTO(saved);
     }

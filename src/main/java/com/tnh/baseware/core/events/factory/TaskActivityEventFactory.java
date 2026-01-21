@@ -118,6 +118,14 @@ public final class TaskActivityEventFactory {
                                 oldRole.toString(), newRole.toString());
         }
 
+        public static TaskActivityEvent memberStatusUpdated(Task task, String actor, User member,
+                        String oldStatus, String newStatus) {
+                return new TaskActivityEvent(
+                                task, actor, LogActionType.UPDATE_MEMBER_STATUS,
+                                "status:" + member.getUsername(),
+                                oldStatus, newStatus);
+        }
+
         public static TaskActivityEvent requirementAdded(Task task, String actor, String content) {
                 return new TaskActivityEvent(
                                 task, actor, LogActionType.ADD_REQUIREMENT,

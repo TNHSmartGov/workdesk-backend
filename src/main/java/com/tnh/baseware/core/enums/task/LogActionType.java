@@ -23,6 +23,7 @@ public enum LogActionType implements BaseEnum<String> {
     UPLOAD_FILE("UPLOAD_FILE", "upload_file", "Tải lên tài liệu"),
     ADD_COMMENT("ADD_COMMENT", "add_comment", "Thêm bình luận"),
     UPDATE_MEMBER_ROLE("UPDATE_MEMBER_ROLE", "update_member_role", "Cập nhật quyền của thành viên"),
+    UPDATE_MEMBER_STATUS("UPDATE_MEMBER_STATUS", "update_member_status", "Cập nhật trạng thái thành viên"),
     ADD_REQUIREMENT("ADD_REQUIREMENT", "add_requirement", "Thêm requirement cho task"),
     ASSIGN_REQUIREMENT("ASSIGN_REQUIREMENT", "assign_requirement", "Phân công requirement cho thành viên"),
     COMPLETE_REQUIREMENT("COMPLETE_REQUIREMENT", "complete_requirement", "Hoàn thành requirement"),

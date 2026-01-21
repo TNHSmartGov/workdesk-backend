@@ -255,7 +255,7 @@ public class TaskCommandService
 
         if (!membersToUpdate.isEmpty()) {
             taskMemberRepository.saveAll(membersToUpdate);
-            updateTaskProgress(task);
+            updateTaskProgress(task, taskMembers);
 
             eventPublisher.publishEvent(
                     TaskActivityEventFactory.systemUpdated(
@@ -287,7 +287,10 @@ public class TaskCommandService
 
         taskMemberRepository.save(member);
 
-        updateTaskProgress(member.getTask());
+        taskMemberRepository.save(member);
+
+        List<TaskMember> allMembers = taskMemberRepository.findByTaskId(taskId);
+        updateTaskProgress(member.getTask(), allMembers);
 
         eventPublisher.publishEvent(
                 TaskActivityEventFactory.progressUpdated(
@@ -482,13 +485,16 @@ public class TaskCommandService
         }
 
         // 3. Update Member Status/Progress
-        // Use a more specific finder and handle permissions
-        TaskMember member = taskMemberRepository.findByTaskIdAndUserId(taskId, currentUser.getId())
+        // Optimization: Fetch ALL members query once
+        List<TaskMember> allMembers = taskMemberRepository.findByTaskId(taskId);
+
+        TaskMember member = allMembers.stream()
+                .filter(m -> m.getUser().getId().equals(currentUser.getId()))
+                .findFirst()
                 .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_ASSIGNED_TO_TASK));
 
         Integer oldProgress = member.getPersonalProgress(); // Capture old progress
         MemberStatus oldStatus = member.getStatus(); // Capture old status
-        boolean progressChanged = false;
 
         // STATUS IS MANDATORY (Source of Truth)
         member.setStatus(form.getStatus());
@@ -501,26 +507,28 @@ public class TaskCommandService
                     throw new BWCValidationException(MessageConstant.PROGRESS_VALIDATE);
 
                 member.setPersonalProgress(form.getProgress());
-                progressChanged = true;
             }
         } else {
             // Case B: User did NOT provide progress -> Infer from Status (Smart Default)
             if (!taskRequirementRepository.existsByTaskId(taskId)) {
                 if (form.getStatus() == MemberStatus.COMPLETED) {
                     member.setPersonalProgress(100);
-                    progressChanged = true;
                 } else if (form.getStatus() == MemberStatus.ASSIGNED) {
                     member.setPersonalProgress(0);
-                    progressChanged = true;
                 }
                 // If IN_PROGRESS, keep old progress (do nothing)
             }
         }
 
+        // Detect changes using Objects.equals
+        boolean progressChanged = !Objects.equals(oldProgress, member.getPersonalProgress());
+        boolean statusChanged = !Objects.equals(oldStatus, member.getStatus());
+
         taskMemberRepository.save(member);
 
         if (progressChanged) {
-            recalculateTaskProgress(taskId);
+            // Use optimized update method passing the existing list
+            updateTaskProgress(task, allMembers);
 
             eventPublisher.publishEvent(
                     TaskActivityEventFactory.progressUpdated(
@@ -530,7 +538,7 @@ public class TaskCommandService
                             member.getPersonalProgress())); // Use new actual value
         }
 
-        if (oldStatus != member.getStatus()) {
+        if (statusChanged) {
             eventPublisher.publishEvent(
                     TaskActivityEventFactory.memberStatusUpdated(
                             member.getTask(),
@@ -546,12 +554,13 @@ public class TaskCommandService
     public void recalculateTaskProgress(UUID taskId) {
         Task task = repository.findById(taskId)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
-        updateTaskProgress(task);
+
+        // Fetch members here and pass to update logic
+        List<TaskMember> members = taskMemberRepository.findByTaskId(taskId);
+        updateTaskProgress(task, members);
     }
 
-    private void updateTaskProgress(Task task) {
-        List<TaskMember> members = taskMemberRepository.findByTaskId(task.getId());
-
+    private void updateTaskProgress(Task task, List<TaskMember> members) {
         if (members.isEmpty())
             return;
 
@@ -559,14 +568,7 @@ public class TaskCommandService
         double totalWeight = 0;
 
         for (TaskMember m : members) {
-            // Only consider ASSIGNEE role for progress calculation (Lead/Reviewer/Watcher
-            // typically don't contribute execution progress)
-            // Update: Logic depends on business rule. If LEAD also does work, they should
-            // be included.
-            // For now, keeping existing logic: strictly check if personalProgress > 0 or if
-            // all members count.
-            // Existing logic: if (m.getRole() == TaskMemberRole.ASSIGNEE)
-            // I will keep it but make it robust.
+            // Consider only ASSIGNEE and LEAD roles when calculating execution progress.
             if (m.getRole() == TaskMemberRole.ASSIGNEE || m.getRole() == TaskMemberRole.LEAD) {
                 // Expanded to LEAD as they might have tasks too.
                 int w = (m.getWeight() == null) ? 1 : m.getWeight();
@@ -584,8 +586,8 @@ public class TaskCommandService
             if (overallProgress > 0 && task.getStatus() == TaskStatus.TODO) {
                 task.setStatus(TaskStatus.IN_PROGRESS);
             }
-            // Auto complete if 100% ? Maybe not, let user manually complete or specific
-            // flow.
+            // Do not automatically mark the task as COMPLETED at 100% progress; completion
+            // is handled by an explicit workflow.
 
             repository.save(task);
 

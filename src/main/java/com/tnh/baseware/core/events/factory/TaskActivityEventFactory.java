@@ -149,6 +149,12 @@ public final class TaskActivityEventFactory {
                                 "requirement", null, truncate(content, 50));
         }
 
+        public static TaskActivityEvent commentAdded(Task task, String actor, String content) {
+                return new TaskActivityEvent(
+                                task, actor, LogActionType.ADD_COMMENT,
+                                "comment", null, truncate(content, 50));
+        }
+
         private static String truncate(String s, int maxLen) {
                 return s != null && s.length() > maxLen ? s.substring(0, maxLen) + "..." : s;
         }

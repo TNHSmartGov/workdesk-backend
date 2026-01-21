@@ -7,6 +7,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.hateoas.RepresentationModel;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -22,4 +24,9 @@ public class TaskCommentDTO extends RepresentationModel<TaskCommentDTO> implemen
     BasicTaskDTO task;
     BasicUserDTO user;
     String content;
+    Instant createdDate;
+    UUID parentId;
+    List<TaskCommentDTO> replies;
+    Long replyCount;
+    Long attachmentCount;
 }

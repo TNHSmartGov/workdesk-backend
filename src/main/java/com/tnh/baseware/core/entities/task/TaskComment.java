@@ -6,6 +6,7 @@ import com.tnh.baseware.core.enums.task.TaskCommentType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -39,5 +40,7 @@ public class TaskComment extends Auditable<String> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private TaskComment parentComment;
+    TaskComment parentComment;
+
+    List<String> mentionedUser;
 }

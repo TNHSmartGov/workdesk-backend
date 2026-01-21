@@ -26,4 +26,6 @@ public class TaskCommentEditorForm {
 
     @NotBlank(message = "{content.not.blank}")
     String content;
+
+    UUID parentCommentId;
 }

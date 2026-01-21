@@ -6,10 +6,8 @@ import com.tnh.baseware.core.constants.TaskSnapshot;
 import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.dtos.task.UserTaskPermissionDTO;
 import com.tnh.baseware.core.entities.project.Project;
-import com.tnh.baseware.core.entities.task.Task;
-import com.tnh.baseware.core.entities.task.TaskList;
-import com.tnh.baseware.core.entities.task.TaskMember;
-import com.tnh.baseware.core.entities.task.TaskRequirement;
+import com.tnh.baseware.core.entities.task.*;
+import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.enums.project.ProjectType;
 import com.tnh.baseware.core.enums.task.*;
@@ -17,6 +15,7 @@ import com.tnh.baseware.core.events.factory.TaskActivityEventFactory;
 import com.tnh.baseware.core.exceptions.BWCAccessDeniedException;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
+import com.tnh.baseware.core.forms.task.CreateTaskReportForm;
 import com.tnh.baseware.core.forms.task.TaskEditorForm;
 import com.tnh.baseware.core.components.GenericEntityFetcher;
 import com.tnh.baseware.core.mappers.task.ITaskMapper;
@@ -36,6 +35,8 @@ import com.tnh.baseware.core.repositories.task.ITaskCommentAttachmentRepository;
 import com.tnh.baseware.core.repositories.task.ITaskCommentRepository;
 import com.tnh.baseware.core.repositories.task.ITaskDependencyRepository;
 import com.tnh.baseware.core.repositories.task.ITaskDocumentRepository;
+import com.tnh.baseware.core.repositories.doc.IFileDocumentRepository;
+import com.tnh.baseware.core.entities.doc.FileDocument;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.ApplicationEventPublisher;
@@ -65,6 +66,7 @@ public class TaskCommandService
     ITaskActivityLogRepository taskActivityLogRepository;
     ITaskDocumentRepository taskDocumentRepository;
     ITaskDependencyRepository taskDependencyRepository;
+    IFileDocumentRepository fileDocumentRepository;
 
     public TaskCommandService(ITaskRepository repository,
             ITaskMapper mapper,
@@ -81,7 +83,8 @@ public class TaskCommandService
             ITaskAttachmentRepository taskAttachmentRepository,
             ITaskActivityLogRepository taskActivityLogRepository,
             ITaskDocumentRepository taskDocumentRepository,
-            ITaskDependencyRepository taskDependencyRepository) {
+            ITaskDependencyRepository taskDependencyRepository,
+            IFileDocumentRepository fileDocumentRepository) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
         this.taskCategoryRepository = taskCategoryRepository;
@@ -96,6 +99,7 @@ public class TaskCommandService
         this.taskActivityLogRepository = taskActivityLogRepository;
         this.taskDocumentRepository = taskDocumentRepository;
         this.taskDependencyRepository = taskDependencyRepository;
+        this.fileDocumentRepository = fileDocumentRepository;
     }
 
     @Override
@@ -438,6 +442,103 @@ public class TaskCommandService
             case START, COMPLETE, CANCEL -> isProjectAdminOrTaskLead;
             case APPROVE -> isProjectAdminOrTaskLead || taskRole == TaskMemberRole.REVIEWER;
         };
+    }
+
+    @Override
+    @Transactional
+    public void reportProgress(UUID taskId, CreateTaskReportForm form) {
+        Task task = repository.findById(taskId)
+                .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
+
+        User currentUser = getCurrentUser();
+
+        // 1. Create Comment (Type REPORT)
+        TaskComment comment = TaskComment.builder()
+                .task(task)
+                .user(currentUser)
+                .content(form.getContent())
+                .type(TaskCommentType.REPORT)
+                .build();
+
+        TaskComment savedComment = taskCommentRepository.save(comment);
+
+        // 2. Handle Attachments (if any)
+        if (form.getFileIds() != null && !form.getFileIds().isEmpty()) {
+            List<TaskCommentAttachment> attachments = form.getFileIds().stream()
+                    .map(fileId -> {
+                        // Correctly fetch FileDocument entity
+                        FileDocument file = fileDocumentRepository.findById(fileId)
+                                .orElseThrow(
+                                        () -> new BWCNotFoundException(messageService.getMessage("file.not.found")));
+
+                        return TaskCommentAttachment.builder()
+                                .comment(savedComment)
+                                .file(file)
+                                .uploader(currentUser)
+                                .build();
+                    })
+                    .toList();
+            taskCommentAttachmentRepository.saveAll(attachments);
+        }
+
+        // 3. Update Member Status/Progress
+        // Use a more specific finder and handle permissions
+        TaskMember member = taskMemberRepository.findByTaskIdAndUserId(taskId, currentUser.getId())
+                .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_ASSIGNED_TO_TASK));
+
+        Integer oldProgress = member.getPersonalProgress(); // Capture old progress
+        MemberStatus oldStatus = member.getStatus(); // Capture old status
+        boolean progressChanged = false;
+
+        // STATUS IS MANDATORY (Source of Truth)
+        member.setStatus(form.getStatus());
+
+        // PROGRESS LOGIC
+        if (form.getProgress() != null) {
+            // Case A: User provided explicit progress -> Use it (if allowed)
+            if (!taskRequirementRepository.existsByTaskId(taskId)) {
+                if (form.getProgress() < 0 || form.getProgress() > 100)
+                    throw new BWCValidationException(MessageConstant.PROGRESS_VALIDATE);
+
+                member.setPersonalProgress(form.getProgress());
+                progressChanged = true;
+            }
+        } else {
+            // Case B: User did NOT provide progress -> Infer from Status (Smart Default)
+            if (!taskRequirementRepository.existsByTaskId(taskId)) {
+                if (form.getStatus() == MemberStatus.COMPLETED) {
+                    member.setPersonalProgress(100);
+                    progressChanged = true;
+                } else if (form.getStatus() == MemberStatus.ASSIGNED) {
+                    member.setPersonalProgress(0);
+                    progressChanged = true;
+                }
+                // If IN_PROGRESS, keep old progress (do nothing)
+            }
+        }
+
+        taskMemberRepository.save(member);
+
+        if (progressChanged) {
+            recalculateTaskProgress(taskId);
+
+            eventPublisher.publishEvent(
+                    TaskActivityEventFactory.progressUpdated(
+                            member.getTask(),
+                            currentUser.getUsername(),
+                            oldProgress,
+                            member.getPersonalProgress())); // Use new actual value
+        }
+
+        if (oldStatus != member.getStatus()) {
+            eventPublisher.publishEvent(
+                    TaskActivityEventFactory.memberStatusUpdated(
+                            member.getTask(),
+                            currentUser.getUsername(),
+                            member.getUser(),
+                            oldStatus.toString(),
+                            member.getStatus().toString()));
+        }
     }
 
     @Override

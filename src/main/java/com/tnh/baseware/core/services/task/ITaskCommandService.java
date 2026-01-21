@@ -4,6 +4,8 @@ import com.tnh.baseware.core.enums.task.TaskAction;
 
 import java.util.UUID;
 
+import com.tnh.baseware.core.forms.task.CreateTaskReportForm;
+
 public interface ITaskCommandService extends ITaskService {
     void performAction(UUID id, TaskAction action);
 
@@ -12,4 +14,6 @@ public interface ITaskCommandService extends ITaskService {
     void updatePersonalProgress(UUID taskId, Integer progress);
 
     void recalculateTaskProgress(UUID taskId);
+
+    void reportProgress(UUID taskId, CreateTaskReportForm form);
 }

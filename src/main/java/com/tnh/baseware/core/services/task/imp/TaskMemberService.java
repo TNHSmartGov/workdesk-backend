@@ -17,6 +17,7 @@ import com.tnh.baseware.core.repositories.task.ITaskRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
+import com.tnh.baseware.core.services.task.ITaskCommandService;
 import com.tnh.baseware.core.services.task.ITaskMemberService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -34,6 +35,7 @@ public class TaskMemberService extends
                 implements ITaskMemberService {
         ITaskRepository taskRepository;
         IUserRepository userRepository;
+        ITaskCommandService taskCommandService;
         ApplicationEventPublisher eventPublisher;
 
         public TaskMemberService(ITaskMemberRepository repository,
@@ -41,10 +43,12 @@ public class TaskMemberService extends
                         MessageService messageService,
                         ITaskRepository taskRepository,
                         IUserRepository userRepository,
+                        ITaskCommandService taskCommandService,
                         ApplicationEventPublisher eventPublisher) {
                 super(repository, mapper, messageService, TaskMember.class);
                 this.taskRepository = taskRepository;
                 this.userRepository = userRepository;
+                this.taskCommandService = taskCommandService;
                 this.eventPublisher = eventPublisher;
         }
 
@@ -107,6 +111,9 @@ public class TaskMemberService extends
                 // Publish event
                 publishMemberAssignedEvent(task, user);
 
+                // Recalculate progress
+                taskCommandService.recalculateTaskProgress(taskId);
+
                 return mapper.entityToDTO(saved);
         }
 
@@ -132,6 +139,9 @@ public class TaskMemberService extends
 
                 // Publish events for all saved members
                 savedMembers.forEach(member -> publishMemberAssignedEvent(task, member.getUser()));
+
+                // Recalculate progress
+                taskCommandService.recalculateTaskProgress(taskId);
 
                 return mapper.entitiesToDTOs(savedMembers);
         }
@@ -170,6 +180,9 @@ public class TaskMemberService extends
                                                         form.getRole()));
                 }
 
+                // Recalculate progress
+                taskCommandService.recalculateTaskProgress(taskId);
+
                 return mapper.entityToDTO(saved);
         }
 
@@ -191,6 +204,9 @@ public class TaskMemberService extends
                                                 member.getTask(),
                                                 getCurrentUser().getUsername(),
                                                 member.getUser()));
+
+                // Recalculate progress
+                taskCommandService.recalculateTaskProgress(taskId);
         }
 
         @Override

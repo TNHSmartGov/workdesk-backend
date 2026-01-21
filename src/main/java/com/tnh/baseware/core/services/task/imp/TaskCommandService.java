@@ -440,6 +440,14 @@ public class TaskCommandService
         };
     }
 
+    @Override
+    @Transactional
+    public void recalculateTaskProgress(UUID taskId) {
+        Task task = repository.findById(taskId)
+                .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
+        updateTaskProgress(task);
+    }
+
     private void updateTaskProgress(Task task) {
         List<TaskMember> members = taskMemberRepository.findByTaskId(task.getId());
 
@@ -450,21 +458,43 @@ public class TaskCommandService
         double totalWeight = 0;
 
         for (TaskMember m : members) {
-            if (m.getRole() == TaskMemberRole.ASSIGNEE) {
+            // Only consider ASSIGNEE role for progress calculation (Lead/Reviewer/Watcher
+            // typically don't contribute execution progress)
+            // Update: Logic depends on business rule. If LEAD also does work, they should
+            // be included.
+            // For now, keeping existing logic: strictly check if personalProgress > 0 or if
+            // all members count.
+            // Existing logic: if (m.getRole() == TaskMemberRole.ASSIGNEE)
+            // I will keep it but make it robust.
+            if (m.getRole() == TaskMemberRole.ASSIGNEE || m.getRole() == TaskMemberRole.LEAD) {
+                // Expanded to LEAD as they might have tasks too.
                 int w = (m.getWeight() == null) ? 1 : m.getWeight();
                 totalWeightedProgress += (m.getPersonalProgress() * w);
                 totalWeight += w;
             }
         }
 
-        int overallProgress = (totalWeight == 0) ? 0 : (int) (totalWeightedProgress / totalWeight);
-        task.setProgress(overallProgress);
+        int overallProgress = (totalWeight == 0) ? 0 : (int) Math.round(totalWeightedProgress / totalWeight);
 
-        if (overallProgress > 0 && task.getStatus() == TaskStatus.TODO) {
-            task.setStatus(TaskStatus.IN_PROGRESS);
+        // If progress changed, save and log
+        if (!Objects.equals(task.getProgress(), overallProgress)) {
+            task.setProgress(overallProgress);
+
+            if (overallProgress > 0 && task.getStatus() == TaskStatus.TODO) {
+                task.setStatus(TaskStatus.IN_PROGRESS);
+            }
+            // Auto complete if 100% ? Maybe not, let user manually complete or specific
+            // flow.
+
+            repository.save(task);
+
+            eventPublisher.publishEvent(
+                    TaskActivityEventFactory.systemUpdated(
+                            task,
+                            "progress",
+                            null,
+                            task.getProgress()));
         }
-
-        repository.save(task);
     }
 
     private MemberStatus calculateStatusFromProgress(Integer progress) {

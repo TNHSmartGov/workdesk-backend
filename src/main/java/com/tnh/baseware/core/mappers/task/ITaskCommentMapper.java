@@ -12,8 +12,6 @@ import org.mapstruct.ReportingPolicy;
 public interface ITaskCommentMapper extends IGenericMapper<TaskComment, TaskCommentEditorForm, TaskCommentDTO> {
 
     @Override
-    @Mapping(target = "taskId", source = "task.id")
-    @Mapping(target = "userId", source = "user.id")
     TaskCommentDTO entityToDTO(TaskComment entity);
 
     @Override

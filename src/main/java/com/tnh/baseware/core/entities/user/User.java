@@ -56,6 +56,7 @@ public class User extends Auditable<String> implements Serializable {
 
     @Column(unique = false)
     String email;
+
     String avatarUrl;
 
     @Column(unique = false, nullable = true)

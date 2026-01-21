@@ -3,7 +3,6 @@ package com.tnh.baseware.core.mappers.project;
 import com.tnh.baseware.core.dtos.project.MemberDTO;
 import com.tnh.baseware.core.dtos.project.ProjectMemberDTO;
 import com.tnh.baseware.core.entities.project.ProjectMember;
-import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.forms.project.ProjectMemberEditorForm;
 import com.tnh.baseware.core.mappers.IGenericMapper;
 import org.mapstruct.Mapper;
@@ -22,6 +21,8 @@ public interface IProjectMemberMapper extends IGenericMapper<ProjectMember, Proj
     @Mapping(source = "projectId", target = "project.id")
     @Mapping(source = "userId", target = "user.id")
     void formToEntity(ProjectMemberEditorForm form, @org.mapstruct.MappingTarget ProjectMember entity);
+
+    // MemberDTO userToMemberDTO(User user);
 
     MemberDTO entityToMemberDTO(ProjectMember entity);
 

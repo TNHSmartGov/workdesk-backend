@@ -24,11 +24,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import com.tnh.baseware.core.enums.task.LogActionType;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
+import com.tnh.baseware.core.repositories.task.ITaskCommentAttachmentRepository;
+import com.tnh.baseware.core.repositories.task.ITaskCommentRepository;
+import com.tnh.baseware.core.mappers.task.ITaskActivityLogMapper;
+import com.tnh.baseware.core.mappers.task.ITaskCommentMapper;
+import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -39,6 +49,11 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
     IProjectService projectService;
     ITaskRequirementRepository taskRequirementRepository;
     SecurityUtils securityUtils;
+    ITaskActivityLogRepository taskActivityLogRepository;
+    ITaskCommentRepository taskCommentRepository;
+    ITaskCommentAttachmentRepository taskCommentAttachmentRepository;
+    ITaskActivityLogMapper taskActivityLogMapper;
+    ITaskCommentMapper taskCommentMapper;
 
     public TaskQueryService(ITaskRepository repository,
             ITaskMapper mapper,
@@ -47,13 +62,23 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
             ITaskMemberRepository taskMemberRepository,
             ITaskRequirementRepository taskRequirementRepository,
             IProjectService projectService,
-            SecurityUtils securityUtils) {
+            SecurityUtils securityUtils,
+            ITaskActivityLogRepository taskActivityLogRepository,
+            ITaskCommentRepository taskCommentRepository,
+            ITaskCommentAttachmentRepository taskCommentAttachmentRepository,
+            ITaskActivityLogMapper taskActivityLogMapper,
+            ITaskCommentMapper taskCommentMapper) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
         this.taskMemberRepository = taskMemberRepository;
         this.taskRequirementRepository = taskRequirementRepository;
         this.projectService = projectService;
         this.securityUtils = securityUtils;
+        this.taskActivityLogRepository = taskActivityLogRepository;
+        this.taskCommentRepository = taskCommentRepository;
+        this.taskCommentAttachmentRepository = taskCommentAttachmentRepository;
+        this.taskActivityLogMapper = taskActivityLogMapper;
+        this.taskCommentMapper = taskCommentMapper;
     }
 
     @Override
@@ -216,4 +241,49 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         return mapper.entityToDTO(task);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<TaskTimelineItemDTO> getTaskTimeline(UUID taskId) {
+        // 1. Convert logs to timeline items
+        var logItems = taskActivityLogRepository.findByTaskId(taskId).stream()
+                .filter(log -> log.getActionType() != LogActionType.ADD_COMMENT)
+                .map(taskActivityLogMapper::entityToDTO)
+                .map(dto -> TaskTimelineItemDTO.builder()
+                        .type("ACTIVITY")
+                        .id(dto.getId())
+                        .timestamp(dto.getCreatedDate())
+                        .activity(dto)
+                        .build())
+                .collect(Collectors.toList());
+
+        // 2. Fetch ROOT comments and populate counts (Lazy Loading)
+        var rootComments = taskCommentRepository.findByTaskIdAndParentCommentIsNull(taskId).stream()
+                .map(comment -> {
+                    var dto = taskCommentMapper.entityToDTO(comment);
+                    dto.setReplyCount(taskCommentRepository.countByParentComment_Id(comment.getId()));
+                    dto.setAttachmentCount(taskCommentAttachmentRepository.countByComment_Id(comment.getId()));
+                    dto.setReplies(null);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        // 3. Convert root comments to timeline items
+        var commentItems = rootComments.stream()
+                .map(dto -> TaskTimelineItemDTO.builder()
+                        .type("COMMENT")
+                        .id(dto.getId())
+                        .timestamp(dto.getCreatedDate())
+                        .comment(dto)
+                        .build())
+                .collect(Collectors.toList());
+
+        // 4. Merge and sort reverse chronologically
+        List<TaskTimelineItemDTO> result = new ArrayList<>(logItems);
+        result.addAll(commentItems);
+        result.sort(Comparator.comparing(
+                TaskTimelineItemDTO::getTimestamp,
+                Comparator.nullsLast(Comparator.reverseOrder())));
+
+        return result;
+    }
 }

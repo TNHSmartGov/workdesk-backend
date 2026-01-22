@@ -201,12 +201,14 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         filters.addAll(searchRequest.getFilters());
                 }
 
-                filters.add(FilterRequest.builder()
-                                .key("project.organization.id")
-                                .operator(Operator.EQUAL)
-                                .fieldType(FieldType.UUID)
-                                .value(orgId.toString())
-                                .build());
+                if (!Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
+                        filters.add(FilterRequest.builder()
+                                        .key("project.organization.id")
+                                        .operator(Operator.EQUAL)
+                                        .fieldType(FieldType.UUID)
+                                        .value(orgId.toString())
+                                        .build());
+                }
 
                 SearchRequest securedRequest = SearchRequest.builder()
                                 .filters(filters)

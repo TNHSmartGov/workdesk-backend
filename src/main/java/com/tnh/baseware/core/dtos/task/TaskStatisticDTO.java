@@ -11,10 +11,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TaskStatisticDTO {
     long total;
-    long totalNew; // Status = TODO
-    long totalInProgress; // Status = IN_PROGRESS
-    long totalReview; // Status = REVIEW
-    long totalCompleted; // Status = DONE
-    long totalOverdue; // DueDate < Now && Status != DONE
-    long totalDueSoon; // DueDate between Now and Now + 3 days && Status != DONE
+    long totalNew;
+    long totalInProgress;
+    long totalReview;
+    long totalCompleted;
+    long totalOverdue;
+    long totalDueSoon;
 }

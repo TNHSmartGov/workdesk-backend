@@ -21,12 +21,12 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
                      pm.role as projectRole,
                      tm.role as taskRole
                  FROM Task t
-                 JOIN ProjectMember pm ON pm.project.id = t.project.id AND pm.user.id = :userId
+                 LEFT JOIN ProjectMember pm ON pm.project.id = t.project.id AND pm.user.id = :userId
                  LEFT JOIN TaskMember tm ON tm.task.id = t.id AND tm.user.id = :userId
                  WHERE t.id = :taskId
             """)
     Optional<UserTaskPermissionDTO> findUserPermissions(@Param("taskId") UUID taskId,
-                                                        @Param("userId") UUID userId);
+            @Param("userId") UUID userId);
 
     @Query("SELECT t FROM Task t WHERE t.project.organization.id = :orgId")
     List<Task> findByOrganizationId(@Param("orgId") UUID orgId);
@@ -37,14 +37,14 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
     @Query("""
             SELECT DISTINCT t
             FROM Task t
-            WHERE t.project.organization.id = :orgId
+            WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
               AND (
-                  EXISTS (
+                  (t.project IS NOT NULL AND EXISTS (
                       SELECT pm
                       FROM ProjectMember pm
                       WHERE pm.project.id = t.project.id
                         AND pm.user.id = :userId
-                  )
+                  ))
                   OR EXISTS (
                       SELECT tm
                       FROM TaskMember tm
@@ -55,14 +55,13 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
             """)
     List<Task> findAccessibleByUser(
             @Param("orgId") UUID orgId,
-            @Param("userId") UUID userId
-    );
+            @Param("userId") UUID userId);
 
     @Query("""
             SELECT DISTINCT t FROM Task t
-            WHERE t.project.organization.id = :orgId
+            WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
             AND (
-                EXISTS (SELECT 1 FROM ProjectMember pm WHERE pm.project.id = t.project.id AND pm.user.id = :userId)
+                (t.project IS NOT NULL AND EXISTS (SELECT 1 FROM ProjectMember pm WHERE pm.project.id = t.project.id AND pm.user.id = :userId))
                 OR EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
             )
             """)
@@ -73,15 +72,21 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
 
     @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
     List<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId);
+
     @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
-    Page<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId, Pageable pageable);
+    Page<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId,
+            Pageable pageable);
 
     @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
     List<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId);
+
     @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
-    Page<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId, Pageable pageable);
+    Page<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId,
+            Pageable pageable);
+
     @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
     List<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId);
+
     @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
     Page<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId, Pageable pageable);
 

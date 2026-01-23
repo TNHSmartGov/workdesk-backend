@@ -299,7 +299,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 UUID orgId = securityUtils.currentOrgId();
                 UUID userId = securityUtils.currentUser().getId();
                 java.time.Instant now = java.time.Instant.now();
-                java.time.Instant future = now.plus(3, java.time.temporal.ChronoUnit.DAYS);
+                java.time.Instant future = now.plus(1, java.time.temporal.ChronoUnit.DAYS);
 
                 TaskStatisticDTO stats = new TaskStatisticDTO();
                 stats.setTotal(repository.countAccessibleByUser(orgId, userId));

@@ -1,7 +1,7 @@
 package com.tnh.baseware.core.services.task;
 
 import com.tnh.baseware.core.dtos.task.TaskDTO;
-import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
+
 import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
 
 import com.tnh.baseware.core.enums.task.TaskStatus;
@@ -36,5 +36,4 @@ public interface ITaskQueryService extends ITaskService {
 
     List<TaskTimelineItemDTO> getTaskTimeline(UUID taskId);
 
-    TaskStatisticDTO getDashboardStatistics();
 }

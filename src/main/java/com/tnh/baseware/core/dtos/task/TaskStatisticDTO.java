@@ -17,4 +17,5 @@ public class TaskStatisticDTO {
     long totalCompleted;
     long totalOverdue;
     long totalDueSoon;
+    long totalActiveProjects;
 }

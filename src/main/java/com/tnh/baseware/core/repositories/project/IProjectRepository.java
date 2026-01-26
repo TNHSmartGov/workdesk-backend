@@ -31,4 +31,15 @@ public interface IProjectRepository extends IGenericRepository<Project, UUID> {
   Page<Project> findByOrganizationId(UUID organizationId, Pageable pageable);
 
   List<Project> findByOrganizationId(UUID organizationId, Sort sort);
+
+  @Query("""
+      SELECT COUNT(DISTINCT p)
+      FROM Project p
+      JOIN ProjectMember pm ON pm.project = p
+      WHERE pm.user.id = :userId
+        AND p.organization.id = :orgId
+        AND p.status = 'ACTIVE'
+      """)
+  long countActiveProjectsByUser(@org.springframework.data.repository.query.Param("orgId") UUID orgId,
+      @org.springframework.data.repository.query.Param("userId") UUID userId);
 }

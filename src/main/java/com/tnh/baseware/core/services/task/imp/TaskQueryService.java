@@ -189,11 +189,11 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 return repository.findAll(baseSpec.and(orgSpec), pageable).map(mapper::entityToDTO);
         }
 
-        @Override
-        @Transactional(readOnly = true)
-        public Page<TaskDTO> searchTasksAssignedToMe(SearchRequest searchRequest) {
-                User currentUser = getCurrentUser();
-                UUID orgId = securityUtils.currentOrgId();
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TaskDTO> searchTasksAssignedToMe(SearchRequest searchRequest) {
+        User currentUser = getCurrentUser();
+        UUID orgId = securityUtils.currentOrgId();
 
                 List<FilterRequest> filters = new ArrayList<>();
                 if (searchRequest != null && searchRequest.getFilters() != null) {

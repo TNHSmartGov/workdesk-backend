@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.services.task.imp;
 
 import com.tnh.baseware.core.dtos.task.TaskDTO;
+import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.entities.task.TaskMember;
 import com.tnh.baseware.core.entities.user.User;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskCommentAttachmentRepository;
 import com.tnh.baseware.core.repositories.task.ITaskCommentRepository;
+import com.tnh.baseware.core.repositories.task.ITaskListRepository;
 import com.tnh.baseware.core.mappers.task.ITaskActivityLogMapper;
 import com.tnh.baseware.core.mappers.task.ITaskCommentMapper;
 
@@ -45,8 +47,10 @@ import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskDTO, ITaskRepository, ITaskMapper, UUID>
                 implements ITaskQueryService {
-
+        ITaskListRepository taskListRepository;
         ITaskMemberRepository taskMemberRepository;
+        IProjectService projectService;
+        ITaskRequirementRepository taskRequirementRepository;
         SecurityUtils securityUtils;
         ITaskActivityLogRepository taskActivityLogRepository;
         ITaskCommentRepository taskCommentRepository;
@@ -57,9 +61,10 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         public TaskQueryService(ITaskRepository repository,
                         ITaskMapper mapper,
                         MessageService messageService,
-
+                        ITaskListRepository taskListRepository,
                         ITaskMemberRepository taskMemberRepository,
-
+                        ITaskRequirementRepository taskRequirementRepository,
+                        IProjectService projectService,
                         SecurityUtils securityUtils,
                         ITaskActivityLogRepository taskActivityLogRepository,
                         ITaskCommentRepository taskCommentRepository,
@@ -67,9 +72,10 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         ITaskActivityLogMapper taskActivityLogMapper,
                         ITaskCommentMapper taskCommentMapper) {
                 super(repository, mapper, messageService, Task.class);
-
+                this.taskListRepository = taskListRepository;
                 this.taskMemberRepository = taskMemberRepository;
-
+                this.taskRequirementRepository = taskRequirementRepository;
+                this.projectService = projectService;
                 this.securityUtils = securityUtils;
                 this.taskActivityLogRepository = taskActivityLogRepository;
                 this.taskCommentRepository = taskCommentRepository;
@@ -81,9 +87,10 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         @Override
         @Transactional(readOnly = true)
         public List<TaskDTO> findByProjectId(UUID projectId) {
+                User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
                 return repository.findByProjectIdAndOrgId(projectId, orgId).stream()
-                                .map(mapper::entityToDTO)
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository))
                                 .toList();
         }
 
@@ -98,18 +105,20 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         @Override
         @Transactional(readOnly = true)
         public List<TaskDTO> findByTaskListId(UUID taskListId) {
+                User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
                 return repository.findByTaskListIdAndOrgId(taskListId, orgId).stream()
-                                .map(mapper::entityToDTO)
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository))
                                 .toList();
         }
 
         @Override
         @Transactional(readOnly = true)
         public Page<TaskDTO> findByTaskListId(UUID taskListId, Pageable pageable) {
+                User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
                 return repository.findByTaskListIdAndOrgId(taskListId, orgId, pageable)
-                                .map(mapper::entityToDTO);
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 
         @Override
@@ -119,7 +128,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 UUID orgId = securityUtils.currentOrgId();
                 UUID userId = currentUser.getId();
                 return repository.findAccessibleByUser(orgId, userId).stream()
-                                .map(mapper::entityToDTO)
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository))
                                 .toList();
         }
 
@@ -130,24 +139,26 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 UUID orgId = securityUtils.currentOrgId();
                 UUID userId = currentUser.getId();
                 return repository.findAccessibleByUser(orgId, userId, pageable)
-                                .map(mapper::entityToDTO);
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 
         @Override
         @Transactional(readOnly = true)
         public List<TaskDTO> findByStatus(TaskStatus status) {
+                User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
                 return repository.findByStatusAndOrgId(status, orgId).stream()
-                                .map(mapper::entityToDTO)
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository))
                                 .toList();
         }
 
         @Override
         @Transactional(readOnly = true)
         public Page<TaskDTO> findByStatus(TaskStatus status, Pageable pageable) {
+                User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
                 return repository.findByStatusAndOrgId(status, orgId, pageable)
-                                .map(mapper::entityToDTO);
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 
         @Override
@@ -292,6 +303,86 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 Comparator.nullsLast(Comparator.reverseOrder())));
 
                 return result;
+        }
+
+        @Override
+        public TaskStatisticDTO getDashboardStatistics() {
+                UUID orgId = securityUtils.currentOrgId();
+                UUID userId = securityUtils.currentUser().getId();
+                java.time.Instant now = java.time.Instant.now();
+                java.time.Instant future = now.plus(1, java.time.temporal.ChronoUnit.DAYS);
+
+                TaskStatisticDTO stats = new TaskStatisticDTO();
+                stats.setTotal(repository.countAccessibleByUser(orgId, userId));
+                stats.setTotalNew(repository.countAccessibleByStatus(orgId, userId, TaskStatus.TODO));
+                stats.setTotalInProgress(repository.countAccessibleByStatus(orgId, userId, TaskStatus.IN_PROGRESS));
+                stats.setTotalReview(repository.countAccessibleByStatus(orgId, userId, TaskStatus.REVIEW));
+                stats.setTotalCompleted(repository.countAccessibleByStatus(orgId, userId, TaskStatus.DONE));
+                stats.setTotalOverdue(repository.countAccessibleOverdue(orgId, userId, now));
+                stats.setTotalDueSoon(repository.countAccessibleDueSoon(orgId, userId, now, future));
+
+                return stats;
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<TaskDTO> search(SearchRequest searchRequest) {
+                UUID orgId = securityUtils.currentOrgId();
+                UUID userId = getCurrentUser().getId();
+
+                // 1. Filter theo Organization (Bắt buộc)
+                Specification<Task> orgSpec = (root, query, cb) -> cb
+                                .equal(root.get("project").get("organization").get("id"), orgId);
+
+                // 2. Filter theo Quyền truy cập (Người dùng tham gia Task hoặc Project)
+                Specification<Task> accessSpec = (root, query, cb) -> {
+                        // Subquery cho TaskMember
+                        var taskMemberSubquery = query.subquery(UUID.class);
+                        var taskMember = taskMemberSubquery.from(TaskMember.class);
+                        taskMemberSubquery.select(taskMember.get("task").get("id"))
+                                        .where(cb.equal(taskMember.get("user").get("id"), userId));
+
+                        // Subquery cho ProjectMember
+                        var projectMemberSubquery = query.subquery(UUID.class);
+                        var projectMember = projectMemberSubquery.from(ProjectMember.class);
+                        projectMemberSubquery.select(projectMember.get("project").get("id"))
+                                        .where(cb.equal(projectMember.get("user").get("id"), userId));
+
+                        return cb.or(
+                                        root.get("id").in(taskMemberSubquery),
+                                        root.get("project").get("id").in(projectMemberSubquery));
+                };
+
+                // 3. Filter động từ SearchRequest
+                var searchSpec = new GenericSpecification<Task>(searchRequest);
+
+                // Kết hợp tất cả bằng AND
+                var combinedSpec = Specification.where(orgSpec).and(accessSpec).and(searchSpec);
+
+                var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
+                return repository.findAll(combinedSpec, pageable)
+                                .map(entity -> mapper.entityToDTO(entity, getCurrentUser(), taskMemberRepository));
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<TaskDTO> findAll(Pageable pageable) {
+                UUID orgId = securityUtils.currentOrgId();
+
+                // Mặc định findAll trả về các task liên quan đến người dùng trong Org
+                List<FilterRequest> filters = new ArrayList<>();
+                filters.add(FilterRequest.builder()
+                                .key("project.organization.id")
+                                .operator(Operator.EQUAL)
+                                .fieldType(FieldType.UUID)
+                                .value(orgId.toString())
+                                .build());
+
+                return search(SearchRequest.builder()
+                                .filters(filters)
+                                .page(pageable.getPageNumber())
+                                .size(pageable.getPageSize())
+                                .build());
         }
 
 }

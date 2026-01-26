@@ -65,13 +65,13 @@ public class TaskMemberService extends
 
         private void validateMemberAssignment(UUID taskId, TaskMemberEditorForm form) {
                 // Check if user already assigned
-                if (repository.existsByTaskIdAndUserId(taskId, form.getUserId())) {
+                if (repository.existsByTask_IdAndUser_Id(taskId, form.getUserId())) {
                         throw new BWCValidationException(messageService.getMessage("user.already.assigned"));
                 }
 
                 // Check LEAD uniqueness
                 if (form.getRole() == TaskMemberRole.LEAD &&
-                                repository.existsByTaskIdAndRole(taskId, TaskMemberRole.LEAD)) {
+                                repository.existsByTask_IdAndRole(taskId, TaskMemberRole.LEAD)) {
                         throw new BWCValidationException(messageService.getMessage("task.already.has.lead"));
                 }
         }
@@ -160,7 +160,7 @@ public class TaskMemberService extends
                 // Validate LEAD uniqueness
                 if (form.getRole() == TaskMemberRole.LEAD &&
                                 member.getRole() != TaskMemberRole.LEAD &&
-                                repository.existsByTaskIdAndRole(taskId, TaskMemberRole.LEAD)) {
+                                repository.existsByTask_IdAndRole(taskId, TaskMemberRole.LEAD)) {
                         throw new BWCValidationException(messageService.getMessage("task.already.has.lead"));
                 }
 
@@ -211,7 +211,7 @@ public class TaskMemberService extends
 
         @Override
         public List<TaskMemberDTO> getTaskMembers(UUID taskId) {
-                return repository.findByTaskId(taskId).stream()
+                return repository.findByTask_Id(taskId).stream()
                                 .map(mapper::entityToDTO)
                                 .toList();
         }

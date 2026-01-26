@@ -209,7 +209,7 @@ public class TaskRequirementService extends
     }
 
     private void validateAssigneeIsMember(UUID taskId, UUID userId) {
-        if (!taskMemberRepository.existsByTaskIdAndUserId(taskId, userId)) {
+        if (!taskMemberRepository.existsByTask_IdAndUser_Id(taskId, userId)) {
             throw new BWCValidationException(messageService.getMessage("user.not.task.member"));
         }
     }
@@ -229,7 +229,7 @@ public class TaskRequirementService extends
         }
 
         // 2. Check task level permission (OWNER or LEAD)
-        var taskMember = taskMemberRepository.findByTaskIdAndUserId(task.getId(), userId);
+        var taskMember = taskMemberRepository.findByTask_IdAndUser_Id(task.getId(), userId);
         if (taskMember.isPresent()) {
             var role = taskMember.get().getRole();
             if (role == TaskMemberRole.OWNER ||
@@ -264,7 +264,7 @@ public class TaskRequirementService extends
         }
 
         // 2. Check if user is task assignee
-        var taskMember = taskMemberRepository.findByTaskIdAndUserId(task.getId(), userId);
+        var taskMember = taskMemberRepository.findByTask_IdAndUser_Id(task.getId(), userId);
         if (taskMember.isPresent()) {
             var role = taskMember.get().getRole();
             if (role == TaskMemberRole.ASSIGNEE) {

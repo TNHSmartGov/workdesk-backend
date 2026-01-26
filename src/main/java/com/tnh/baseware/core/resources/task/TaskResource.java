@@ -5,6 +5,7 @@ import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.dtos.task.TaskMemberDTO;
 import com.tnh.baseware.core.dtos.task.TaskRequirementDTO;
 import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
+import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.enums.ApiResponseType;
@@ -266,48 +267,31 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                                 .build());
         }
 
-    @Operation(summary = "Find tasks by task list ID")
-    @ApiOkResponse(value = TaskDTO.class)
-    @GetMapping("/by-task-list/{taskListId}")
-    public ResponseEntity<ApiMessageDTO<List<TaskDTO>>> findByTaskListId(@PathVariable UUID taskListId) {
-        var tasks = taskQueryService.findByTaskListId(taskListId);
-        return ResponseEntity.ok(ApiMessageDTO.<List<TaskDTO>>builder()
-                .data(tasks)
-                .result(true)
-                .message(messageService.getMessage("tasks.found"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
+        @Operation(summary = "Find tasks by task list ID")
+        @ApiOkResponse(value = TaskDTO.class)
+        @GetMapping("/by-task-list/{taskListId}")
+        public ResponseEntity<ApiMessageDTO<List<TaskDTO>>> findByTaskListId(@PathVariable UUID taskListId) {
+                var tasks = taskQueryService.findByTaskListId(taskListId);
+                return ResponseEntity.ok(ApiMessageDTO.<List<TaskDTO>>builder()
+                                .data(tasks)
+                                .result(true)
+                                .message(messageService.getMessage("tasks.found"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
 
-    @Operation(summary = "Get task timeline (Activity Log + Comments)")
-    @GetMapping("/{id}/timeline")
-    public ResponseEntity<ApiMessageDTO<List<TaskTimelineItemDTO>>> getTaskTimeline(
-            @PathVariable UUID id) {
-        var timeline = taskQueryService.getTaskTimeline(id);
-        return ResponseEntity.ok(ApiMessageDTO.<List<TaskTimelineItemDTO>>builder()
-                .data(timeline)
-                .result(true)
-                .message(messageService.getMessage("timeline.found"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
-
-    @Operation(summary = "Find tasks by task list ID with pagination")
-    @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
-    @GetMapping("/by-task-list/{taskListId}/pagination")
-    public ResponseEntity<ApiMessageDTO<PagedModel<TaskDTO>>> findByTaskListIdPagination(
-            @PathVariable UUID taskListId,
-            Pageable pageable,
-            PagedResourcesAssembler<TaskDTO> assembler) {
-        var tasks = taskQueryService.findByTaskListId(taskListId, pageable);
-        var pagedModel = assembler.toModel(tasks, this::toModel);
-        return ResponseEntity.ok(ApiMessageDTO.<PagedModel<TaskDTO>>builder()
-                .data(pagedModel)
-                .result(true)
-                .message(messageService.getMessage("timeline.found"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
+        @Operation(summary = "Get task timeline (Activity Log + Comments)")
+        @GetMapping("/{id}/timeline")
+        public ResponseEntity<ApiMessageDTO<List<TaskTimelineItemDTO>>> getTaskTimeline(
+                        @PathVariable UUID id) {
+                var timeline = taskQueryService.getTaskTimeline(id);
+                return ResponseEntity.ok(ApiMessageDTO.<List<TaskTimelineItemDTO>>builder()
+                                .data(timeline)
+                                .result(true)
+                                .message(messageService.getMessage("timeline.found"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
 
         @Operation(summary = "Find tasks by task list ID with pagination")
         @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
@@ -321,7 +305,7 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                 return ResponseEntity.ok(ApiMessageDTO.<PagedModel<TaskDTO>>builder()
                                 .data(pagedModel)
                                 .result(true)
-                                .message(messageService.getMessage("tasks.found"))
+                                .message(messageService.getMessage("timeline.found"))
                                 .code(HttpStatus.OK.value())
                                 .build());
         }
@@ -413,6 +397,19 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                                 .data(pagedModel)
                                 .result(true)
                                 .message(messageService.getMessage("tasks.found"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @Operation(summary = "Get task dashboard statistics")
+        @ApiOkResponse(value = TaskStatisticDTO.class)
+        @GetMapping("/statistics")
+        public ResponseEntity<ApiMessageDTO<TaskStatisticDTO>> getDashboardStatistics() {
+                var stats = taskQueryService.getDashboardStatistics();
+                return ResponseEntity.ok(ApiMessageDTO.<TaskStatisticDTO>builder()
+                                .data(stats)
+                                .result(true)
+                                .message(messageService.getMessage("tasks.statistics.fetched"))
                                 .code(HttpStatus.OK.value())
                                 .build());
         }

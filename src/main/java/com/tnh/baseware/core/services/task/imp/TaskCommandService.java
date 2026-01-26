@@ -5,7 +5,7 @@ import com.tnh.baseware.core.constants.MessageConstant;
 import com.tnh.baseware.core.constants.TaskSnapshot;
 import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.dtos.task.UserTaskPermissionDTO;
-import com.tnh.baseware.core.entities.project.Project;
+
 import com.tnh.baseware.core.entities.task.*;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
@@ -26,7 +26,7 @@ import com.tnh.baseware.core.repositories.task.ITaskRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRequirementRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
-import com.tnh.baseware.core.services.project.IProjectService;
+
 import com.tnh.baseware.core.services.task.ITaskCommandService;
 import com.tnh.baseware.core.utils.DiffUtil;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
@@ -55,7 +55,7 @@ public class TaskCommandService
     ITaskListRepository taskListRepository;
     ITaskCategoryRepository taskCategoryRepository;
     ITaskMemberRepository taskMemberRepository;
-    IProjectService projectService;
+
     ITaskRequirementRepository taskRequirementRepository;
     GenericEntityFetcher fetcher;
     ApplicationEventPublisher eventPublisher;
@@ -75,7 +75,7 @@ public class TaskCommandService
             ITaskCategoryRepository taskCategoryRepository,
             ITaskMemberRepository taskMemberRepository,
             ITaskRequirementRepository taskRequirementRepository,
-            IProjectService projectService,
+
             GenericEntityFetcher fetcher,
             ApplicationEventPublisher eventPublisher,
             ITaskCommentAttachmentRepository taskCommentAttachmentRepository,
@@ -90,7 +90,7 @@ public class TaskCommandService
         this.taskCategoryRepository = taskCategoryRepository;
         this.taskMemberRepository = taskMemberRepository;
         this.taskRequirementRepository = taskRequirementRepository;
-        this.projectService = projectService;
+
         this.fetcher = fetcher;
         this.eventPublisher = eventPublisher;
         this.taskCommentAttachmentRepository = taskCommentAttachmentRepository;
@@ -106,21 +106,16 @@ public class TaskCommandService
     @Transactional
     public TaskDTO create(TaskEditorForm form) {
         validateDates(form);
-        TaskList taskList;
+        TaskList taskList = null;
 
         if (form.getTaskListId() != null) {
             taskList = taskListRepository.findById(form.getTaskListId())
                     .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_LIST_NOT_FOUND));
-        } else {
-            Project personalProject = projectService.getOrCreatePersonalProject(getCurrentUser().getId());
-            taskList = taskListRepository.findDefaultByProjectId(personalProject.getId())
-                    .orElseThrow(() -> new BWCValidationException(
-                            MessageConstant.ERROR_CREATE_PROJECT_WITH_DEFAULT_TASK_LIST));
         }
 
         Task task = mapper.formToEntity(form);
         task.setTaskList(taskList);
-        task.setProject(taskList.getProject());
+        task.setProject(taskList != null ? taskList.getProject() : null);
         task.setStatus(TaskStatus.TODO);
         if (form.getTaskCategoryId() != null) {
             task.setTaskCategory(taskCategoryRepository.findById(form.getTaskCategoryId())
@@ -129,22 +124,12 @@ public class TaskCommandService
 
         Task savedTask = repository.save(task);
 
-        if (task.getProject().getType() == ProjectType.PERSONAL) {
-            taskMemberRepository.save(TaskMember.builder()
-                    .user(getCurrentUser())
-                    .task(savedTask)
-                    .status(MemberStatus.ASSIGNED)
-                    .role(TaskMemberRole.ASSIGNEE)
-                    .build());
-        } else {
-            var taskMember = TaskMember.builder()
-                    .task(task)
-                    .user(getCurrentUser())
-                    .role(TaskMemberRole.OWNER)
-                    .status(MemberStatus.ASSIGNED)
-                    .build();
-            taskMemberRepository.save(taskMember);
-        }
+        taskMemberRepository.save(TaskMember.builder()
+                .user(getCurrentUser())
+                .task(savedTask)
+                .status(MemberStatus.ASSIGNED)
+                .role(TaskMemberRole.OWNER)
+                .build());
 
         eventPublisher.publishEvent(
                 TaskActivityEventFactory.created(savedTask, getCurrentUser().getUsername()));
@@ -379,7 +364,7 @@ public class TaskCommandService
         if (task.getStatus() != TaskStatus.IN_PROGRESS) {
             throw new BWCValidationException(MessageConstant.VALIDATE_COMPLETE_ACTION);
         }
-        if (task.getProject().getType() == ProjectType.PERSONAL) {
+        if (task.getProject() == null || task.getProject().getType() == ProjectType.PERSONAL) {
             task.setStatus(TaskStatus.DONE);
         } else {
             task.setStatus(TaskStatus.REVIEW);
@@ -401,8 +386,21 @@ public class TaskCommandService
     }
 
     private void validateAction(Task task, TaskAction action, UUID userId) {
-        if (task.getProject().getType() == ProjectType.PERSONAL) {
-            if (!task.getCreatedBy().equalsIgnoreCase(userId.toString())) {
+        if (task.getProject() == null) {
+            TaskMember member = taskMemberRepository.findByTaskIdAndUserId(task.getId(), userId)
+                    .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_ASSIGNED_TO_TASK));
+
+            TaskMemberRole role = member.getRole();
+            if (role == TaskMemberRole.OWNER) {
+                return;
+            }
+
+            boolean allowed = switch (action) {
+                case START, COMPLETE, CANCEL -> (role == TaskMemberRole.LEAD || role == TaskMemberRole.ASSIGNEE);
+                case APPROVE -> (role == TaskMemberRole.REVIEWER);
+            };
+
+            if (!allowed) {
                 throw new BWCAccessDeniedException(MessageConstant.NOT_ALLOW_PERFORM_ACTION);
             }
             return;
@@ -579,15 +577,12 @@ public class TaskCommandService
 
         int overallProgress = (totalWeight == 0) ? 0 : (int) Math.round(totalWeightedProgress / totalWeight);
 
-        // If progress changed, save and log
         if (!Objects.equals(task.getProgress(), overallProgress)) {
             task.setProgress(overallProgress);
 
             if (overallProgress > 0 && task.getStatus() == TaskStatus.TODO) {
                 task.setStatus(TaskStatus.IN_PROGRESS);
             }
-            // Do not automatically mark the task as COMPLETED at 100% progress; completion
-            // is handled by an explicit workflow.
 
             repository.save(task);
 

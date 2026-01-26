@@ -306,7 +306,7 @@ public class ProjectService
                                     .toList());
 
                     // Delete task members
-                    taskMemberRepository.deleteAll(taskMemberRepository.findByTaskId(taskId));
+                    taskMemberRepository.deleteAll(taskMemberRepository.findByTask_Id(taskId));
 
                     // Delete task activity logs
                     taskActivityLogRepository.deleteAll(

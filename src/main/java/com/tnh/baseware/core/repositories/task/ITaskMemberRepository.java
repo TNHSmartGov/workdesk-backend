@@ -14,13 +14,13 @@ import java.util.UUID;
 public interface ITaskMemberRepository
         extends IGenericRepository<TaskMember, UUID> {
 
-    Optional<TaskMember> findByTaskIdAndUserId(UUID taskId, UUID userId);
+    Optional<TaskMember> findByTask_IdAndUser_Id(UUID taskId, UUID userId);
 
-    List<TaskMember> findByTaskId(UUID taskId);
+    List<TaskMember> findByTask_Id(UUID taskId);
 
     List<TaskMember> findByTask(Task task);
 
-    boolean existsByTaskIdAndUserId(UUID taskId, UUID userId);
+    boolean existsByTask_IdAndUser_Id(UUID taskId, UUID userId);
 
-    boolean existsByTaskIdAndRole(UUID taskId, TaskMemberRole role);
+    boolean existsByTask_IdAndRole(UUID taskId, TaskMemberRole role);
 }

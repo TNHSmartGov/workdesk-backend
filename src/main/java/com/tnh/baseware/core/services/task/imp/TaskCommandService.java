@@ -262,7 +262,7 @@ public class TaskCommandService
         }
 
         UUID userId = getCurrentUser().getId();
-        TaskMember member = taskMemberRepository.findByTaskIdAndUserId(taskId, userId)
+        TaskMember member = taskMemberRepository.findByTask_IdAndUser_Id(taskId, userId)
                 .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_ASSIGNED_TO_TASK));
 
         Integer oldProgress = member.getPersonalProgress();
@@ -274,7 +274,7 @@ public class TaskCommandService
 
         taskMemberRepository.save(member);
 
-        List<TaskMember> allMembers = taskMemberRepository.findByTaskId(taskId);
+        List<TaskMember> allMembers = taskMemberRepository.findByTask_Id(taskId);
         updateTaskProgress(member.getTask(), allMembers);
 
         eventPublisher.publishEvent(
@@ -317,7 +317,7 @@ public class TaskCommandService
                         .toList());
 
         // Delete task members
-        taskMemberRepository.deleteAll(taskMemberRepository.findByTaskId(taskId));
+        taskMemberRepository.deleteAll(taskMemberRepository.findByTask_Id(taskId));
 
         // Delete task activity logs
         taskActivityLogRepository.deleteAll(
@@ -387,7 +387,7 @@ public class TaskCommandService
 
     private void validateAction(Task task, TaskAction action, UUID userId) {
         if (task.getProject() == null) {
-            TaskMember member = taskMemberRepository.findByTaskIdAndUserId(task.getId(), userId)
+            TaskMember member = taskMemberRepository.findByTask_IdAndUser_Id(task.getId(), userId)
                     .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_ASSIGNED_TO_TASK));
 
             TaskMemberRole role = member.getRole();
@@ -484,7 +484,7 @@ public class TaskCommandService
 
         // 3. Update Member Status/Progress
         // Optimization: Fetch ALL members query once
-        List<TaskMember> allMembers = taskMemberRepository.findByTaskId(taskId);
+        List<TaskMember> allMembers = taskMemberRepository.findByTask_Id(taskId);
 
         TaskMember member = allMembers.stream()
                 .filter(m -> m.getUser().getId().equals(currentUser.getId()))
@@ -554,7 +554,7 @@ public class TaskCommandService
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
 
         // Fetch members here and pass to update logic
-        List<TaskMember> members = taskMemberRepository.findByTaskId(taskId);
+        List<TaskMember> members = taskMemberRepository.findByTask_Id(taskId);
         updateTaskProgress(task, members);
     }
 

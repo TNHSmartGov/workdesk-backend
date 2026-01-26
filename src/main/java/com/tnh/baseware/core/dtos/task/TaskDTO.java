@@ -31,5 +31,6 @@ public class TaskDTO extends RepresentationModel<TaskDTO> implements Identifiabl
     TaskType type;
     TaskListDTO taskList;
     BasicTaskCategoryDTO taskCategory;
+    Integer progress;
     MemberStatus memberStatus;
 }

@@ -12,10 +12,10 @@ import com.tnh.baseware.core.mappers.task.ITaskMapper;
 
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
-import com.tnh.baseware.core.repositories.task.ITaskRequirementRepository;
+
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
-import com.tnh.baseware.core.services.project.IProjectService;
+
 import com.tnh.baseware.core.services.task.ITaskQueryService;
 import com.tnh.baseware.core.specs.*;
 import com.tnh.baseware.core.utils.SecurityUtils;
@@ -40,7 +40,7 @@ import com.tnh.baseware.core.repositories.task.ITaskCommentRepository;
 import com.tnh.baseware.core.repositories.task.ITaskListRepository;
 import com.tnh.baseware.core.mappers.task.ITaskActivityLogMapper;
 import com.tnh.baseware.core.mappers.task.ITaskCommentMapper;
-import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
+
 import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
 
 @Service
@@ -178,12 +178,6 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 .fieldType(FieldType.STRING)
                                 .value(currentUser.getUsername())
                                 .build());
-                filters.add(FilterRequest.builder()
-                                .key("project.organization.id")
-                                .operator(Operator.EQUAL)
-                                .fieldType(FieldType.UUID)
-                                .value(orgId.toString())
-                                .build());
 
                 SearchRequest securedRequest = SearchRequest.builder()
                                 .filters(filters)
@@ -191,29 +185,31 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 .page(searchRequest != null ? searchRequest.getPage() : null)
                                 .size(searchRequest != null ? searchRequest.getSize() : null)
                                 .build();
-                var specification = new GenericSpecification<Task>(securedRequest);
+                var baseSpec = new GenericSpecification<Task>(securedRequest);
+
+                Specification<Task> orgSpec = (root, query, cb) -> {
+                        if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
+                                return cb.conjunction();
+                        }
+                        return cb.or(
+                                        cb.isNull(root.get("project")),
+                                        cb.equal(root.get("project").get("organization").get("id"), orgId));
+                };
+
                 var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
-                return repository.findAll(specification, pageable).map(entity -> mapper.entityToDTO(entity, currentUser,
-                                taskMemberRepository));
+                return repository.findAll(baseSpec.and(orgSpec), pageable).map(mapper::entityToDTO);
         }
 
-        @Override
-        @Transactional(readOnly = true)
-        public Page<TaskDTO> searchTasksAssignedToMe(SearchRequest searchRequest) {
-                User currentUser = getCurrentUser();
-                UUID orgId = securityUtils.currentOrgId();
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TaskDTO> searchTasksAssignedToMe(SearchRequest searchRequest) {
+        User currentUser = getCurrentUser();
+        UUID orgId = securityUtils.currentOrgId();
 
                 List<FilterRequest> filters = new ArrayList<>();
                 if (searchRequest != null && searchRequest.getFilters() != null) {
                         filters.addAll(searchRequest.getFilters());
                 }
-
-                filters.add(FilterRequest.builder()
-                                .key("project.organization.id")
-                                .operator(Operator.EQUAL)
-                                .fieldType(FieldType.UUID)
-                                .value(orgId.toString())
-                                .build());
 
                 SearchRequest securedRequest = SearchRequest.builder()
                                 .filters(filters)
@@ -232,10 +228,19 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                                                         TaskMemberRole.LEAD));
                         return root.get("id").in(subquery);
                 };
-                var combinedSpec = baseSpec.and(assignedToMeSpec);
+
+                Specification<Task> orgSpec = (root, query, cb) -> {
+                        if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
+                                return cb.conjunction();
+                        }
+                        return cb.or(
+                                        cb.isNull(root.get("project")),
+                                        cb.equal(root.get("project").get("organization").get("id"), orgId));
+                };
+
+                var combinedSpec = baseSpec.and(assignedToMeSpec).and(orgSpec);
                 var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
-                return repository.findAll(combinedSpec, pageable).map(entity -> mapper.entityToDTO(entity,
-                                currentUser, taskMemberRepository));
+                return repository.findAll(combinedSpec, pageable).map(mapper::entityToDTO);
         }
 
         @Override

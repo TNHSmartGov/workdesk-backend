@@ -38,20 +38,7 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
                         SELECT DISTINCT t
                         FROM Task t
                         WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-                          AND (
-                              (t.project IS NOT NULL AND EXISTS (
-                                  SELECT pm
-                                  FROM ProjectMember pm
-                                  WHERE pm.project.id = t.project.id
-                                    AND pm.user.id = :userId
-                              ))
-                              OR EXISTS (
-                                  SELECT tm
-                                  FROM TaskMember tm
-                                  WHERE tm.task.id = t.id
-                                    AND tm.user.id = :userId
-                              )
-                          )
+                          AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
                         """)
         List<Task> findAccessibleByUser(
                         @Param("orgId") UUID orgId,
@@ -60,10 +47,7 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
         @Query("""
                         SELECT DISTINCT t FROM Task t
                         WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-                        AND (
-                            (t.project IS NOT NULL AND EXISTS (SELECT 1 FROM ProjectMember pm WHERE pm.project.id = t.project.id AND pm.user.id = :userId))
-                            OR EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-                        )
+                        AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
                         """)
         Page<Task> findAccessibleByUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId, Pageable pageable);
 
@@ -96,10 +80,7 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
                         SELECT COUNT( DISTINCT t)
                         FROM Task t
                         WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-                          AND (
-                              (t.project IS NOT NULL AND EXISTS (SELECT 1 FROM ProjectMember pm WHERE pm.project.id = t.project.id AND pm.user.id = :userId))
-                              OR EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-                          )
+                          AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
                         """)
         long countAccessibleByUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId);
 
@@ -108,10 +89,7 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
                         FROM Task t
                         WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
                           AND t.status = :status
-                          AND (
-                              (t.project IS NOT NULL AND EXISTS (SELECT 1 FROM ProjectMember pm WHERE pm.project.id = t.project.id AND pm.user.id = :userId))
-                              OR EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-                          )
+                          AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
                         """)
         long countAccessibleByStatus(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
                         @Param("status") TaskStatus status);
@@ -122,10 +100,7 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
                         WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
                           AND t.status != 'DONE' AND t.status != 'CANCELLED'
                           AND t.dueDate < :now
-                          AND (
-                              (t.project IS NOT NULL AND EXISTS (SELECT 1 FROM ProjectMember pm WHERE pm.project.id = t.project.id AND pm.user.id = :userId))
-                              OR EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-                          )
+                          AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
                         """)
         long countAccessibleOverdue(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
                         @Param("now") java.time.Instant now);
@@ -136,11 +111,21 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
                         WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
                           AND t.status != 'DONE' AND t.status != 'CANCELLED'
                           AND t.dueDate >= :now AND t.dueDate <= :future
-                          AND (
-                              (t.project IS NOT NULL AND EXISTS (SELECT 1 FROM ProjectMember pm WHERE pm.project.id = t.project.id AND pm.user.id = :userId))
-                              OR EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-                          )
+                          AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
                         """)
         long countAccessibleDueSoon(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
                         @Param("now") java.time.Instant now, @Param("future") java.time.Instant future);
+
+        @Query("""
+                        SELECT DISTINCT t
+                        FROM Task t
+                        WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
+                          AND t.dueDate >= :start AND t.dueDate <= :end
+                          AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
+                        """)
+        List<Task> findAccessibleByDueDateRange(
+                        @Param("orgId") UUID orgId,
+                        @Param("userId") UUID userId,
+                        @Param("start") java.time.Instant start,
+                        @Param("end") java.time.Instant end);
 }

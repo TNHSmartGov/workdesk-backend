@@ -5,7 +5,7 @@ import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.dtos.task.TaskMemberDTO;
 import com.tnh.baseware.core.dtos.task.TaskRequirementDTO;
 import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
-import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
+
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.enums.ApiResponseType;
@@ -401,16 +401,4 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                                 .build());
         }
 
-        @Operation(summary = "Get task dashboard statistics")
-        @ApiOkResponse(value = TaskStatisticDTO.class)
-        @GetMapping("/statistics")
-        public ResponseEntity<ApiMessageDTO<TaskStatisticDTO>> getDashboardStatistics() {
-                var stats = taskQueryService.getDashboardStatistics();
-                return ResponseEntity.ok(ApiMessageDTO.<TaskStatisticDTO>builder()
-                                .data(stats)
-                                .result(true)
-                                .message(messageService.getMessage("tasks.statistics.fetched"))
-                                .code(HttpStatus.OK.value())
-                                .build());
-        }
 }

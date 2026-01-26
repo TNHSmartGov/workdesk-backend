@@ -38,7 +38,7 @@ import com.tnh.baseware.core.repositories.task.ITaskCommentAttachmentRepository;
 import com.tnh.baseware.core.repositories.task.ITaskCommentRepository;
 import com.tnh.baseware.core.mappers.task.ITaskActivityLogMapper;
 import com.tnh.baseware.core.mappers.task.ITaskCommentMapper;
-import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
+
 import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
 
 @Service
@@ -294,22 +294,4 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 return result;
         }
 
-        @Override
-        public TaskStatisticDTO getDashboardStatistics() {
-                UUID orgId = securityUtils.currentOrgId();
-                UUID userId = securityUtils.currentUser().getId();
-                java.time.Instant now = java.time.Instant.now();
-                java.time.Instant future = now.plus(1, java.time.temporal.ChronoUnit.DAYS);
-
-                TaskStatisticDTO stats = new TaskStatisticDTO();
-                stats.setTotal(repository.countAccessibleByUser(orgId, userId));
-                stats.setTotalNew(repository.countAccessibleByStatus(orgId, userId, TaskStatus.TODO));
-                stats.setTotalInProgress(repository.countAccessibleByStatus(orgId, userId, TaskStatus.IN_PROGRESS));
-                stats.setTotalReview(repository.countAccessibleByStatus(orgId, userId, TaskStatus.REVIEW));
-                stats.setTotalCompleted(repository.countAccessibleByStatus(orgId, userId, TaskStatus.DONE));
-                stats.setTotalOverdue(repository.countAccessibleOverdue(orgId, userId, now));
-                stats.setTotalDueSoon(repository.countAccessibleDueSoon(orgId, userId, now, future));
-
-                return stats;
-        }
 }

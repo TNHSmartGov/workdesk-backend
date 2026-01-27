@@ -401,4 +401,80 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                                 .build());
         }
 
+        @Operation(summary = "Search accessible tasks by current user")
+        @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
+        @PostMapping("/my-tasks/search")
+        public ResponseEntity<ApiMessageDTO<PagedModel<TaskDTO>>> searchMyTasks(
+                        @RequestBody(required = false) SearchRequest searchRequest,
+                        PagedResourcesAssembler<TaskDTO> assembler) {
+                var tasks = taskQueryService.searchAccessibleByUser(searchRequest);
+                var pagedModel = assembler.toModel(tasks, this::toModel);
+                return ResponseEntity.ok(ApiMessageDTO.<PagedModel<TaskDTO>>builder()
+                                .data(pagedModel)
+                                .result(true)
+                                .message(messageService.getMessage("tasks.found"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @Operation(summary = "Search accessible tasks by current user with pagination")
+        @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
+        @PostMapping("/my-tasks/pagination/search")
+        public ResponseEntity<ApiMessageDTO<PagedModel<TaskDTO>>> searchMyTasksPagination(
+                        @RequestBody(required = false) SearchRequest searchRequest,
+                        PagedResourcesAssembler<TaskDTO> assembler) {
+                return searchMyTasks(searchRequest, assembler);
+        }
+
+        @Operation(summary = "Search tasks by project ID")
+        @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
+        @PostMapping("/by-project/{projectId}/search")
+        public ResponseEntity<ApiMessageDTO<PagedModel<TaskDTO>>> searchByProjectId(
+                        @PathVariable UUID projectId,
+                        @RequestBody(required = false) SearchRequest searchRequest,
+                        PagedResourcesAssembler<TaskDTO> assembler) {
+                var tasks = taskQueryService.searchByProjectId(projectId, searchRequest);
+                var pagedModel = assembler.toModel(tasks, this::toModel);
+                return ResponseEntity.ok(ApiMessageDTO.<PagedModel<TaskDTO>>builder()
+                                .data(pagedModel)
+                                .result(true)
+                                .message(messageService.getMessage("tasks.found"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @Operation(summary = "Search tasks by task list ID")
+        @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
+        @PostMapping("/by-task-list/{taskListId}/search")
+        public ResponseEntity<ApiMessageDTO<PagedModel<TaskDTO>>> searchByTaskListId(
+                        @PathVariable UUID taskListId,
+                        @RequestBody(required = false) SearchRequest searchRequest,
+                        PagedResourcesAssembler<TaskDTO> assembler) {
+                var tasks = taskQueryService.searchByTaskListId(taskListId, searchRequest);
+                var pagedModel = assembler.toModel(tasks, this::toModel);
+                return ResponseEntity.ok(ApiMessageDTO.<PagedModel<TaskDTO>>builder()
+                                .data(pagedModel)
+                                .result(true)
+                                .message(messageService.getMessage("tasks.found"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @Operation(summary = "Search tasks by status")
+        @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
+        @PostMapping("/by-status/search")
+        public ResponseEntity<ApiMessageDTO<PagedModel<TaskDTO>>> searchByStatus(
+                        @RequestParam TaskStatus status,
+                        @RequestBody(required = false) SearchRequest searchRequest,
+                        PagedResourcesAssembler<TaskDTO> assembler) {
+                var tasks = taskQueryService.searchByStatus(status, searchRequest);
+                var pagedModel = assembler.toModel(tasks, this::toModel);
+                return ResponseEntity.ok(ApiMessageDTO.<PagedModel<TaskDTO>>builder()
+                                .data(pagedModel)
+                                .result(true)
+                                .message(messageService.getMessage("tasks.found"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
 }

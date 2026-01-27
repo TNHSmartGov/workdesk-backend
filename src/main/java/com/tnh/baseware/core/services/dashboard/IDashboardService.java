@@ -31,4 +31,8 @@ public interface IDashboardService {
      * Get tasks for calendar view within a specific date range.
      */
     List<CalendarTaskDTO> getCalendarTasks(Instant startDate, Instant endDate);
+
+    com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO getUnitPerformance();
+
+    List<com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO> getUnitWorkload();
 }

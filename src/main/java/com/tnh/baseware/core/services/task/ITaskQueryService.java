@@ -34,6 +34,14 @@ public interface ITaskQueryService extends ITaskService {
 
     Page<TaskDTO> searchTasksAssignedToMe(SearchRequest searchRequest);
 
+    Page<TaskDTO> searchAccessibleByUser(SearchRequest searchRequest);
+
+    Page<TaskDTO> searchByProjectId(UUID projectId, SearchRequest searchRequest);
+
+    Page<TaskDTO> searchByTaskListId(UUID taskListId, SearchRequest searchRequest);
+
+    Page<TaskDTO> searchByStatus(TaskStatus status, SearchRequest searchRequest);
+
     List<TaskTimelineItemDTO> getTaskTimeline(UUID taskId);
 
 }

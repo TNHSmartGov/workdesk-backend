@@ -2,11 +2,17 @@ package com.tnh.baseware.core.services.dashboard.imp;
 
 import com.tnh.baseware.core.dtos.task.ActivityLogDTO;
 import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
+import com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO;
+import com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO;
+import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.enums.task.TaskStatus;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
+import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
 import com.tnh.baseware.core.services.dashboard.IDashboardService;
+import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
+import com.tnh.baseware.core.enums.TitleDefault;
 import com.tnh.baseware.core.utils.SecurityUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +34,8 @@ public class DashboardService implements IDashboardService {
     ITaskRepository taskRepository;
     IProjectRepository projectRepository;
     ITaskActivityLogRepository activityLogRepository;
+    IUserOrganizationRepository userOrganizationRepository;
+    ITaskMemberRepository taskMemberRepository;
     SecurityUtils securityUtils;
 
     @Override
@@ -39,13 +47,23 @@ public class DashboardService implements IDashboardService {
         Instant future = now.plus(3, ChronoUnit.DAYS);
 
         TaskStatisticDTO stats = new TaskStatisticDTO();
-        stats.setTotal(taskRepository.countAccessibleByUser(orgId, userId));
-        stats.setTotalNew(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.TODO));
-        stats.setTotalInProgress(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.IN_PROGRESS));
-        stats.setTotalReview(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.REVIEW));
-        stats.setTotalCompleted(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.DONE));
-        stats.setTotalOverdue(taskRepository.countAccessibleOverdue(orgId, userId, now));
-        stats.setTotalDueSoon(taskRepository.countAccessibleDueSoon(orgId, userId, now, future));
+        if (isUnitManager(userId, orgId)) {
+            stats.setTotal(taskRepository.countByOrganizationId(orgId));
+            stats.setTotalNew(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.TODO));
+            stats.setTotalInProgress(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.IN_PROGRESS));
+            stats.setTotalReview(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.REVIEW));
+            stats.setTotalCompleted(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.DONE));
+            stats.setTotalOverdue(taskRepository.countByOrganizationIdOverdue(orgId, now));
+            stats.setTotalDueSoon(taskRepository.countByOrganizationIdDueSoon(orgId, now, future));
+        } else {
+            stats.setTotal(taskRepository.countAccessibleByUser(orgId, userId));
+            stats.setTotalNew(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.TODO));
+            stats.setTotalInProgress(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.IN_PROGRESS));
+            stats.setTotalReview(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.REVIEW));
+            stats.setTotalCompleted(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.DONE));
+            stats.setTotalOverdue(taskRepository.countAccessibleOverdue(orgId, userId, now));
+            stats.setTotalDueSoon(taskRepository.countAccessibleDueSoon(orgId, userId, now, future));
+        }
 
         // New Metric: Active Projects
         stats.setTotalActiveProjects(projectRepository.countActiveProjectsByUser(orgId, userId));
@@ -96,5 +114,41 @@ public class DashboardService implements IDashboardService {
                         .projectName(task.getProject() != null ? task.getProject().getName() : null)
                         .build())
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UnitPerformanceDTO getUnitPerformance() {
+        UUID orgId = securityUtils.currentOrgId();
+        // Default logic: User's organization
+
+        long total = taskRepository.countByOrganizationId(orgId);
+        long completed = taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.DONE);
+        long overdue = taskRepository.countByOrganizationIdOverdue(orgId, Instant.now());
+
+        double completionRate = total == 0 ? 0.0 : ((double) completed / total) * 100.0;
+        double overdueRate = total == 0 ? 0.0 : ((double) overdue / total) * 100.0;
+
+        return UnitPerformanceDTO.builder()
+                .totalTasksCreated(total)
+                .completionRate(Math.ceil(completionRate * 100) / 100)
+                .overdueRate(Math.ceil(overdueRate * 100) / 100)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<UnitWorkloadDTO> getUnitWorkload() {
+        UUID orgId = securityUtils.currentOrgId();
+        return taskMemberRepository.getWorkloadDistribution(orgId, TaskMemberRole.ASSIGNEE, Instant.now(),
+                TaskStatus.DONE);
+    }
+
+    private boolean isUnitManager(UUID userId, UUID orgId) {
+        return userOrganizationRepository.findByUserIdAndOrganizationId(userId, orgId)
+                .map(uo -> uo.getTitle() != null
+                        && (TitleDefault.UNIT_LEADER.getValue().equals(uo.getTitle().getName())
+                                || TitleDefault.DEPUTY.getValue().equals(uo.getTitle().getName())))
+                .orElse(false);
     }
 }

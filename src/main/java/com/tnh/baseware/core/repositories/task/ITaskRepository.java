@@ -16,142 +16,160 @@ import java.util.UUID;
 
 @Repository
 public interface ITaskRepository extends IGenericRepository<Task, UUID> {
-  @Query("""
-           SELECT
-               pm.role as projectRole,
-               tm.role as taskRole
-           FROM Task t
-           LEFT JOIN ProjectMember pm ON pm.project.id = t.project.id AND pm.user.id = :userId
-           LEFT JOIN TaskMember tm ON tm.task.id = t.id AND tm.user.id = :userId
-           WHERE t.id = :taskId
-      """)
-  Optional<UserTaskPermissionDTO> findUserPermissions(@Param("taskId") UUID taskId,
-      @Param("userId") UUID userId);
+    @Query("""
+                 SELECT
+                     pm.role as projectRole,
+                     tm.role as taskRole
+                 FROM Task t
+                 LEFT JOIN ProjectMember pm ON pm.project.id = t.project.id AND pm.user.id = :userId
+                 LEFT JOIN TaskMember tm ON tm.task.id = t.id AND tm.user.id = :userId
+                 WHERE t.id = :taskId
+            """)
+    Optional<UserTaskPermissionDTO> findUserPermissions(@Param("taskId") UUID taskId,
+            @Param("userId") UUID userId);
 
-  @Query("SELECT t FROM Task t WHERE t.project.organization.id = :orgId")
-  List<Task> findByOrganizationId(@Param("orgId") UUID orgId);
+    @Query("SELECT t FROM Task t LEFT JOIN t.project p LEFT JOIN p.organization o WHERE (p IS NULL OR o.id = :orgId)")
+    List<Task> findByOrganizationId(@Param("orgId") UUID orgId);
 
-  @Query("SELECT t FROM Task t WHERE t.project.organization.id = :orgId")
-  Page<Task> findByOrganizationId(@Param("orgId") UUID orgId, Pageable pageable);
+    @Query("SELECT t FROM Task t LEFT JOIN t.project p LEFT JOIN p.organization o WHERE (p IS NULL OR o.id = :orgId)")
+    Page<Task> findByOrganizationId(@Param("orgId") UUID orgId, Pageable pageable);
 
-  @Query("""
-      SELECT DISTINCT t
-      FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-        AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-      """)
-  List<Task> findAccessibleByUser(
-      @Param("orgId") UUID orgId,
-      @Param("userId") UUID userId);
+    @Query("""
+            SELECT DISTINCT t
+            FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+              AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
+            """)
+    List<Task> findAccessibleByUser(
+            @Param("orgId") UUID orgId,
+            @Param("userId") UUID userId);
 
-  @Query("""
-      SELECT DISTINCT t FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-      AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-      """)
-  Page<Task> findAccessibleByUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId, Pageable pageable);
+    @Query("""
+            SELECT DISTINCT t FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+            AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
+            """)
+    Page<Task> findAccessibleByUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId, Pageable pageable);
 
-  @Query("SELECT t FROM Task t WHERE t.id = :taskId AND t.project.organization.id = :orgId")
-  Optional<Task> findByIdAndOrganizationId(@Param("taskId") UUID taskId, @Param("orgId") UUID orgId);
+    @Query("SELECT t FROM Task t LEFT JOIN t.project p LEFT JOIN p.organization o WHERE t.id = :taskId AND (p IS NULL OR o.id = :orgId)")
+    Optional<Task> findByIdAndOrganizationId(@Param("taskId") UUID taskId, @Param("orgId") UUID orgId);
 
-  @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
-  List<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId);
+    @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
+    List<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId);
 
-  @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
-  Page<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId,
-      Pageable pageable);
+    @Query("SELECT t FROM Task t WHERE t.project.id = :projectId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
+    Page<Task> findByProjectIdAndOrgId(@Param("projectId") UUID projectId, @Param("orgId") UUID orgId,
+            Pageable pageable);
 
-  @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
-  List<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId);
+    @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
+    List<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId);
 
-  @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
-  Page<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId,
-      Pageable pageable);
+    @Query("SELECT t FROM Task t WHERE t.taskList.id = :taskListId AND t.project.organization.id = :orgId ORDER BY t.createdDate DESC")
+    Page<Task> findByTaskListIdAndOrgId(@Param("taskListId") UUID taskListId, @Param("orgId") UUID orgId,
+            Pageable pageable);
 
-  @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
-  List<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId);
+    @Query("SELECT t FROM Task t LEFT JOIN t.project p LEFT JOIN p.organization o WHERE t.status = :status AND (p IS NULL OR o.id = :orgId)")
+    List<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId);
 
-  @Query("SELECT t FROM Task t WHERE t.status = :status AND t.project.organization.id = :orgId")
-  Page<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId,
-      Pageable pageable);
+    @Query("SELECT t FROM Task t LEFT JOIN t.project p LEFT JOIN p.organization o WHERE t.status = :status AND (p IS NULL OR o.id = :orgId)")
+    Page<Task> findByStatusAndOrgId(@Param("status") TaskStatus status, @Param("orgId") UUID orgId,
+            Pageable pageable);
 
-  // STATISTICS QUERIES
-  @Query("""
-      SELECT COUNT( DISTINCT t)
-      FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-        AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-      """)
-  long countAccessibleByUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId);
+    // STATISTICS QUERIES
+    @Query("""
+            SELECT COUNT( DISTINCT t)
+            FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+              AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
+            """)
+    long countAccessibleByUser(@Param("orgId") UUID orgId, @Param("userId") UUID userId);
 
-  @Query("""
-      SELECT COUNT( DISTINCT t)
-      FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-        AND t.status = :status
-        AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-      """)
-  long countAccessibleByStatus(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
-      @Param("status") TaskStatus status);
+    @Query("""
+            SELECT COUNT( DISTINCT t)
+            FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+              AND t.status = :status
+              AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
+            """)
+    long countAccessibleByStatus(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
+            @Param("status") TaskStatus status);
 
-  @Query("""
-      SELECT COUNT( DISTINCT t)
-      FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-        AND t.status != 'DONE' AND t.status != 'CANCELLED'
-        AND t.dueDate < :now
-        AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-      """)
-  long countAccessibleOverdue(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
-      @Param("now") java.time.Instant now);
+    @Query("""
+            SELECT COUNT( DISTINCT t)
+            FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+              AND t.status != 'DONE' AND t.status != 'CANCELLED'
+              AND t.dueDate < :now
+              AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
+            """)
+    long countAccessibleOverdue(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
+            @Param("now") java.time.Instant now);
 
-  @Query("""
-      SELECT COUNT( DISTINCT t)
-      FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-        AND t.status != 'DONE' AND t.status != 'CANCELLED'
-        AND t.dueDate >= :now AND t.dueDate <= :future
-        AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-      """)
-  long countAccessibleDueSoon(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
-      @Param("now") java.time.Instant now, @Param("future") java.time.Instant future);
+    @Query("""
+            SELECT COUNT( DISTINCT t)
+            FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+              AND t.status != 'DONE' AND t.status != 'CANCELLED'
+              AND t.dueDate >= :now AND t.dueDate <= :future
+              AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
+            """)
+    long countAccessibleDueSoon(@Param("orgId") UUID orgId, @Param("userId") UUID userId,
+            @Param("now") java.time.Instant now, @Param("future") java.time.Instant future);
 
-  @Query("""
-      SELECT DISTINCT t
-      FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-        AND t.dueDate >= :start AND t.dueDate <= :end
-        AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
-      """)
-  List<Task> findAccessibleByDueDateRange(
-      @Param("orgId") UUID orgId,
-      @Param("userId") UUID userId,
-      @Param("start") java.time.Instant start,
-      @Param("end") java.time.Instant end);
+    @Query("""
+            SELECT DISTINCT t
+            FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+              AND t.dueDate >= :start AND t.dueDate <= :end
+              AND EXISTS (SELECT 1 FROM TaskMember tm WHERE tm.task.id = t.id AND tm.user.id = :userId)
+            """)
+    List<Task> findAccessibleByDueDateRange(
+            @Param("orgId") UUID orgId,
+            @Param("userId") UUID userId,
+            @Param("start") java.time.Instant start,
+            @Param("end") java.time.Instant end);
 
-  // GLOBAL STATISTICS QUERIES (FOR UNIT LEADER/DEPUTY)
-  @Query("SELECT COUNT(t) FROM Task t WHERE t.project IS NULL OR t.project.organization.id = :orgId")
-  long countByOrganizationId(@Param("orgId") UUID orgId);
+    // GLOBAL STATISTICS QUERIES (FOR UNIT LEADER/DEPUTY)
+    @Query("SELECT COUNT(t) FROM Task t LEFT JOIN t.project p LEFT JOIN p.organization o WHERE p IS NULL OR o.id = :orgId")
+    long countByOrganizationId(@Param("orgId") UUID orgId);
 
-  @Query("SELECT COUNT(t) FROM Task t WHERE (t.project IS NULL OR t.project.organization.id = :orgId) AND t.status = :status")
-  long countByOrganizationIdAndStatus(@Param("orgId") UUID orgId, @Param("status") TaskStatus status);
+    @Query("SELECT COUNT(t) FROM Task t LEFT JOIN t.project p LEFT JOIN p.organization o WHERE (p IS NULL OR o.id = :orgId) AND t.status = :status")
+    long countByOrganizationIdAndStatus(@Param("orgId") UUID orgId, @Param("status") TaskStatus status);
 
-  @Query("""
-      SELECT COUNT(t)
-      FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-        AND t.status != 'DONE' AND t.status != 'CANCELLED'
-        AND t.dueDate < :now
-      """)
-  long countByOrganizationIdOverdue(@Param("orgId") UUID orgId, @Param("now") java.time.Instant now);
+    @Query("""
+            SELECT COUNT(t)
+            FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+              AND t.status != 'DONE' AND t.status != 'CANCELLED'
+              AND t.dueDate < :now
+            """)
+    long countByOrganizationIdOverdue(@Param("orgId") UUID orgId, @Param("now") java.time.Instant now);
 
-  @Query("""
-      SELECT COUNT(t)
-      FROM Task t
-      WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
-        AND t.status != 'DONE' AND t.status != 'CANCELLED'
-        AND t.dueDate >= :now AND t.dueDate <= :future
-      """)
-  long countByOrganizationIdDueSoon(@Param("orgId") UUID orgId,
-      @Param("now") java.time.Instant now, @Param("future") java.time.Instant future);
+    @Query("""
+            SELECT COUNT(t)
+            FROM Task t
+            LEFT JOIN t.project p
+            LEFT JOIN p.organization o
+            WHERE (p IS NULL OR o.id = :orgId)
+              AND t.status != 'DONE' AND t.status != 'CANCELLED'
+              AND t.dueDate >= :now AND t.dueDate <= :future
+            """)
+    long countByOrganizationIdDueSoon(@Param("orgId") UUID orgId,
+            @Param("now") java.time.Instant now, @Param("future") java.time.Instant future);
 }

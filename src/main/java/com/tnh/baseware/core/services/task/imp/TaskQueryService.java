@@ -212,9 +212,13 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
                                 return cb.conjunction();
                         }
+                        var projectJoin = root.<Task, com.tnh.baseware.core.entities.project.Project>join("project",
+                                        jakarta.persistence.criteria.JoinType.LEFT);
+                        var orgJoin = projectJoin.<com.tnh.baseware.core.entities.project.Project, com.tnh.baseware.core.entities.adu.Organization>join(
+                                        "organization", jakarta.persistence.criteria.JoinType.LEFT);
                         return cb.or(
                                         cb.isNull(root.get("project")),
-                                        cb.equal(root.get("project").get("organization").get("id"), orgId));
+                                        cb.equal(orgJoin.get("id"), orgId));
                 };
 
                 var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
@@ -254,9 +258,13 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
                                 return cb.conjunction();
                         }
+                        var projectJoin = root.<Task, com.tnh.baseware.core.entities.project.Project>join("project",
+                                        jakarta.persistence.criteria.JoinType.LEFT);
+                        var orgJoin = projectJoin.<com.tnh.baseware.core.entities.project.Project, com.tnh.baseware.core.entities.adu.Organization>join(
+                                        "organization", jakarta.persistence.criteria.JoinType.LEFT);
                         return cb.or(
                                         cb.isNull(root.get("project")),
-                                        cb.equal(root.get("project").get("organization").get("id"), orgId));
+                                        cb.equal(orgJoin.get("id"), orgId));
                 };
 
                 var combinedSpec = baseSpec.and(assignedToMeSpec).and(orgSpec);

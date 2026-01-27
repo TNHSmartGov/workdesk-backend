@@ -2,9 +2,13 @@ package com.tnh.baseware.core.services.dashboard.imp;
 
 import com.tnh.baseware.core.dtos.task.ActivityLogDTO;
 import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
+import com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO;
+import com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO;
+import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.enums.task.TaskStatus;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
+import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
 import com.tnh.baseware.core.services.dashboard.IDashboardService;
 import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
@@ -31,6 +35,7 @@ public class DashboardService implements IDashboardService {
     IProjectRepository projectRepository;
     ITaskActivityLogRepository activityLogRepository;
     IUserOrganizationRepository userOrganizationRepository;
+    ITaskMemberRepository taskMemberRepository;
     SecurityUtils securityUtils;
 
     @Override
@@ -109,6 +114,34 @@ public class DashboardService implements IDashboardService {
                         .projectName(task.getProject() != null ? task.getProject().getName() : null)
                         .build())
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UnitPerformanceDTO getUnitPerformance() {
+        UUID orgId = securityUtils.currentOrgId();
+        // Default logic: User's organization
+
+        long total = taskRepository.countByOrganizationId(orgId);
+        long completed = taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.DONE);
+        long overdue = taskRepository.countByOrganizationIdOverdue(orgId, Instant.now());
+
+        double completionRate = total == 0 ? 0.0 : ((double) completed / total) * 100.0;
+        double overdueRate = total == 0 ? 0.0 : ((double) overdue / total) * 100.0;
+
+        return UnitPerformanceDTO.builder()
+                .totalTasksCreated(total)
+                .completionRate(Math.ceil(completionRate * 100) / 100)
+                .overdueRate(Math.ceil(overdueRate * 100) / 100)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<UnitWorkloadDTO> getUnitWorkload() {
+        UUID orgId = securityUtils.currentOrgId();
+        return taskMemberRepository.getWorkloadDistribution(orgId, TaskMemberRole.ASSIGNEE, Instant.now(),
+                TaskStatus.DONE);
     }
 
     private boolean isUnitManager(UUID userId, UUID orgId) {

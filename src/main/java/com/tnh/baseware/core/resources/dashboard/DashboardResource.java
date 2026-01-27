@@ -3,6 +3,8 @@ package com.tnh.baseware.core.resources.dashboard;
 import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.task.ActivityLogDTO;
 import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
+import com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO;
+import com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.services.MessageService;
@@ -19,13 +21,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.hateoas.EntityModel;
 import com.tnh.baseware.core.dtos.task.CalendarTaskDTO;
 import java.util.List;
 import java.time.Instant;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/v1/dashboard")
@@ -77,6 +78,32 @@ public class DashboardResource {
                 .data(tasks)
                 .result(true)
                 .message(messageService.getMessage("dashboard.calendar.fetched"))
+                .code(HttpStatus.OK.value())
+                .build());
+    }
+
+    @Operation(summary = "Get unit performance statistics")
+    @ApiOkResponse(value = UnitPerformanceDTO.class)
+    @GetMapping("/unit/performance")
+    public ResponseEntity<ApiMessageDTO<UnitPerformanceDTO>> getUnitPerformance() {
+        var stats = dashboardService.getUnitPerformance();
+        return ResponseEntity.ok(ApiMessageDTO.<UnitPerformanceDTO>builder()
+                .data(stats)
+                .result(true)
+                .message(messageService.getMessage("dashboard.unit.performance.fetched"))
+                .code(HttpStatus.OK.value())
+                .build());
+    }
+
+    @Operation(summary = "Get unit workload distribution")
+    @ApiOkResponse(value = UnitWorkloadDTO.class)
+    @GetMapping("/unit/workload")
+    public ResponseEntity<ApiMessageDTO<List<UnitWorkloadDTO>>> getUnitWorkload() {
+        var workload = dashboardService.getUnitWorkload();
+        return ResponseEntity.ok(ApiMessageDTO.<List<UnitWorkloadDTO>>builder()
+                .data(workload)
+                .result(true)
+                .message(messageService.getMessage("dashboard.unit.workload.fetched"))
                 .code(HttpStatus.OK.value())
                 .build());
     }

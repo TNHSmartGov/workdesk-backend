@@ -7,6 +7,8 @@ import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
 import com.tnh.baseware.core.services.dashboard.IDashboardService;
+import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
+import com.tnh.baseware.core.enums.TitleDefault;
 import com.tnh.baseware.core.utils.SecurityUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class DashboardService implements IDashboardService {
     ITaskRepository taskRepository;
     IProjectRepository projectRepository;
     ITaskActivityLogRepository activityLogRepository;
+    IUserOrganizationRepository userOrganizationRepository;
     SecurityUtils securityUtils;
 
     @Override
@@ -39,13 +42,23 @@ public class DashboardService implements IDashboardService {
         Instant future = now.plus(3, ChronoUnit.DAYS);
 
         TaskStatisticDTO stats = new TaskStatisticDTO();
-        stats.setTotal(taskRepository.countAccessibleByUser(orgId, userId));
-        stats.setTotalNew(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.TODO));
-        stats.setTotalInProgress(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.IN_PROGRESS));
-        stats.setTotalReview(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.REVIEW));
-        stats.setTotalCompleted(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.DONE));
-        stats.setTotalOverdue(taskRepository.countAccessibleOverdue(orgId, userId, now));
-        stats.setTotalDueSoon(taskRepository.countAccessibleDueSoon(orgId, userId, now, future));
+        if (isUnitManager(userId, orgId)) {
+            stats.setTotal(taskRepository.countByOrganizationId(orgId));
+            stats.setTotalNew(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.TODO));
+            stats.setTotalInProgress(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.IN_PROGRESS));
+            stats.setTotalReview(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.REVIEW));
+            stats.setTotalCompleted(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.DONE));
+            stats.setTotalOverdue(taskRepository.countByOrganizationIdOverdue(orgId, now));
+            stats.setTotalDueSoon(taskRepository.countByOrganizationIdDueSoon(orgId, now, future));
+        } else {
+            stats.setTotal(taskRepository.countAccessibleByUser(orgId, userId));
+            stats.setTotalNew(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.TODO));
+            stats.setTotalInProgress(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.IN_PROGRESS));
+            stats.setTotalReview(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.REVIEW));
+            stats.setTotalCompleted(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.DONE));
+            stats.setTotalOverdue(taskRepository.countAccessibleOverdue(orgId, userId, now));
+            stats.setTotalDueSoon(taskRepository.countAccessibleDueSoon(orgId, userId, now, future));
+        }
 
         // New Metric: Active Projects
         stats.setTotalActiveProjects(projectRepository.countActiveProjectsByUser(orgId, userId));
@@ -96,5 +109,13 @@ public class DashboardService implements IDashboardService {
                         .projectName(task.getProject() != null ? task.getProject().getName() : null)
                         .build())
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    private boolean isUnitManager(UUID userId, UUID orgId) {
+        return userOrganizationRepository.findByUserIdAndOrganizationId(userId, orgId)
+                .map(uo -> uo.getTitle() != null
+                        && (TitleDefault.UNIT_LEADER.getValue().equals(uo.getTitle().getName())
+                                || TitleDefault.DEPUTY.getValue().equals(uo.getTitle().getName())))
+                .orElse(false);
     }
 }

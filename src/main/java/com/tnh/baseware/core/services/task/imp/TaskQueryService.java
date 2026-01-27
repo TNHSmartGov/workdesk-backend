@@ -12,6 +12,8 @@ import com.tnh.baseware.core.mappers.task.ITaskMapper;
 
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
+import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
+import com.tnh.baseware.core.enums.TitleDefault;
 
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
@@ -49,8 +51,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 implements ITaskQueryService {
         ITaskListRepository taskListRepository;
         ITaskMemberRepository taskMemberRepository;
-        IProjectService projectService;
-        ITaskRequirementRepository taskRequirementRepository;
+        IUserOrganizationRepository userOrganizationRepository;
         SecurityUtils securityUtils;
         ITaskActivityLogRepository taskActivityLogRepository;
         ITaskCommentRepository taskCommentRepository;
@@ -63,8 +64,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         MessageService messageService,
                         ITaskListRepository taskListRepository,
                         ITaskMemberRepository taskMemberRepository,
-                        ITaskRequirementRepository taskRequirementRepository,
-                        IProjectService projectService,
+                        IUserOrganizationRepository userOrganizationRepository,
                         SecurityUtils securityUtils,
                         ITaskActivityLogRepository taskActivityLogRepository,
                         ITaskCommentRepository taskCommentRepository,
@@ -74,8 +74,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 super(repository, mapper, messageService, Task.class);
                 this.taskListRepository = taskListRepository;
                 this.taskMemberRepository = taskMemberRepository;
-                this.taskRequirementRepository = taskRequirementRepository;
-                this.projectService = projectService;
+                this.userOrganizationRepository = userOrganizationRepository;
                 this.securityUtils = securityUtils;
                 this.taskActivityLogRepository = taskActivityLogRepository;
                 this.taskCommentRepository = taskCommentRepository;
@@ -126,9 +125,16 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         public List<TaskDTO> findAccessibleByUser() {
                 User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
+
+                if (isUnitManager(currentUser.getId(), orgId)) {
+                        return repository.findByOrganizationId(orgId).stream()
+                                        .map(mapper::entityToDTO)
+                                        .toList();
+                }
+
                 UUID userId = currentUser.getId();
                 return repository.findAccessibleByUser(orgId, userId).stream()
-                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository))
+                                .map(mapper::entityToDTO)
                                 .toList();
         }
 
@@ -137,9 +143,24 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
         public Page<TaskDTO> findAccessibleByUser(Pageable pageable) {
                 User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
+
+                if (isUnitManager(currentUser.getId(), orgId)) {
+                        return repository.findByOrganizationId(orgId, pageable)
+                                        .map(mapper::entityToDTO);
+                }
+
                 UUID userId = currentUser.getId();
                 return repository.findAccessibleByUser(orgId, userId, pageable)
-                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
+                                .map(mapper::entityToDTO);
+        }
+
+        private boolean isUnitManager(UUID userId, UUID orgId) {
+                return userOrganizationRepository.findByUserIdAndOrganizationId(userId, orgId)
+                                .map(uo -> uo.getTitle() != null
+                                                && (TitleDefault.UNIT_LEADER.getValue().equals(uo.getTitle().getName())
+                                                                || TitleDefault.DEPUTY.getValue()
+                                                                                .equals(uo.getTitle().getName())))
+                                .orElse(false);
         }
 
         @Override
@@ -191,9 +212,13 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
                                 return cb.conjunction();
                         }
+                        var projectJoin = root.<Task, com.tnh.baseware.core.entities.project.Project>join("project",
+                                        jakarta.persistence.criteria.JoinType.LEFT);
+                        var orgJoin = projectJoin.<com.tnh.baseware.core.entities.project.Project, com.tnh.baseware.core.entities.adu.Organization>join(
+                                        "organization", jakarta.persistence.criteria.JoinType.LEFT);
                         return cb.or(
                                         cb.isNull(root.get("project")),
-                                        cb.equal(root.get("project").get("organization").get("id"), orgId));
+                                        cb.equal(orgJoin.get("id"), orgId));
                 };
 
                 var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
@@ -233,14 +258,118 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
                                 return cb.conjunction();
                         }
+                        var projectJoin = root.<Task, com.tnh.baseware.core.entities.project.Project>join("project",
+                                        jakarta.persistence.criteria.JoinType.LEFT);
+                        var orgJoin = projectJoin.<com.tnh.baseware.core.entities.project.Project, com.tnh.baseware.core.entities.adu.Organization>join(
+                                        "organization", jakarta.persistence.criteria.JoinType.LEFT);
                         return cb.or(
                                         cb.isNull(root.get("project")),
-                                        cb.equal(root.get("project").get("organization").get("id"), orgId));
+                                        cb.equal(orgJoin.get("id"), orgId));
                 };
 
                 var combinedSpec = baseSpec.and(assignedToMeSpec).and(orgSpec);
                 var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
                 return repository.findAll(combinedSpec, pageable).map(mapper::entityToDTO);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<TaskDTO> searchAccessibleByUser(SearchRequest searchRequest) {
+                User currentUser = getCurrentUser();
+                UUID orgId = securityUtils.currentOrgId();
+
+                var baseSpec = new GenericSpecification<Task>(searchRequest);
+                var orgSpec = getOrgSpec(orgId);
+
+                Specification<Task> accessSpec;
+                if (isUnitManager(currentUser.getId(), orgId)) {
+                        accessSpec = Specification.where(null);
+                } else {
+                        accessSpec = (root, query, cb) -> {
+                                var subquery = query.subquery(UUID.class);
+                                var taskMember = subquery.from(TaskMember.class);
+                                subquery.select(taskMember.get("task").get("id"))
+                                                .where(cb.equal(taskMember.get("user").get("id"), currentUser.getId()));
+                                return root.get("id").in(subquery);
+                        };
+                }
+
+                var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
+                return repository.findAll(baseSpec.and(orgSpec).and(accessSpec), pageable).map(mapper::entityToDTO);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<TaskDTO> searchByProjectId(UUID projectId, SearchRequest searchRequest) {
+                UUID orgId = securityUtils.currentOrgId();
+                var baseSpec = new GenericSpecification<Task>(searchRequest);
+                var orgSpec = getOrgSpec(orgId);
+                Specification<Task> projectSpec = (root, query, cb) -> cb.equal(root.get("project").get("id"),
+                                projectId);
+
+                var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
+                return repository.findAll(baseSpec.and(orgSpec).and(projectSpec), pageable).map(mapper::entityToDTO);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<TaskDTO> searchByTaskListId(UUID taskListId, SearchRequest searchRequest) {
+                UUID orgId = securityUtils.currentOrgId();
+                var baseSpec = new GenericSpecification<Task>(searchRequest);
+                var orgSpec = getOrgSpec(orgId);
+                Specification<Task> taskListSpec = (root, query, cb) -> cb.equal(root.get("taskList").get("id"),
+                                taskListId);
+
+                var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
+                return repository.findAll(baseSpec.and(orgSpec).and(taskListSpec), pageable).map(mapper::entityToDTO);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<TaskDTO> searchByStatus(TaskStatus status, SearchRequest searchRequest) {
+                User currentUser = getCurrentUser();
+                UUID orgId = securityUtils.currentOrgId();
+
+                var baseSpec = new GenericSpecification<Task>(searchRequest);
+                var orgSpec = getOrgSpec(orgId);
+                Specification<Task> statusSpec = (root, query, cb) -> cb.equal(root.get("status"), status);
+
+                Specification<Task> accessSpec;
+                if (isUnitManager(currentUser.getId(), orgId)) {
+                        accessSpec = Specification.where(null);
+                } else {
+                        accessSpec = (root, query, cb) -> {
+                                var subquery = query.subquery(UUID.class);
+                                var taskMember = subquery.from(TaskMember.class);
+                                subquery.select(taskMember.get("task").get("id"))
+                                                .where(cb.equal(taskMember.get("user").get("id"), currentUser.getId()));
+                                return root.get("id").in(subquery);
+                        };
+                }
+
+                var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
+                return repository.findAll(baseSpec.and(orgSpec).and(statusSpec).and(accessSpec), pageable)
+                                .map(mapper::entityToDTO);
+        }
+
+        private Specification<Task> getOrgSpec(UUID orgId) {
+                return (root, query, cb) -> {
+                        var deletedPredicate = cb.equal(root.get("deleted"), false);
+
+                        if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
+                                return deletedPredicate;
+                        }
+                        var projectJoin = root.<Task, com.tnh.baseware.core.entities.project.Project>join("project",
+                                        jakarta.persistence.criteria.JoinType.LEFT);
+                        var orgJoin = projectJoin.<com.tnh.baseware.core.entities.project.Project, com.tnh.baseware.core.entities.adu.Organization>join(
+                                        "organization", jakarta.persistence.criteria.JoinType.LEFT);
+
+                        var orgPredicate = cb.or(
+                                        cb.isNull(root.get("project")),
+                                        cb.equal(orgJoin.get("id"), orgId));
+
+                        return cb.and(deletedPredicate, orgPredicate);
+                };
         }
 
         @Override
@@ -303,25 +432,6 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 Comparator.nullsLast(Comparator.reverseOrder())));
 
                 return result;
-        }
-
-        @Override
-        public TaskStatisticDTO getDashboardStatistics() {
-                UUID orgId = securityUtils.currentOrgId();
-                UUID userId = securityUtils.currentUser().getId();
-                java.time.Instant now = java.time.Instant.now();
-                java.time.Instant future = now.plus(1, java.time.temporal.ChronoUnit.DAYS);
-
-                TaskStatisticDTO stats = new TaskStatisticDTO();
-                stats.setTotal(repository.countAccessibleByUser(orgId, userId));
-                stats.setTotalNew(repository.countAccessibleByStatus(orgId, userId, TaskStatus.TODO));
-                stats.setTotalInProgress(repository.countAccessibleByStatus(orgId, userId, TaskStatus.IN_PROGRESS));
-                stats.setTotalReview(repository.countAccessibleByStatus(orgId, userId, TaskStatus.REVIEW));
-                stats.setTotalCompleted(repository.countAccessibleByStatus(orgId, userId, TaskStatus.DONE));
-                stats.setTotalOverdue(repository.countAccessibleOverdue(orgId, userId, now));
-                stats.setTotalDueSoon(repository.countAccessibleDueSoon(orgId, userId, now, future));
-
-                return stats;
         }
 
         @Override

@@ -12,21 +12,23 @@ import java.util.UUID;
 public record TaskSnapshot(
         String title,
         String description,
+        Instant startDate,
         Instant dueDate,
         TaskPriority priority,
         TaskType type,
-        UUID taskListId
-) implements DiffSnapshot {
+        UUID taskListId,
+        UUID taskCategoryId) implements DiffSnapshot {
 
     public static TaskSnapshot from(Task task) {
         return new TaskSnapshot(
                 task.getTitle(),
                 task.getDescription(),
+                task.getStartDate(),
                 task.getDueDate(),
                 task.getPriority(),
                 task.getType(),
-                task.getTaskList() != null ? task.getTaskList().getId() : null
-        );
+                task.getTaskList() != null ? task.getTaskList().getId() : null,
+                task.getTaskCategory() != null ? task.getTaskCategory().getId() : null);
     }
 
     @Override
@@ -34,10 +36,12 @@ public record TaskSnapshot(
         Map<String, Object> map = new HashMap<>();
         map.put("title", title);
         map.put("description", description);
+        map.put("startDate", startDate);
         map.put("dueDate", dueDate);
         map.put("priority", priority);
         map.put("type", type);
         map.put("taskList", taskListId);
+        map.put("taskCategory", taskCategoryId);
         return map;
     }
 }

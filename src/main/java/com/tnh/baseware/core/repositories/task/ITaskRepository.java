@@ -150,6 +150,126 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
                         @Param("start") java.time.Instant start,
                         @Param("end") java.time.Instant end);
 
+        // TIMEBOXED COUNTS (For Date Range Filtering)
+
+        @Query("""
+                        SELECT COUNT(t)
+                        FROM Task t
+                        LEFT JOIN ProjectMember pm ON pm.project.id = t.project.id AND pm.user.id = :userId
+                        LEFT JOIN TaskMember tm ON tm.task.id = t.id AND tm.user.id = :userId
+                        WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
+                          AND t.deleted = false
+                          AND (t.createdDate >= :from OR :from IS NULL)
+                          AND (t.createdDate <= :to OR :to IS NULL)
+                          AND (
+                             t.createdBy = :userId
+                             OR tm.user.id = :userId
+                             OR (pm.user.id = :userId AND (pm.role = 'MANAGER' OR pm.role = 'OWNER'))
+                          )
+                        """)
+        long countAccessibleByUserTimeboxed(
+                        @Param("orgId") UUID orgId,
+                        @Param("userId") UUID userId,
+                        @Param("from") java.time.Instant from,
+                        @Param("to") java.time.Instant to);
+
+        @Query("""
+                        SELECT COUNT(t)
+                        FROM Task t
+                        LEFT JOIN ProjectMember pm ON pm.project.id = t.project.id AND pm.user.id = :userId
+                        LEFT JOIN TaskMember tm ON tm.task.id = t.id AND tm.user.id = :userId
+                        WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
+                          AND t.deleted = false
+                          AND t.status = :status
+                          AND (t.createdDate >= :from OR :from IS NULL)
+                          AND (t.createdDate <= :to OR :to IS NULL)
+                          AND (
+                             t.createdBy = :userId
+                             OR tm.user.id = :userId
+                             OR (pm.user.id = :userId AND (pm.role = 'MANAGER' OR pm.role = 'OWNER'))
+                          )
+                        """)
+        long countAccessibleByStatusTimeboxed(
+                        @Param("orgId") UUID orgId,
+                        @Param("userId") UUID userId,
+                        @Param("status") TaskStatus status,
+                        @Param("from") java.time.Instant from,
+                        @Param("to") java.time.Instant to);
+
+        @Query("""
+                        SELECT COUNT(t)
+                        FROM Task t
+                        LEFT JOIN ProjectMember pm ON pm.project.id = t.project.id AND pm.user.id = :userId
+                        LEFT JOIN TaskMember tm ON tm.task.id = t.id AND tm.user.id = :userId
+                        WHERE (t.project IS NULL OR t.project.organization.id = :orgId)
+                          AND t.deleted = false
+                          AND t.status = :status
+                          AND (t.modifiedDate >= :from OR :from IS NULL)
+                          AND (t.modifiedDate <= :to OR :to IS NULL)
+                          AND (
+                             t.createdBy = :userId
+                             OR tm.user.id = :userId
+                             OR (pm.user.id = :userId AND (pm.role = 'MANAGER' OR pm.role = 'OWNER'))
+                          )
+                        """)
+        long countAccessibleByStatusFinishedTimeboxed(
+                        @Param("orgId") UUID orgId,
+                        @Param("userId") UUID userId,
+                        @Param("status") TaskStatus status,
+                        @Param("from") java.time.Instant from,
+                        @Param("to") java.time.Instant to);
+
+        // ORG WIDE TIMEBOXED
+
+        @Query("""
+                        SELECT COUNT(t)
+                        FROM Task t
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        WHERE (p IS NULL OR o.id = :orgId)
+                          AND t.deleted = false
+                          AND (t.createdDate >= :from OR :from IS NULL)
+                          AND (t.createdDate <= :to OR :to IS NULL)
+                        """)
+        long countByOrganizationIdTimeboxed(
+                        @Param("orgId") UUID orgId,
+                        @Param("from") java.time.Instant from,
+                        @Param("to") java.time.Instant to);
+
+        @Query("""
+                        SELECT COUNT(t)
+                        FROM Task t
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        WHERE (p IS NULL OR o.id = :orgId)
+                          AND t.deleted = false
+                          AND t.status = :status
+                          AND (t.createdDate >= :from OR :from IS NULL)
+                          AND (t.createdDate <= :to OR :to IS NULL)
+                        """)
+        long countByOrganizationIdAndStatusTimeboxed(
+                        @Param("orgId") UUID orgId,
+                        @Param("status") TaskStatus status,
+                        @Param("from") java.time.Instant from,
+                        @Param("to") java.time.Instant to);
+
+        @Query("""
+                        SELECT COUNT(t)
+                        FROM Task t
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        WHERE (p IS NULL OR o.id = :orgId)
+                          AND t.deleted = false
+                          AND t.status = :status
+                          AND (t.modifiedDate >= :from OR :from IS NULL)
+                          AND (t.modifiedDate <= :to OR :to IS NULL)
+                        """)
+        long countByOrganizationIdAndStatusFinishedTimeboxed(
+                        @Param("orgId") UUID orgId,
+                        @Param("status") TaskStatus status,
+                        @Param("from") java.time.Instant from,
+                        @Param("to") java.time.Instant to);
+
         // GLOBAL STATISTICS QUERIES (FOR UNIT LEADER/DEPUTY)
         @Query("SELECT COUNT(t) FROM Task t LEFT JOIN t.project p LEFT JOIN p.organization o WHERE (p IS NULL OR o.id = :orgId) AND t.deleted = false")
         long countByOrganizationId(@Param("orgId") UUID orgId);
@@ -181,4 +301,120 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
                         """)
         long countByOrganizationIdDueSoon(@Param("orgId") UUID orgId,
                         @Param("now") java.time.Instant now, @Param("future") java.time.Instant future);
+
+        // EXECUTIVE DASHBOARD QUERIES
+
+        // 1. AT RISK: High Priority AND Due < 48h AND Progress < 20%
+        @Query("""
+                        SELECT COUNT(t)
+                        FROM Task t
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        WHERE (p IS NULL OR o.id = :orgId)
+                          AND t.deleted = false
+                          AND t.status != 'DONE' AND t.status != 'CANCELLED'
+                          AND t.priority = 'HIGH'
+                          AND t.dueDate <= :future
+                          AND t.progress < 20
+                        """)
+        long countDeepAtRisk(
+                        @Param("orgId") UUID orgId,
+                        @Param("future") java.time.Instant future);
+
+        // 2. BLOCKED: Active AND Created > 48h AND No Report in last 48h
+        @Query("""
+                        SELECT COUNT(t)
+                        FROM Task t
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        WHERE (p IS NULL OR o.id = :orgId)
+                          AND t.deleted = false
+                          AND t.status != 'DONE' AND t.status != 'CANCELLED'
+                          AND t.createdDate < :past
+                          AND NOT EXISTS (
+                              SELECT 1 FROM TaskComment c
+                              WHERE c.task.id = t.id
+                              AND c.type = 'REPORT'
+                              AND c.createdDate > :past
+                          )
+                        """)
+        long countBlocked(
+                        @Param("orgId") UUID orgId,
+                        @Param("past") java.time.Instant past);
+
+        // 3. URGENT TASKS FOR ME: Assigned to me AND High Priority AND Not Done
+        @Query("""
+                        SELECT DISTINCT t
+                        FROM Task t
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        JOIN TaskMember tm ON tm.task.id = t.id
+                        WHERE tm.user.id = :userId
+                          AND t.deleted = false
+                          AND t.status != 'DONE' AND t.status != 'CANCELLED'
+                          AND t.priority = 'HIGH'
+                        ORDER BY t.dueDate ASC
+                        """)
+        List<Task> findMyUrgentTasks(@Param("userId") UUID userId);
+
+        // 4. APPROVAL QUEUE: Status = REVIEW AND (I am reviewer OR I am Unit Manager)
+        // Note: Since 'reviewer' concept isn't strictly defined in Task entity yet,
+        // we assume for now that Unit Leaders see all tasks in REVIEW state for their
+        // Org,
+        // or tasks where they are explicitly assigned.
+        // Making this broader: All tasks in REVIEW in accessible scope.
+        @Query("""
+                        SELECT DISTINCT t
+                        FROM Task t
+                        LEFT JOIN t.project p
+                          AND t.status = 'REVIEW'
+                        """)
+        List<Task> findTasksInReview(@Param("orgId") UUID orgId);
+
+        // 5. VELOCITY DATA: Completed tasks in range
+        @Query("""
+                        SELECT t
+                        FROM Task t
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        WHERE (p IS NULL OR o.id = :orgId)
+                          AND t.deleted = false
+                          AND t.status = 'DONE'
+                          AND t.modifiedDate >= :startDate
+                        """)
+        List<Task> findCompletedTasksInRange(
+                        @Param("orgId") UUID orgId,
+                        @Param("startDate") java.time.Instant startDate);
+
+        // 6. RESOURCE WORKLOAD AGGREGATION
+        // Returns Object array: [User, Long count]
+        @Query("""
+                        SELECT tm.user, COUNT(distinct t.id)
+                        FROM Task t
+                        JOIN TaskMember tm ON tm.task.id = t.id
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        WHERE (p IS NULL OR o.id = :orgId)
+                          AND t.deleted = false
+                          AND t.status != 'DONE' AND t.status != 'CANCELLED'
+                        GROUP BY tm.user
+                        ORDER BY COUNT(distinct t.id) DESC
+                        """)
+        List<Object[]> countActiveTasksPerUser(@Param("orgId") UUID orgId);
+
+        // 7. PROJECT PROGRESS STATS
+        // Returns Object array: [ProjectId, TotalCount, CompletedCount]
+        @Query("""
+                        SELECT t.project.id,
+                               COUNT(t.id),
+                               SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END)
+                        FROM Task t
+                        LEFT JOIN t.project p
+                        LEFT JOIN p.organization o
+                        WHERE o.id = :orgId
+                          AND t.project IS NOT NULL
+                          AND t.deleted = false
+                        GROUP BY t.project.id
+                        """)
+        List<Object[]> getProjectProgressStats(@Param("orgId") UUID orgId);
 }

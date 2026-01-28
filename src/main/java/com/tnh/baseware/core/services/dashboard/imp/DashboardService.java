@@ -40,7 +40,7 @@ public class DashboardService implements IDashboardService {
 
     @Override
     @Transactional(readOnly = true)
-    public TaskStatisticDTO getPersonalStatistics() {
+    public TaskStatisticDTO getPersonalStatistics(Instant from, Instant to) {
         UUID orgId = securityUtils.currentOrgId();
         UUID userId = securityUtils.currentUser().getId();
         Instant now = Instant.now();
@@ -48,24 +48,50 @@ public class DashboardService implements IDashboardService {
 
         TaskStatisticDTO stats = new TaskStatisticDTO();
         if (isUnitManager(userId, orgId)) {
-            stats.setTotal(taskRepository.countByOrganizationId(orgId));
-            stats.setTotalNew(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.TODO));
-            stats.setTotalInProgress(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.IN_PROGRESS));
-            stats.setTotalReview(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.REVIEW));
-            stats.setTotalCompleted(taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.DONE));
+            stats.setTotal(taskRepository.countByOrganizationIdTimeboxed(orgId, from, to));
+            stats.setTotalNew(taskRepository.countByOrganizationIdAndStatusTimeboxed(orgId, TaskStatus.TODO, from, to));
+            stats.setTotalInProgress(
+                    taskRepository.countByOrganizationIdAndStatusTimeboxed(orgId, TaskStatus.IN_PROGRESS, from, to));
+            stats.setTotalReview(
+                    taskRepository.countByOrganizationIdAndStatusTimeboxed(orgId, TaskStatus.REVIEW, from, to));
+
+            // Logic: Completed tasks -> Filter by Completion Date (ModifiedDate)
+            stats.setTotalCompleted(
+                    taskRepository.countByOrganizationIdAndStatusFinishedTimeboxed(orgId, TaskStatus.DONE, from, to));
+
+            // Overdue/DueSoon are "Snapshot" metrics, usually ignore "Created Date" filter,
+            // but enforce "Active now".
+            // If user wants "Overdue tasks among those created this month", we use the
+            // filter.
+            // Let's assume filter applies to the *set of tasks considered*.
+            // Currently Overdue query does not support timeboxing createdDate easily
+            // without modifying it.
+            // For now, keep Overdue/DueSoon as "Current State" (ignoring from/to) or we
+            // need to add Timebox to them too.
+            // User request usually implies filtering the "Report".
+            // Let's leave Overdue/DueSoon as global snapshot for now unless requested
+            // otherwise.
             stats.setTotalOverdue(taskRepository.countByOrganizationIdOverdue(orgId, now));
             stats.setTotalDueSoon(taskRepository.countByOrganizationIdDueSoon(orgId, now, future));
         } else {
-            stats.setTotal(taskRepository.countAccessibleByUser(orgId, userId));
-            stats.setTotalNew(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.TODO));
-            stats.setTotalInProgress(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.IN_PROGRESS));
-            stats.setTotalReview(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.REVIEW));
-            stats.setTotalCompleted(taskRepository.countAccessibleByStatus(orgId, userId, TaskStatus.DONE));
+            stats.setTotal(taskRepository.countAccessibleByUserTimeboxed(orgId, userId, from, to));
+            stats.setTotalNew(
+                    taskRepository.countAccessibleByStatusTimeboxed(orgId, userId, TaskStatus.TODO, from, to));
+            stats.setTotalInProgress(
+                    taskRepository.countAccessibleByStatusTimeboxed(orgId, userId, TaskStatus.IN_PROGRESS, from, to));
+            stats.setTotalReview(
+                    taskRepository.countAccessibleByStatusTimeboxed(orgId, userId, TaskStatus.REVIEW, from, to));
+
+            // Logic: Completed tasks -> Filter by Completion Date (ModifiedDate)
+            stats.setTotalCompleted(
+                    taskRepository.countAccessibleByStatusFinishedTimeboxed(orgId, userId, TaskStatus.DONE, from, to));
+
             stats.setTotalOverdue(taskRepository.countAccessibleOverdue(orgId, userId, now));
             stats.setTotalDueSoon(taskRepository.countAccessibleDueSoon(orgId, userId, now, future));
         }
 
-        // New Metric: Active Projects
+        // New Metric: Active Projects (Can also timebox by StartDate if needed, but
+        // usually Active is state)
         stats.setTotalActiveProjects(projectRepository.countActiveProjectsByUser(orgId, userId));
 
         return stats;

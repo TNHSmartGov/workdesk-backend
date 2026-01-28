@@ -14,7 +14,7 @@ public interface IDashboardService {
      * Get personal statistics for the current user.
      * Includes task counts (Total, New, Overdue) and active project count.
      */
-    TaskStatisticDTO getPersonalStatistics();
+    TaskStatisticDTO getPersonalStatistics(java.time.Instant from, java.time.Instant to);
 
     /**
      * Get recent activity stream for the current user.

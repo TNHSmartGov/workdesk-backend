@@ -42,4 +42,6 @@ public interface IProjectRepository extends IGenericRepository<Project, UUID> {
       """)
   long countActiveProjectsByUser(@org.springframework.data.repository.query.Param("orgId") UUID orgId,
       @org.springframework.data.repository.query.Param("userId") UUID userId);
+
+  List<Project> findAllByOrganizationId(UUID organizationId);
 }

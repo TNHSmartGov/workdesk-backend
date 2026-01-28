@@ -41,10 +41,12 @@ public class DashboardResource {
     @Operation(summary = "Get personal statistics")
     @ApiOkResponse(value = TaskStatisticDTO.class)
     @GetMapping("/personal/statistics")
-    public ResponseEntity<ApiMessageDTO<TaskStatisticDTO>> getPersonalStatistics() {
-        var stats = dashboardService.getPersonalStatistics();
+    public ResponseEntity<ApiMessageDTO<TaskStatisticDTO>> getPersonalStatistics(
+            @RequestParam(required = false) java.time.Instant fromDate,
+            @RequestParam(required = false) java.time.Instant toDate) {
+        var data = dashboardService.getPersonalStatistics(fromDate, toDate);
         return ResponseEntity.ok(ApiMessageDTO.<TaskStatisticDTO>builder()
-                .data(stats)
+                .data(data)
                 .result(true)
                 .message(messageService.getMessage("dashboard.statistics.fetched"))
                 .code(HttpStatus.OK.value())

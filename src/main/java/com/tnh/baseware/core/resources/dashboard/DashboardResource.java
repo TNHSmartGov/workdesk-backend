@@ -35,76 +35,83 @@ import java.time.Instant;
 @Tag(name = "Dashboard", description = "Dashboard Aggregation APIs")
 public class DashboardResource {
 
-    IDashboardService dashboardService;
-    MessageService messageService;
+        IDashboardService dashboardService;
+        MessageService messageService;
+        com.tnh.baseware.core.utils.SecurityUtils securityUtils;
 
-    @Operation(summary = "Get personal statistics")
-    @ApiOkResponse(value = TaskStatisticDTO.class)
-    @GetMapping("/personal/statistics")
-    public ResponseEntity<ApiMessageDTO<TaskStatisticDTO>> getPersonalStatistics() {
-        var stats = dashboardService.getPersonalStatistics();
-        return ResponseEntity.ok(ApiMessageDTO.<TaskStatisticDTO>builder()
-                .data(stats)
-                .result(true)
-                .message(messageService.getMessage("dashboard.statistics.fetched"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
+        @Operation(summary = "Get personal statistics")
+        @ApiOkResponse(value = TaskStatisticDTO.class)
+        @GetMapping("/personal/statistics")
+        public ResponseEntity<ApiMessageDTO<TaskStatisticDTO>> getPersonalStatistics(
+                        @RequestParam(required = false) java.time.Instant fromDate,
+                        @RequestParam(required = false) java.time.Instant toDate) {
+                var userId = securityUtils.currentUser().getId();
+                var orgId = securityUtils.currentOrgId();
+                var data = dashboardService.getPersonalStatistics(userId, orgId, fromDate, toDate);
+                return ResponseEntity.ok(ApiMessageDTO.<TaskStatisticDTO>builder()
+                                .data(data)
+                                .result(true)
+                                .message(messageService.getMessage("dashboard.statistics.fetched"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
 
-    @Operation(summary = "Get personal recent activities")
-    @ApiOkResponse(value = ActivityLogDTO.class, type = ApiResponseType.HATEOAS_PAGE)
-    @GetMapping("/personal/activities")
-    public ResponseEntity<ApiMessageDTO<PagedModel<EntityModel<ActivityLogDTO>>>> getRecentActivities(
-            Pageable pageable,
-            PagedResourcesAssembler<ActivityLogDTO> assembler) {
-        var activities = dashboardService.getRecentActivities(pageable);
-        var pagedModel = assembler.toModel(activities);
-        return ResponseEntity.ok(ApiMessageDTO.<PagedModel<EntityModel<ActivityLogDTO>>>builder()
-                .data(pagedModel)
-                .result(true)
-                .message(messageService.getMessage("dashboard.activities.fetched"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
+        @Operation(summary = "Get personal recent activities")
+        @ApiOkResponse(value = ActivityLogDTO.class, type = ApiResponseType.HATEOAS_PAGE)
+        @GetMapping("/personal/activities")
+        public ResponseEntity<ApiMessageDTO<PagedModel<EntityModel<ActivityLogDTO>>>> getRecentActivities(
+                        Pageable pageable,
+                        PagedResourcesAssembler<ActivityLogDTO> assembler) {
+                var activities = dashboardService.getRecentActivities(pageable);
+                var pagedModel = assembler.toModel(activities);
+                return ResponseEntity.ok(ApiMessageDTO.<PagedModel<EntityModel<ActivityLogDTO>>>builder()
+                                .data(pagedModel)
+                                .result(true)
+                                .message(messageService.getMessage("dashboard.activities.fetched"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
 
-    @Operation(summary = "Get calendar tasks")
-    @ApiOkResponse(value = CalendarTaskDTO.class)
-    @GetMapping("/calendar")
-    public ResponseEntity<ApiMessageDTO<List<CalendarTaskDTO>>> getCalendarTasks(
-            @RequestParam Instant start,
-            @RequestParam Instant end) {
-        var tasks = dashboardService.getCalendarTasks(start, end);
-        return ResponseEntity.ok(ApiMessageDTO.<List<CalendarTaskDTO>>builder()
-                .data(tasks)
-                .result(true)
-                .message(messageService.getMessage("dashboard.calendar.fetched"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
+        @Operation(summary = "Get calendar tasks")
+        @ApiOkResponse(value = CalendarTaskDTO.class)
+        @GetMapping("/calendar")
+        public ResponseEntity<ApiMessageDTO<List<CalendarTaskDTO>>> getCalendarTasks(
+                        @RequestParam Instant start,
+                        @RequestParam Instant end) {
+                var tasks = dashboardService.getCalendarTasks(start, end);
+                return ResponseEntity.ok(ApiMessageDTO.<List<CalendarTaskDTO>>builder()
+                                .data(tasks)
+                                .result(true)
+                                .message(messageService.getMessage("dashboard.calendar.fetched"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
 
-    @Operation(summary = "Get unit performance statistics")
-    @ApiOkResponse(value = UnitPerformanceDTO.class)
-    @GetMapping("/unit/performance")
-    public ResponseEntity<ApiMessageDTO<UnitPerformanceDTO>> getUnitPerformance() {
-        var stats = dashboardService.getUnitPerformance();
-        return ResponseEntity.ok(ApiMessageDTO.<UnitPerformanceDTO>builder()
-                .data(stats)
-                .result(true)
-                .message(messageService.getMessage("dashboard.unit.performance.fetched"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
+        @Operation(summary = "Get unit performance statistics")
+        @ApiOkResponse(value = UnitPerformanceDTO.class)
+        @GetMapping("/unit/performance")
+        public ResponseEntity<ApiMessageDTO<UnitPerformanceDTO>> getUnitPerformance() {
+                var orgId = securityUtils.currentOrgId();
+                var stats = dashboardService.getUnitPerformance(orgId);
+                return ResponseEntity.ok(ApiMessageDTO.<UnitPerformanceDTO>builder()
+                                .data(stats)
+                                .result(true)
+                                .message(messageService.getMessage("dashboard.unit.performance.fetched"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
 
-    @Operation(summary = "Get unit workload distribution")
-    @ApiOkResponse(value = UnitWorkloadDTO.class)
-    @GetMapping("/unit/workload")
-    public ResponseEntity<ApiMessageDTO<List<UnitWorkloadDTO>>> getUnitWorkload() {
-        var workload = dashboardService.getUnitWorkload();
-        return ResponseEntity.ok(ApiMessageDTO.<List<UnitWorkloadDTO>>builder()
-                .data(workload)
-                .result(true)
-                .message(messageService.getMessage("dashboard.unit.workload.fetched"))
-                .code(HttpStatus.OK.value())
-                .build());
-    }
+        @Operation(summary = "Get unit workload distribution")
+        @ApiOkResponse(value = UnitWorkloadDTO.class)
+        @GetMapping("/unit/workload")
+        public ResponseEntity<ApiMessageDTO<List<UnitWorkloadDTO>>> getUnitWorkload() {
+                var orgId = securityUtils.currentOrgId();
+                var workload = dashboardService.getUnitWorkload(orgId);
+                return ResponseEntity.ok(ApiMessageDTO.<List<UnitWorkloadDTO>>builder()
+                                .data(workload)
+                                .result(true)
+                                .message(messageService.getMessage("dashboard.unit.workload.fetched"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
 }

@@ -453,35 +453,37 @@ public class TaskCommandService
 
         User currentUser = getCurrentUser();
 
-        // 1. Create Comment (Type REPORT)
-        TaskComment comment = TaskComment.builder()
-                .task(task)
-                .user(currentUser)
-                .content(form.getContent())
-                .type(TaskCommentType.REPORT)
-                .build();
+        if (form.getContent() != null && !form.getContent().isBlank()) {
+            // 1. Create Comment (Type REPORT)
+            TaskComment comment = TaskComment.builder()
+                    .task(task)
+                    .user(currentUser)
+                    .content(form.getContent())
+                    .type(TaskCommentType.REPORT)
+                    .build();
 
-        TaskComment savedComment = taskCommentRepository.save(comment);
+            TaskComment savedComment = taskCommentRepository.save(comment);
 
-        // 2. Handle Attachments (if any)
-        if (form.getFileIds() != null && !form.getFileIds().isEmpty()) {
-            List<TaskCommentAttachment> attachments = form.getFileIds().stream()
-                    .map(fileId -> {
-                        // Correctly fetch FileDocument entity
-                        FileDocument file = fileDocumentRepository.findById(fileId)
-                                .orElseThrow(
-                                        () -> new BWCNotFoundException(messageService.getMessage("file.not.found")));
+            // 2. Handle Attachments (if any)
+            if (form.getFileIds() != null && !form.getFileIds().isEmpty()) {
+                List<TaskCommentAttachment> attachments = form.getFileIds().stream()
+                        .map(fileId -> {
+                            // Correctly fetch FileDocument entity
+                            FileDocument file = fileDocumentRepository.findById(fileId)
+                                    .orElseThrow(
+                                            () -> new BWCNotFoundException(
+                                                    messageService.getMessage("file.not.found")));
 
-                        return TaskCommentAttachment.builder()
-                                .comment(savedComment)
-                                .file(file)
-                                .uploader(currentUser)
-                                .build();
-                    })
-                    .toList();
-            taskCommentAttachmentRepository.saveAll(attachments);
+                            return TaskCommentAttachment.builder()
+                                    .comment(savedComment)
+                                    .file(file)
+                                    .uploader(currentUser)
+                                    .build();
+                        })
+                        .toList();
+                taskCommentAttachmentRepository.saveAll(attachments);
+            }
         }
-
         // 3. Update Member Status/Progress
         // Optimization: Fetch ALL members query once
         List<TaskMember> allMembers = taskMemberRepository.findByTask_Id(taskId);

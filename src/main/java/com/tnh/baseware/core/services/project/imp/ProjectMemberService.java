@@ -1,6 +1,5 @@
 package com.tnh.baseware.core.services.project.imp;
 
-import com.tnh.baseware.core.dtos.project.MemberDTO;
 import com.tnh.baseware.core.dtos.project.ProjectMemberDTO;
 import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.user.UserOrganization;
@@ -46,7 +45,7 @@ public class ProjectMemberService extends
     }
 
     @Override
-    public List<MemberDTO> getMembersByProject(UUID projectId) {
+    public List<ProjectMemberDTO> getMembersByProject(UUID projectId) {
         // lấy người dùng của dự án cụ thể , nếu người dùng đó là quản lý của đơn vị ,
         var curentUser = getCurrentUser();
         var project = projectRepository.findById(projectId)
@@ -68,7 +67,7 @@ public class ProjectMemberService extends
         }
 
         var members = repository.findDistinctByProject_Id(projectId);
-        return members.stream().map(mapper::entityToMemberDTO).toList();
+        return members.stream().map(mapper::entityToDTO).toList();
     }
 
     @Override

@@ -112,6 +112,10 @@ public class CacheConfiguration {
         initialCacheConfigurations.put("configCache", defaultCacheConfig.entryTtl(CONFIG_TTL));
         initialCacheConfigurations.put("userCache", defaultCacheConfig.entryTtl(Duration.ofMinutes(30)));
 
+        // Dashboard Caches
+        initialCacheConfigurations.put("dashboard_personal", defaultCacheConfig.entryTtl(Duration.ofMinutes(5)));
+        initialCacheConfigurations.put("dashboard_unit", defaultCacheConfig.entryTtl(Duration.ofMinutes(15)));
+
         log.debug(LogStyleHelper.debug("Redis Cache TTLs: default={}min, auth={}h, config={}h"),
                 DEFAULT_TTL.toMinutes(), AUTH_TTL.toHours(), CONFIG_TTL.toHours());
 
@@ -152,20 +156,20 @@ public class CacheConfiguration {
         return new CacheErrorHandler() {
             @Override
             public void handleCacheGetError(@NonNull RuntimeException exception,
-                                            @NonNull Cache cache, @NonNull Object key) {
+                    @NonNull Cache cache, @NonNull Object key) {
                 logCacheError("Error getting from cache", exception, cache, key);
             }
 
             @Override
             public void handleCachePutError(@NonNull RuntimeException exception,
-                                            @NonNull Cache cache, @NonNull Object key,
-                                            Object value) {
+                    @NonNull Cache cache, @NonNull Object key,
+                    Object value) {
                 logCacheError("Error putting in cache", exception, cache, key);
             }
 
             @Override
             public void handleCacheEvictError(@NonNull RuntimeException exception,
-                                              @NonNull Cache cache, @NonNull Object key) {
+                    @NonNull Cache cache, @NonNull Object key) {
                 logCacheError("Error evicting from cache", exception, cache, key);
             }
 
@@ -175,7 +179,7 @@ public class CacheConfiguration {
             }
 
             private void logCacheError(String operation, RuntimeException exception,
-                                       @NonNull Cache cache, Object key) {
+                    @NonNull Cache cache, Object key) {
                 String cacheName = cache.getName();
                 String keyString = key != null ? key.toString() : "null";
                 String message = String.format("%s: %s, cache: %s, key: %s",

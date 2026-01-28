@@ -139,6 +139,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#id")
     public TaskDTO update(UUID id, TaskEditorForm form) {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
@@ -168,6 +169,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#id")
     public void performAction(UUID id, TaskAction action) {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
@@ -253,6 +255,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#taskId")
     public void updatePersonalProgress(UUID taskId, Integer progress) {
         if (progress < 0 || progress > 100)
             throw new BWCValidationException(MessageConstant.PROGRESS_VALIDATE);
@@ -447,6 +450,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#taskId")
     public void reportProgress(UUID taskId, CreateTaskReportForm form) {
         Task task = repository.findById(taskId)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
@@ -551,6 +555,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#taskId")
     public void recalculateTaskProgress(UUID taskId) {
         Task task = repository.findById(taskId)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));

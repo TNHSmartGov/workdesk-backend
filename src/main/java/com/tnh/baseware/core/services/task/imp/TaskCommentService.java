@@ -35,6 +35,7 @@ public class TaskCommentService extends
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#form.taskId")
     public TaskCommentDTO create(TaskCommentEditorForm form) {
         if (form.getParentCommentId() != null) {
             var parent = repository.findById(form.getParentCommentId())

@@ -116,6 +116,10 @@ public class CacheConfiguration {
         initialCacheConfigurations.put("dashboard_personal", defaultCacheConfig.entryTtl(Duration.ofMinutes(5)));
         initialCacheConfigurations.put("dashboard_unit", defaultCacheConfig.entryTtl(Duration.ofMinutes(15)));
 
+        // Task Caches
+        initialCacheConfigurations.put("task_timeline", defaultCacheConfig.entryTtl(Duration.ofMinutes(15)));
+        initialCacheConfigurations.put("task_permissions", defaultCacheConfig.entryTtl(Duration.ofMinutes(5)));
+
         log.debug(LogStyleHelper.debug("Redis Cache TTLs: default={}min, auth={}h, config={}h"),
                 DEFAULT_TTL.toMinutes(), AUTH_TTL.toHours(), CONFIG_TTL.toHours());
 

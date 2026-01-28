@@ -25,6 +25,7 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
            LEFT JOIN TaskMember tm ON tm.task.id = t.id AND tm.user.id = :userId
            WHERE t.id = :taskId AND t.deleted = false
       """)
+  @org.springframework.cache.annotation.Cacheable(value = "task_permissions", key = "{#taskId, #userId}")
   Optional<UserTaskPermissionDTO> findUserPermissions(@Param("taskId") UUID taskId,
       @Param("userId") UUID userId);
 

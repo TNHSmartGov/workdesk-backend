@@ -390,6 +390,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
 
         @Override
         @Transactional(readOnly = true)
+        @org.springframework.cache.annotation.Cacheable(value = "task_timeline", key = "#taskId")
         public List<TaskTimelineItemDTO> getTaskTimeline(UUID taskId) {
                 // 1. Convert logs to timeline items
                 var logItems = taskActivityLogRepository.findByTaskId(taskId).stream()

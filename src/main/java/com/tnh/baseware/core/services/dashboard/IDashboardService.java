@@ -14,12 +14,8 @@ public interface IDashboardService {
      * Get personal statistics for the current user.
      * Includes task counts (Total, New, Overdue) and active project count.
      */
-    TaskStatisticDTO getPersonalStatistics(java.time.Instant from, java.time.Instant to);
-
-    /**
-     * Get recent activity stream for the current user.
-     * Aggregates logs from all accessible tasks/projects.
-     */
+    TaskStatisticDTO getPersonalStatistics(java.util.UUID userId, java.util.UUID orgId, java.time.Instant from,
+            java.time.Instant to);
 
     /**
      * Get recent activity stream for the current user.
@@ -32,7 +28,7 @@ public interface IDashboardService {
      */
     List<CalendarTaskDTO> getCalendarTasks(Instant startDate, Instant endDate);
 
-    com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO getUnitPerformance();
+    com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO getUnitPerformance(java.util.UUID orgId);
 
-    List<com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO> getUnitWorkload();
+    List<com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO> getUnitWorkload(java.util.UUID orgId);
 }

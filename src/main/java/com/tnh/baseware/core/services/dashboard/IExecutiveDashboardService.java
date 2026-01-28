@@ -9,13 +9,13 @@ import com.tnh.baseware.core.dtos.dashboard.executive.WeekVelocityDTO;
 import java.util.List;
 
 public interface IExecutiveDashboardService {
-    ExecutiveHotspotDTO getHotspots();
+    ExecutiveHotspotDTO getHotspots(java.util.UUID orgId);
 
-    ExecutiveActionItemDTO getActionItems();
+    ExecutiveActionItemDTO getActionItems(java.util.UUID orgId, java.util.UUID userId);
 
-    List<WeekVelocityDTO> getVelocity();
+    List<WeekVelocityDTO> getVelocity(java.util.UUID orgId);
 
-    List<ResourceHealthDTO> getResourceHealth();
+    List<ResourceHealthDTO> getResourceHealth(java.util.UUID orgId);
 
-    List<ProjectHealthDTO> getProjectHealth();
+    List<ProjectHealthDTO> getProjectHealth(java.util.UUID orgId);
 }

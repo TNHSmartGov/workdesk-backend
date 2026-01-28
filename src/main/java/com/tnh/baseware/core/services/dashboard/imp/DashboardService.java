@@ -17,6 +17,7 @@ import com.tnh.baseware.core.utils.SecurityUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,9 +41,8 @@ public class DashboardService implements IDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        public TaskStatisticDTO getPersonalStatistics(Instant from, Instant to) {
-                UUID orgId = securityUtils.currentOrgId();
-                UUID userId = securityUtils.currentUser().getId();
+        @Cacheable(value = "dashboard_personal", key = "{#userId, #orgId, #from, #to}")
+        public TaskStatisticDTO getPersonalStatistics(UUID userId, UUID orgId, Instant from, Instant to) {
                 Instant now = Instant.now();
                 Instant future = now.plus(3, ChronoUnit.DAYS);
 
@@ -151,8 +151,8 @@ public class DashboardService implements IDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        public UnitPerformanceDTO getUnitPerformance() {
-                UUID orgId = securityUtils.currentOrgId();
+        @Cacheable(value = "dashboard_unit", key = "#orgId")
+        public UnitPerformanceDTO getUnitPerformance(UUID orgId) {
                 // Default logic: User's organization
 
                 long total = taskRepository.countByOrganizationId(orgId);
@@ -171,8 +171,8 @@ public class DashboardService implements IDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        public java.util.List<UnitWorkloadDTO> getUnitWorkload() {
-                UUID orgId = securityUtils.currentOrgId();
+        @Cacheable(value = "dashboard_unit", key = "'workload:' + #orgId")
+        public java.util.List<UnitWorkloadDTO> getUnitWorkload(UUID orgId) {
                 return taskMemberRepository.getWorkloadDistribution(orgId, TaskMemberRole.ASSIGNEE, Instant.now(),
                                 TaskStatus.DONE);
         }

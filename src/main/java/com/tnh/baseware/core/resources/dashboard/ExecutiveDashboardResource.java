@@ -27,12 +27,14 @@ public class ExecutiveDashboardResource {
 
     IExecutiveDashboardService executiveService;
     MessageService messageService;
+    com.tnh.baseware.core.utils.SecurityUtils securityUtils;
 
     @Operation(summary = "Get risk hotspots (Overdue, At Risk, Blocked)")
     @ApiOkResponse(value = ExecutiveHotspotDTO.class)
     @GetMapping("/hotspots")
     public ResponseEntity<ApiMessageDTO<ExecutiveHotspotDTO>> getHotspots() {
-        var data = executiveService.getHotspots();
+        var orgId = securityUtils.currentOrgId();
+        var data = executiveService.getHotspots(orgId);
         return ResponseEntity.ok(ApiMessageDTO.<ExecutiveHotspotDTO>builder()
                 .data(data)
                 .result(true)
@@ -45,7 +47,9 @@ public class ExecutiveDashboardResource {
     @ApiOkResponse(value = ExecutiveActionItemDTO.class)
     @GetMapping("/action-items")
     public ResponseEntity<ApiMessageDTO<ExecutiveActionItemDTO>> getActionItems() {
-        var data = executiveService.getActionItems();
+        var orgId = securityUtils.currentOrgId();
+        var userId = securityUtils.currentUser().getId();
+        var data = executiveService.getActionItems(orgId, userId);
         return ResponseEntity.ok(ApiMessageDTO.<ExecutiveActionItemDTO>builder()
                 .data(data)
                 .result(true)
@@ -58,7 +62,8 @@ public class ExecutiveDashboardResource {
     @ApiOkResponse(value = WeekVelocityDTO.class)
     @GetMapping("/velocity")
     public ResponseEntity<ApiMessageDTO<List<WeekVelocityDTO>>> getVelocity() {
-        var data = executiveService.getVelocity();
+        var orgId = securityUtils.currentOrgId();
+        var data = executiveService.getVelocity(orgId);
         return ResponseEntity.ok(ApiMessageDTO.<List<WeekVelocityDTO>>builder()
                 .data(data)
                 .result(true)
@@ -71,7 +76,8 @@ public class ExecutiveDashboardResource {
     @ApiOkResponse(value = ResourceHealthDTO.class)
     @GetMapping("/resources/health")
     public ResponseEntity<ApiMessageDTO<List<ResourceHealthDTO>>> getResourceHealth() {
-        var data = executiveService.getResourceHealth();
+        var orgId = securityUtils.currentOrgId();
+        var data = executiveService.getResourceHealth(orgId);
         return ResponseEntity.ok(ApiMessageDTO.<List<ResourceHealthDTO>>builder()
                 .data(data)
                 .result(true)
@@ -84,7 +90,8 @@ public class ExecutiveDashboardResource {
     @ApiOkResponse(value = ProjectHealthDTO.class)
     @GetMapping("/projects/health")
     public ResponseEntity<ApiMessageDTO<List<ProjectHealthDTO>>> getProjectHealth() {
-        var data = executiveService.getProjectHealth();
+        var orgId = securityUtils.currentOrgId();
+        var data = executiveService.getProjectHealth(orgId);
         return ResponseEntity.ok(ApiMessageDTO.<List<ProjectHealthDTO>>builder()
                 .data(data)
                 .result(true)

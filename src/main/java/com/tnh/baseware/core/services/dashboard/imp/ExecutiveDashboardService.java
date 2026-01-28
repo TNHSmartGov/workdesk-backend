@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
 import java.util.*;
@@ -37,8 +36,8 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        public ExecutiveHotspotDTO getHotspots() {
-                UUID orgId = securityUtils.currentOrgId();
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "#orgId")
+        public ExecutiveHotspotDTO getHotspots(UUID orgId) {
                 Instant now = Instant.now();
                 Instant future48h = now.plus(48, ChronoUnit.HOURS);
                 Instant past48h = now.minus(48, ChronoUnit.HOURS);
@@ -61,10 +60,8 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        public ExecutiveActionItemDTO getActionItems() {
-                UUID orgId = securityUtils.currentOrgId();
-                UUID userId = securityUtils.currentUser().getId();
-
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_personal", key = "'executive_actions:' + #orgId + ':' + #userId")
+        public ExecutiveActionItemDTO getActionItems(UUID orgId, UUID userId) {
                 // 1. Approval Queue (Status = REVIEW)
                 // Ideally this should filter by permissions, but for "Unit Leader" view,
                 // seeing all REVIEW tasks in the unit is appropriate.
@@ -74,7 +71,8 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
                 List<Task> urgents = taskRepository.findMyUrgentTasks(userId);
 
                 // Mapping to DTOs
-                var currentUser = securityUtils.currentUser();
+                var currentUser = securityUtils.currentUser(); // This might be cached or efficient enough. If needed we
+                                                               // can pass User too, but ID is enough for cache key.
 
                 return ExecutiveActionItemDTO.builder()
                                 .approvalQueue(reviews.stream()
@@ -88,8 +86,8 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        public List<WeekVelocityDTO> getVelocity() {
-                UUID orgId = securityUtils.currentOrgId();
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'velocity:' + #orgId")
+        public List<WeekVelocityDTO> getVelocity(UUID orgId) {
                 Instant now = Instant.now();
                 Instant start = now.minus(28, ChronoUnit.DAYS); // Last 4 weeks
 
@@ -122,9 +120,8 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        public List<ResourceHealthDTO> getResourceHealth() {
-                UUID orgId = securityUtils.currentOrgId();
-
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'resource_health:' + #orgId")
+        public List<ResourceHealthDTO> getResourceHealth(UUID orgId) {
                 List<Object[]> workload = taskRepository.countActiveTasksPerUser(orgId);
 
                 return workload.stream().map(obj -> {
@@ -143,42 +140,48 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
                 }).limit(5).collect(Collectors.toList()); // Top 5 busiest
         }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ProjectHealthDTO> getProjectHealth() {
-        UUID orgId = securityUtils.currentOrgId();
+        @Override
+        @Transactional(readOnly = true)
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'project_health:' + #orgId")
+        public List<ProjectHealthDTO> getProjectHealth(UUID orgId) {
+                // 1. Get stats
+                List<Object[]> stats = taskRepository.getProjectProgressStats(orgId);
+                Map<UUID, long[]> statMap = new HashMap<>(); // [Total, Completed]
+                for (Object[] row : stats) {
+                        statMap.put((UUID) row[0], new long[] { (Long) row[1], (Long) row[2] });
+                }
 
-        // 1. Get stats
-        List<Object[]> stats = taskRepository.getProjectProgressStats(orgId);
-        Map<UUID, long[]> statMap = new HashMap<>(); // [Total, Completed]
-        for (Object[] row : stats) {
-            statMap.put((UUID) row[0], new long[]{(Long) row[1], (Long) row[2]});
+                // 2. Get Active Projects
+                List<Project> projects = projectRepository.findAllByOrganizationId(orgId); // Assuming basic find exists
+
+                return projects.stream()
+                                .filter(p -> p.getDeleted() == Boolean.FALSE) // Double check soft delete in memory or
+                                                                              // repo
+                                .map(p -> {
+                                        long[] s = statMap.getOrDefault(p.getId(), new long[] { 0L, 0L });
+                                        long total = s[0];
+                                        long completed = s[1];
+                                        int progress = total == 0 ? 0 : (int) ((completed * 100) / total);
+
+                                        return ProjectHealthDTO.builder()
+                                                        .projectId(p.getId())
+                                                        .projectCode(p.getCode())
+                                                        .projectName(p.getName())
+                                                        .status(p.getStatus())
+                                                        .totalTasks(total)
+                                                        .completedTasks(completed)
+                                                        .progress(progress)
+                                                        .build();
+                                })
+                                .sorted((p1, p2) -> Integer.compare(p2.getProgress(), p1.getProgress())) // Sort by
+                                                                                                         // Progress
+                                                                                                         // desc? Or
+                                                                                                         // recency?
+                                                                                                         // Let's do
+                                                                                                         // Progress for
+                                                                                                         // now.
+                                .limit(5)
+                                .collect(Collectors.toList());
         }
-
-        // 2. Get Active Projects
-        List<Project> projects = projectRepository.findAllByOrganizationId(orgId); // Assuming basic find exists
-
-        return projects.stream()
-                .filter(p -> p.getDeleted() == Boolean.FALSE) // Double check soft delete in memory or repo
-                .map(p -> {
-                    long[] s = statMap.getOrDefault(p.getId(), new long[]{0L, 0L});
-                    long total = s[0];
-                    long completed = s[1];
-                    int progress = total == 0 ? 0 : (int) ((completed * 100) / total);
-
-                    return ProjectHealthDTO.builder()
-                            .projectId(p.getId())
-                            .projectCode(p.getCode())
-                            .projectName(p.getName())
-                            .status(p.getStatus())
-                            .totalTasks(total)
-                            .completedTasks(completed)
-                            .progress(progress)
-                            .build();
-                })
-                .sorted((p1, p2) -> Integer.compare(p2.getProgress(), p1.getProgress())) // Sort by Progress desc? Or recency? Let's do Progress for now.
-                .limit(5)
-                .collect(Collectors.toList());
-    }
 
 }

@@ -1,5 +1,6 @@
 package com.tnh.baseware.core.dtos.project;
 
+import com.tnh.baseware.core.dtos.basic.BasicUserDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
 import lombok.*;
@@ -18,8 +19,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProjectMemberDTO extends RepresentationModel<ProjectMemberDTO> implements Identifiable<UUID> {
     UUID id;
-    ProjectDTO project;
-    UserDTO user;
+    BasicUserDTO user;
     String role;
     Instant joinedAt;
 }

@@ -1,6 +1,5 @@
 package com.tnh.baseware.core.resources.project;
 
-import com.tnh.baseware.core.dtos.project.MemberDTO;
 import com.tnh.baseware.core.dtos.project.ProjectMemberDTO;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.project.ProjectMember;
@@ -46,9 +45,10 @@ public class ProjectMemberResource
 
     @GetMapping("/by-project/{projectId}")
     @Operation(summary = "Get project members by project id")
-    public ResponseEntity<ApiMessageDTO<List<MemberDTO>>> getProjectMembersByProjectId(@PathVariable UUID projectId) {
+    public ResponseEntity<ApiMessageDTO<List<ProjectMemberDTO>>> getProjectMembersByProjectId(
+            @PathVariable UUID projectId) {
         var data = projectMemberService.getMembersByProject(projectId);
-        ApiMessageDTO<List<MemberDTO>> apiMessageDTO = ApiMessageDTO.<List<MemberDTO>>builder()
+        ApiMessageDTO<List<ProjectMemberDTO>> apiMessageDTO = ApiMessageDTO.<List<ProjectMemberDTO>>builder()
                 .data(data)
                 .result(true)
                 .message(messageService.getMessage("project.member.get.success"))

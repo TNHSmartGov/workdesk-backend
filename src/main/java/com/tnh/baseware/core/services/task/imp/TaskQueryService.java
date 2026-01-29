@@ -44,6 +44,10 @@ import com.tnh.baseware.core.mappers.task.ITaskActivityLogMapper;
 import com.tnh.baseware.core.mappers.task.ITaskCommentMapper;
 
 import com.tnh.baseware.core.dtos.task.TaskTimelineItemDTO;
+import com.tnh.baseware.core.dtos.task.TaskCommentDTO;
+import com.tnh.baseware.core.dtos.task.TaskActivityLogDTO;
+import com.tnh.baseware.core.dtos.task.TimelineActivityLogDTO;
+import com.tnh.baseware.core.dtos.task.TimelineCommentDTO;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -390,11 +394,13 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
 
         @Override
         @Transactional(readOnly = true)
+        @org.springframework.cache.annotation.Cacheable(value = "task_timeline", key = "#taskId")
         public List<TaskTimelineItemDTO> getTaskTimeline(UUID taskId) {
                 // 1. Convert logs to timeline items
                 var logItems = taskActivityLogRepository.findByTaskId(taskId).stream()
                                 .filter(log -> log.getActionType() != LogActionType.ADD_COMMENT)
                                 .map(taskActivityLogMapper::entityToDTO)
+                                .map(this::toTimelineLogDTO)
                                 .map(dto -> TaskTimelineItemDTO.builder()
                                                 .type("ACTIVITY")
                                                 .id(dto.getId())
@@ -418,6 +424,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
 
                 // 3. Convert root comments to timeline items
                 var commentItems = rootComments.stream()
+                                .map(this::toTimelineCommentDTO)
                                 .map(dto -> TaskTimelineItemDTO.builder()
                                                 .type("COMMENT")
                                                 .id(dto.getId())
@@ -497,4 +504,35 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 .build());
         }
 
+        private TimelineActivityLogDTO toTimelineLogDTO(TaskActivityLogDTO dto) {
+                if (dto == null)
+                        return null;
+                return TimelineActivityLogDTO.builder()
+                                .id(dto.getId())
+                                .taskId(dto.getTaskId())
+                                .actorId(dto.getActorId())
+                                .actionType(dto.getActionType())
+                                .targetField(dto.getTargetField())
+                                .oldValue(dto.getOldValue())
+                                .newValue(dto.getNewValue())
+                                .createdDate(dto.getCreatedDate())
+                                .build();
+        }
+
+        private TimelineCommentDTO toTimelineCommentDTO(TaskCommentDTO dto) {
+                if (dto == null)
+                        return null;
+                return TimelineCommentDTO.builder()
+                                .id(dto.getId())
+                                .task(dto.getTask())
+                                .user(dto.getUser())
+                                .content(dto.getContent())
+                                .createdDate(dto.getCreatedDate())
+                                .parentId(dto.getParentId())
+                                // .replies(dto.getReplies()) // Recursion not needed for top level or handling
+                                // separately
+                                .replyCount(dto.getReplyCount())
+                                .attachmentCount(dto.getAttachmentCount())
+                                .build();
+        }
 }

@@ -139,6 +139,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#id")
     public TaskDTO update(UUID id, TaskEditorForm form) {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
@@ -168,6 +169,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#id")
     public void performAction(UUID id, TaskAction action) {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
@@ -253,6 +255,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#taskId")
     public void updatePersonalProgress(UUID taskId, Integer progress) {
         if (progress < 0 || progress > 100)
             throw new BWCValidationException(MessageConstant.PROGRESS_VALIDATE);
@@ -447,6 +450,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#taskId")
     public void reportProgress(UUID taskId, CreateTaskReportForm form) {
         Task task = repository.findById(taskId)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
@@ -502,7 +506,8 @@ public class TaskCommandService
         // PROGRESS LOGIC
         if (form.getProgress() != null) {
             // Case A: User provided explicit progress -> Use it (if allowed)
-            if (!taskRequirementRepository.existsByTaskId(taskId)) {
+            // Fix: Only block if THIS user has assigned requirements
+            if (!taskRequirementRepository.existsByTaskIdAndAssigneeId(taskId, currentUser.getId())) {
                 if (form.getProgress() < 0 || form.getProgress() > 100)
                     throw new BWCValidationException(MessageConstant.PROGRESS_VALIDATE);
 
@@ -510,7 +515,8 @@ public class TaskCommandService
             }
         } else {
             // Case B: User did NOT provide progress -> Infer from Status (Smart Default)
-            if (!taskRequirementRepository.existsByTaskId(taskId)) {
+            // Fix: Only block if THIS user has assigned requirements
+            if (!taskRequirementRepository.existsByTaskIdAndAssigneeId(taskId, currentUser.getId())) {
                 if (form.getStatus() == MemberStatus.COMPLETED) {
                     member.setPersonalProgress(100);
                 } else if (form.getStatus() == MemberStatus.ASSIGNED) {
@@ -551,6 +557,7 @@ public class TaskCommandService
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#taskId")
     public void recalculateTaskProgress(UUID taskId) {
         Task task = repository.findById(taskId)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));

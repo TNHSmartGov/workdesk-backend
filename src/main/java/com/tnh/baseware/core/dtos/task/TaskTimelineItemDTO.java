@@ -16,6 +16,6 @@ public class TaskTimelineItemDTO {
     UUID id;
     String type; // "COMMENT" or "ACTIVITY"
     Instant timestamp;
-    TaskCommentDTO comment;
-    TaskActivityLogDTO activity;
+    TimelineCommentDTO comment;
+    TimelineActivityLogDTO activity;
 }

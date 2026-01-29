@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -173,7 +174,7 @@ public class DashboardService implements IDashboardService {
         @Transactional(readOnly = true)
         @Cacheable(value = "dashboard_unit", key = "'workload:' + #orgId")
         public java.util.List<UnitWorkloadDTO> getUnitWorkload(UUID orgId) {
-                return taskMemberRepository.getWorkloadDistribution(orgId, TaskMemberRole.ASSIGNEE, Instant.now(),
+                return taskMemberRepository.getWorkloadDistribution(orgId, List.of(TaskMemberRole.ASSIGNEE, TaskMemberRole.LEAD, TaskMemberRole.OWNER, TaskMemberRole.REVIEWER), Instant.now(),
                                 TaskStatus.DONE);
         }
 

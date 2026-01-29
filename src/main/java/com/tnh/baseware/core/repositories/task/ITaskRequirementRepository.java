@@ -16,6 +16,8 @@ public interface ITaskRequirementRepository extends IGenericRepository<TaskRequi
 
     Boolean existsByTaskId(UUID taskId);
 
+    Boolean existsByTaskIdAndAssigneeId(UUID taskId, UUID assigneeId);
+
     List<TaskRequirement> findByTaskIdOrderBySortOrder(UUID taskId);
 
     @Query("SELECT MAX(r.sortOrder) FROM TaskRequirement r WHERE r.task.id = :taskId")

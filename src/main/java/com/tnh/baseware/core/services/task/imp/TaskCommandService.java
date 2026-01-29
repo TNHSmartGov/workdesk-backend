@@ -506,7 +506,8 @@ public class TaskCommandService
         // PROGRESS LOGIC
         if (form.getProgress() != null) {
             // Case A: User provided explicit progress -> Use it (if allowed)
-            if (!taskRequirementRepository.existsByTaskId(taskId)) {
+            // Fix: Only block if THIS user has assigned requirements
+            if (!taskRequirementRepository.existsByTaskIdAndAssigneeId(taskId, currentUser.getId())) {
                 if (form.getProgress() < 0 || form.getProgress() > 100)
                     throw new BWCValidationException(MessageConstant.PROGRESS_VALIDATE);
 
@@ -514,7 +515,8 @@ public class TaskCommandService
             }
         } else {
             // Case B: User did NOT provide progress -> Infer from Status (Smart Default)
-            if (!taskRequirementRepository.existsByTaskId(taskId)) {
+            // Fix: Only block if THIS user has assigned requirements
+            if (!taskRequirementRepository.existsByTaskIdAndAssigneeId(taskId, currentUser.getId())) {
                 if (form.getStatus() == MemberStatus.COMPLETED) {
                     member.setPersonalProgress(100);
                 } else if (form.getStatus() == MemberStatus.ASSIGNED) {

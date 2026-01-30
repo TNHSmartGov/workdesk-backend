@@ -6,6 +6,7 @@ import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.entities.task.TaskMember;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.task.MemberStatus;
+import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.forms.task.TaskEditorForm;
 import com.tnh.baseware.core.mappers.IGenericMapper;
 import com.tnh.baseware.core.repositories.task.ITaskCategoryRepository;
@@ -35,6 +36,7 @@ public interface ITaskMapper extends IGenericMapper<Task, TaskEditorForm, TaskDT
                         @Context ITaskCategoryRepository taskCategoryRepository);
 
         @Mapping(target = "memberStatus", expression = "java(getMemberStatus(entity, currentUser, taskMemberRepository))")
+        @Mapping(target = "memberRole", expression = "java(getMemberRole(entity, currentUser, taskMemberRepository))")
         TaskDTO entityToDTO(Task entity, @Context User currentUser,
                         @Context ITaskMemberRepository taskMemberRepository);
 
@@ -46,5 +48,15 @@ public interface ITaskMapper extends IGenericMapper<Task, TaskEditorForm, TaskDT
                         return null;
                 }
                 return taskMember.get().getStatus();
+        }
+
+        default TaskMemberRole getMemberRole(Task task, @Context User currentUser,
+                        @Context ITaskMemberRepository taskMemberRepository) {
+                Optional<TaskMember> taskMember = taskMemberRepository.findByTask_IdAndUser_Id(task.getId(),
+                                currentUser.getId());
+                if (taskMember.isEmpty()) {
+                        return null;
+                }
+                return taskMember.get().getRole();
         }
 }

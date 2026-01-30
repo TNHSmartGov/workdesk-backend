@@ -22,4 +22,5 @@ public class CategoryDTO extends RepresentationModel<CategoryDTO> implements Ide
     String name;
     String displayName;
     String description;
+    Boolean isSystem;
 }

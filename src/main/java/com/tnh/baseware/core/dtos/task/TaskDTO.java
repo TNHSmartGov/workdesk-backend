@@ -3,6 +3,7 @@ package com.tnh.baseware.core.dtos.task;
 import com.tnh.baseware.core.dtos.basic.BasicTaskCategoryDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
 import com.tnh.baseware.core.enums.task.MemberStatus;
+import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.enums.task.TaskPriority;
 import com.tnh.baseware.core.enums.task.TaskStatus;
 import com.tnh.baseware.core.enums.task.TaskType;
@@ -32,6 +33,9 @@ public class TaskDTO extends RepresentationModel<TaskDTO> implements Identifiabl
     TaskListDTO taskList;
     BasicTaskCategoryDTO taskCategory;
     Integer progress;
+    Instant createdAt;
+    // Thông tin dành cho người dùng hiện tại
     MemberStatus memberStatus;
+    TaskMemberRole memberRole;
     Instant createdAt;
 }

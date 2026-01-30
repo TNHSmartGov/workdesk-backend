@@ -37,4 +37,5 @@ public class TaskDTO extends RepresentationModel<TaskDTO> implements Identifiabl
     // Thông tin dành cho người dùng hiện tại
     MemberStatus memberStatus;
     TaskMemberRole memberRole;
+    Instant createdAt;
 }

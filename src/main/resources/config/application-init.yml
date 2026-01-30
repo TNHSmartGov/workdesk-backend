@@ -9,7 +9,7 @@ init:
     - name: "Anonymous"
       description: "Anonymous role"
   users:
-    - username: "starcom"
+    - username: "admin"
       password: "12345678aA@"
       first-name: "Doi"
       last-name: "Nguyen Van"
@@ -20,4 +20,10 @@ init:
       idn: "072086003192"
       ial: 2
       enabled: true
+      isSuperAdmin: true
       role: "Administrator"
+  organizations:
+    - name: "Hệ thống"
+      description: "Tổ chức hệ thống"
+      code: "SYSTEM"
+      isSystem: true

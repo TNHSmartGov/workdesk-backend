@@ -440,10 +440,12 @@ public class TaskCommandService
         boolean isProjectAdmin = projectRole == ProjectMemberRole.OWNER
                 || projectRole == ProjectMemberRole.MANAGER;
         boolean isTaskLead = taskRole == TaskMemberRole.LEAD;
+        boolean isTaskOwner = taskRole == TaskMemberRole.OWNER;
         boolean isProjectAdminOrTaskLead = isProjectAdmin || isTaskLead;
 
         return switch (action) {
-            case START, COMPLETE, CANCEL -> isProjectAdminOrTaskLead;
+            case START, COMPLETE -> isProjectAdminOrTaskLead;
+            case CANCEL -> isProjectAdminOrTaskLead || isTaskOwner;
             case APPROVE -> isProjectAdminOrTaskLead || taskRole == TaskMemberRole.REVIEWER;
         };
     }

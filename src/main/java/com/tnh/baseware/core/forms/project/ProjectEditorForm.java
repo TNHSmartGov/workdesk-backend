@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.tnh.baseware.core.constants.Views;
+import com.tnh.baseware.core.enums.project.ProjectStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,6 +36,9 @@ public class ProjectEditorForm {
 
     @JsonView(Views.Common.class)
     Instant endDate;
+
+    @JsonView(Views.Common.class)
+    ProjectStatus status;
 
     @JsonView(Views.Create.class)
     boolean createDefaultTaskList;

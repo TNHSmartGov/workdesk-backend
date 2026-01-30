@@ -9,6 +9,7 @@ import com.tnh.baseware.core.mappers.IGenericMapper;
 import com.tnh.baseware.core.repositories.audit.ICategoryRepository;
 import org.mapstruct.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,21 +20,22 @@ public interface IMenuMapper extends IGenericMapper<Menu, MenuEditorForm, MenuDT
 
     @Mapping(target = "menuType", expression = "java(fetcher.formToEntity(repository, form.getMenuTypeId()))")
     Menu formToEntity(MenuEditorForm form,
-                      @Context GenericEntityFetcher fetcher,
-                      @Context ICategoryRepository repository);
+            @Context GenericEntityFetcher fetcher,
+            @Context ICategoryRepository repository);
 
     @Mapping(target = "menuType", expression = "java(fetcher.formToEntity(repository, form.getMenuTypeId()))")
     void updateMenuFromForm(MenuEditorForm form,
-                            @MappingTarget Menu menu,
-                            @Context GenericEntityFetcher fetcher,
-                            @Context ICategoryRepository repository);
+            @MappingTarget Menu menu,
+            @Context GenericEntityFetcher fetcher,
+            @Context ICategoryRepository repository);
 
     @Mapping(source = "parent", target = "parent", qualifiedByName = "mapParent")
     MenuDTO entityToDTO(Menu entity);
 
     @Named("mapParent")
     default MenuDTO mapParent(Menu parent) {
-        if (parent == null) return null;
+        if (parent == null)
+            return null;
 
         var parentDTO = MenuDTO.builder()
                 .id(parent.getId())
@@ -64,7 +66,8 @@ public interface IMenuMapper extends IGenericMapper<Menu, MenuEditorForm, MenuDT
     }
 
     default List<MenuDTO> mapMenusToTree(List<Menu> menus) {
-        if (menus == null || menus.isEmpty()) return List.of();
+        if (menus == null || menus.isEmpty())
+            return List.of();
 
         var parentMap = menus.stream()
                 .filter(m -> m.getParent() != null)
@@ -72,6 +75,7 @@ public interface IMenuMapper extends IGenericMapper<Menu, MenuEditorForm, MenuDT
 
         return menus.stream()
                 .filter(m -> m.getParent() == null)
+                .sorted(Comparator.comparing(Menu::getMenuOrder))
                 .map(m -> buildMenuTree(m, parentMap))
                 .toList();
     }
@@ -82,6 +86,7 @@ public interface IMenuMapper extends IGenericMapper<Menu, MenuEditorForm, MenuDT
 
         if (!children.isEmpty()) {
             var childDTOs = children.stream()
+                    .sorted(Comparator.comparing(Menu::getMenuOrder))
                     .map(child -> buildMenuTree(child, parentMap))
                     .toList();
             dto.setChildren(childDTOs);

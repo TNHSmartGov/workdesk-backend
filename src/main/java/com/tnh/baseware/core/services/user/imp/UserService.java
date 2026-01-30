@@ -1,5 +1,6 @@
 package com.tnh.baseware.core.services.user.imp;
 
+import com.tnh.baseware.core.dtos.user.MenuDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.Menu;
@@ -260,18 +261,25 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
 
         boolean orgSelectionRequired = orgIdOpt.isEmpty();
 
-        List<Menu> menus;
+        Set<UUID> authorizedIds = new HashSet<>();
+        List<Menu> allMenus = menuRepository.findAll();
+
         if (Boolean.TRUE.equals(user.getSuperAdmin())) {
-            menus = menuRepository.findAll();
+            authorizedIds.addAll(allMenus.stream().map(Menu::getId).collect(Collectors.toSet()));
         } else {
-            menus = user.getRoles().stream()
+            user.getRoles().stream()
                     .flatMap(role -> role.getMenus().stream())
-                    .collect(Collectors.collectingAndThen(
-                            Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(Menu::getId))),
-                            ArrayList::new));
+                    .forEach(menu -> collectMenuHierarchy(authorizedIds, menu));
         }
 
-        if (BasewareUtils.isBlank(menus)) {
+        List<Menu> authorizedMenus = allMenus.stream()
+                .filter(m -> authorizedIds.contains(m.getId()))
+                .filter(m -> Integer.valueOf(1).equals(m.getPublished()))
+                .toList();
+
+        List<MenuDTO> menuTree = menuMapper.mapMenusToTree(authorizedMenus);
+
+        if (BasewareUtils.isBlank(menuTree)) {
             log.debug(LogStyleHelper.debug("User {} has no menus"), username);
             throw new BWCNotFoundException(messageService.getMessage("user.menus.not.found", username));
         }
@@ -295,7 +303,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
                 .lastActiveOrganization(orgIdOpt.map(UUID::fromString).orElse(null))
                 .orgSelectionRequired(orgSelectionRequired)
                 .superAdmin(user.getSuperAdmin())
-                .menus(menuMapper.entitiesToDTOs(menus))
+                .menus(menuTree)
                 .build();
     }
 
@@ -421,6 +429,29 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
                 !"application/vnd.ms-excel".equals(contentType)) {
             throw new BWCValidationException(messageService.getMessage("file.invalid.type"));
 
+        }
+    }
+
+    private void collectMenuHierarchy(Set<UUID> authorizedIds, Menu menu) {
+        if (menu == null || Integer.valueOf(0).equals(menu.getPublished())) {
+            return;
+        }
+
+        // Check if all ancestors are published
+        List<Menu> hierarchy = new ArrayList<>();
+        Menu current = menu;
+        while (current != null) {
+            if (Integer.valueOf(0).equals(current.getPublished())) {
+                // If any ancestor is unpublished, the whole branch is invalid
+                return;
+            }
+            hierarchy.add(current);
+            current = current.getParent();
+        }
+
+        // If we reached here, the menu and all its ancestors are published
+        for (Menu m : hierarchy) {
+            authorizedIds.add(m.getId());
         }
     }
 

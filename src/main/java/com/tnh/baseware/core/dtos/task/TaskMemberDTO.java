@@ -26,5 +26,5 @@ public class TaskMemberDTO extends RepresentationModel<TaskMemberDTO> implements
     Instant joinedAt;
     Instant completedAt;
     Integer weight;
-
+    Integer personalProgress;
 }

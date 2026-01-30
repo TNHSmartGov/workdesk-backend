@@ -50,4 +50,33 @@ public interface ITaskMemberRepository
             @Param("roles") List<TaskMemberRole> roles,
             @Param("now") java.time.Instant now,
             @Param("doneStatus") com.tnh.baseware.core.enums.task.TaskStatus doneStatus);
+
+    @Query("""
+            SELECT new com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO(
+                u.id, u.fullName, u.avatarUrl,
+                COUNT(t),
+                COALESCE(SUM(CASE WHEN t.dueDate < :now THEN 1L ELSE 0L END), 0L)
+            )
+            FROM com.tnh.baseware.core.entities.user.UserOrganization uo
+            JOIN uo.user u
+            LEFT JOIN TaskMember tm ON tm.user = u
+                AND tm.role IN :roles
+                AND tm.deleted = false
+            LEFT JOIN tm.task t ON t = tm.task
+                AND t.status != :doneStatus
+                AND t.status != 'CANCELLED'
+                AND t.deleted = false
+                AND t.createdDate >= :from
+                AND t.createdDate <= :to
+            WHERE uo.organization.id = :orgId
+              AND uo.active = true
+            GROUP BY u.id, u.fullName, u.avatarUrl
+            """)
+    List<com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO> getWorkloadDistributionTimeboxed(
+            @Param("orgId") UUID orgId,
+            @Param("roles") List<TaskMemberRole> roles,
+            @Param("now") java.time.Instant now,
+            @Param("doneStatus") com.tnh.baseware.core.enums.task.TaskStatus doneStatus,
+            @Param("from") java.time.Instant from,
+            @Param("to") java.time.Instant to);
 }

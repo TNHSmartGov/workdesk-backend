@@ -301,7 +301,8 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 }
 
                 var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
-                return repository.findAll(baseSpec.and(orgSpec).and(accessSpec), pageable).map(mapper::entityToDTO);
+                return repository.findAll(baseSpec.and(orgSpec).and(accessSpec), pageable)
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 
         @Override

@@ -114,6 +114,15 @@ public class User extends Auditable<String> implements Serializable {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
+    public void addOrganization(Organization organization) {
+        if (organization != null) {
+            UserOrganization userOrganization = new UserOrganization();
+            userOrganization.setOrganization(organization);
+            userOrganization.setUser(this);
+            organizations.add(userOrganization);
+        }
+    }
+
     public void addRole(Role role) {
         if (role != null) {
             roles.add(role);

@@ -217,6 +217,10 @@ public class ProjectService
             throw new BWCBusinessException("You do not have permission to update this project");
         }
 
+        if (form.getStatus() != null) {
+            project.setStatus(form.getStatus());
+        }
+
         mapper.formToEntity(form, project);
 
         return mapper.entityToDTO(repository.save(project));

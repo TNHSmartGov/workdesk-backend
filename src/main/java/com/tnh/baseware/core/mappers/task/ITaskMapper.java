@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.mappers.task;
 
 import com.tnh.baseware.core.components.GenericEntityFetcher;
+import com.tnh.baseware.core.dtos.basic.BasicUserDTO;
 import com.tnh.baseware.core.dtos.task.TaskDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.entities.task.TaskMember;
@@ -37,6 +38,7 @@ public interface ITaskMapper extends IGenericMapper<Task, TaskEditorForm, TaskDT
 
         @Mapping(target = "memberStatus", expression = "java(getMemberStatus(entity, currentUser, taskMemberRepository))")
         @Mapping(target = "memberRole", expression = "java(getMemberRole(entity, currentUser, taskMemberRepository))")
+        @Mapping(target = "leader", expression = "java(getMemberLead(entity, taskMemberRepository))")
         TaskDTO entityToDTO(Task entity, @Context User currentUser,
                         @Context ITaskMemberRepository taskMemberRepository);
 
@@ -58,5 +60,30 @@ public interface ITaskMapper extends IGenericMapper<Task, TaskEditorForm, TaskDT
                         return null;
                 }
                 return taskMember.get().getRole();
+        }
+
+        default BasicUserDTO getMemberLead(Task task, @Context ITaskMemberRepository taskMemberRepository) {
+                var members = taskMemberRepository.findByTask_IdAndRole(task.getId(), TaskMemberRole.LEAD);
+                // Ưu tiên tìm LEAD
+                var lead = members.stream()
+                                .findFirst();
+                BasicUserDTO basicUserDTO = new BasicUserDTO();
+                if (lead.isPresent()) {
+                        basicUserDTO.setId(lead.get().getUser().getId());
+                        basicUserDTO.setFullName(lead.get().getUser().getFullName());
+                        basicUserDTO.setAvatarUrl(lead.get().getUser().getAvatarUrl());
+                        return basicUserDTO;
+                }
+                members = taskMemberRepository.findByTask_IdAndRole(task.getId(), TaskMemberRole.OWNER);
+                // Nếu không có LEAD, tìm OWNER
+                var owner = members.stream()
+                                .findFirst();
+                if (owner.isPresent()) {
+                        basicUserDTO.setId(owner.get().getUser().getId());
+                        basicUserDTO.setFullName(owner.get().getUser().getFullName());
+                        basicUserDTO.setAvatarUrl(owner.get().getUser().getAvatarUrl());
+                        return basicUserDTO;
+                }
+                return null;
         }
 }

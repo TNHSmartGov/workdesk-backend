@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -67,7 +68,10 @@ public class ProjectMemberService extends
         }
 
         var members = repository.findDistinctByProject_Id(projectId);
-        return members.stream().map(mapper::entityToDTO).toList();
+        return members.stream()
+                .sorted(Comparator.comparingInt(m -> m.getRole().getOrder()))
+                .map(mapper::entityToDTO)
+                .toList();
     }
 
     @Override

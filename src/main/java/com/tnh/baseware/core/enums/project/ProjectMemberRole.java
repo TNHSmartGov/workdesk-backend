@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
 public enum ProjectMemberRole implements BaseEnum<String> {
-    OWNER("OWNER", "owner", "Chủ trì", Set.of(ProjectPermission.values())),
+    OWNER("OWNER", "owner", "Chủ trì", Set.of(ProjectPermission.values()), 1),
     MANAGER("MANAGER", "manager", "Quản lý dự án", Set.of(
             ProjectPermission.PROJECT_VIEW,
             ProjectPermission.PROJECT_UPDATE,
@@ -26,22 +26,23 @@ public enum ProjectMemberRole implements BaseEnum<String> {
             ProjectPermission.FILE_DELETE,
             ProjectPermission.FILE_DOWNLOAD,
             ProjectPermission.FILE_UPLOAD,
-            ProjectPermission.FILE_UPDATE)),
+            ProjectPermission.FILE_UPDATE), 2),
     MEMBER("MEMBER", "member", "Tham gia", Set.of(
             ProjectPermission.PROJECT_VIEW,
             ProjectPermission.MEMBER_VIEW,
             ProjectPermission.TASK_VIEW,
             ProjectPermission.TASK_CREATE,
-            ProjectPermission.FILE_UPLOAD)),
+            ProjectPermission.FILE_UPLOAD), 3),
     VIEWER("VIEWER", "viewer", "Theo dõi", Set.of(
             ProjectPermission.PROJECT_VIEW,
             ProjectPermission.MEMBER_VIEW,
-            ProjectPermission.TASK_VIEW));
+            ProjectPermission.TASK_VIEW), 4);
 
     String value;
     String name;
     String displayName;
     Set<ProjectPermission> permissions;
+    int order;
 
     public static ProjectMemberRole fromValue(String value) {
         for (ProjectMemberRole role : values()) {

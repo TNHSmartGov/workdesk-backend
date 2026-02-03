@@ -98,6 +98,11 @@ baseware:
         cron: "0 0 0 1,15 * ?" # Every month at 00:00:00
         timeout: 10000 # 10 seconds
         threads: 5
+      user-stats:
+        enabled: true
+        schedules:
+          - name: "daily-job"
+            cron: "0 0 1 * * ?" # 01:00 AM daily
     cors:
       allowed-origins: "*"
       allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,HEAD,PATCH,TRACE"

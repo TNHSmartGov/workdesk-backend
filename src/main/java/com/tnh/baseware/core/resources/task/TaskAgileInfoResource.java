@@ -64,4 +64,5 @@ public class TaskAgileInfoResource
                 .code(HttpStatus.OK.value())
                 .build());
     }
+
 }

@@ -4,7 +4,7 @@ import com.tnh.baseware.core.dtos.task.TaskAgileInfoDTO;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.entities.task.TaskAgileInfo;
 import com.tnh.baseware.core.entities.task.TaskActivityLog;
-import com.tnh.baseware.core.entities.user.User;
+
 import com.tnh.baseware.core.enums.task.LogActionType;
 import com.tnh.baseware.core.enums.task.TaskStatus;
 import com.tnh.baseware.core.exceptions.BWCGenericRuntimeException;
@@ -16,6 +16,7 @@ import com.tnh.baseware.core.repositories.project.ISprintRepository;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskAgileInfoRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
+import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.task.ITaskAgileInfoService;
@@ -37,16 +38,19 @@ public class TaskAgileInfoService extends
     GenericEntityFetcher fetcher;
     // Activity Logger
     ITaskActivityLogRepository taskActivityLogRepository;
+    IUserRepository userRepository;
 
     public TaskAgileInfoService(ITaskAgileInfoRepository repository, ITaskAgileInfoMapper mapper,
             MessageService messageService, ISprintRepository sprintRepository, ITaskRepository taskRepository,
             GenericEntityFetcher fetcher,
-            ITaskActivityLogRepository taskActivityLogRepository) {
+            ITaskActivityLogRepository taskActivityLogRepository,
+            IUserRepository userRepository) {
         super(repository, mapper, messageService, TaskAgileInfo.class);
         this.sprintRepository = sprintRepository;
         this.taskRepository = taskRepository;
         this.fetcher = fetcher;
         this.taskActivityLogRepository = taskActivityLogRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -60,7 +64,7 @@ public class TaskAgileInfoService extends
     @Transactional
     public TaskAgileInfoDTO updateByTaskId(UUID taskId, TaskAgileInfoEditorForm form) {
         TaskAgileInfo agileInfo = repository.findById(taskId).orElse(null);
-
+        var currentUser = getCurrentUser();
         if (agileInfo == null) {
             // Create new if not exists
             Task task = taskRepository.findById(taskId)
@@ -89,8 +93,7 @@ public class TaskAgileInfoService extends
             if (form.getRemainingEstimate() != null && !form.getRemainingEstimate().equals(oldRemaining)) {
                 TaskActivityLog log = new TaskActivityLog();
                 log.setTask(agileInfo.getTask());
-                log.setActor(agileInfo.getModifiedBy() != null ? User.builder()
-                        .id(UUID.fromString(agileInfo.getModifiedBy())).build() : null); // Simple workaround,
+                log.setActor(currentUser);
                 log.setActionType(LogActionType.UPDATE_FIELD);
                 log.setTargetField("remainingEstimate");
                 log.setOldValue(String.valueOf(oldRemaining));

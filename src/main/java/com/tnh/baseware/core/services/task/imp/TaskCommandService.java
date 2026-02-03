@@ -30,6 +30,7 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.task.ITaskCommandService;
 import com.tnh.baseware.core.utils.DiffUtil;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
+import com.tnh.baseware.core.repositories.task.ITaskAgileInfoRepository;
 import com.tnh.baseware.core.repositories.task.ITaskAttachmentRepository;
 import com.tnh.baseware.core.repositories.task.ITaskCommentAttachmentRepository;
 import com.tnh.baseware.core.repositories.task.ITaskCommentRepository;
@@ -67,6 +68,7 @@ public class TaskCommandService
     ITaskDocumentRepository taskDocumentRepository;
     ITaskDependencyRepository taskDependencyRepository;
     IFileDocumentRepository fileDocumentRepository;
+    ITaskAgileInfoRepository taskAgileInfoRepository;
 
     public TaskCommandService(ITaskRepository repository,
             ITaskMapper mapper,
@@ -84,7 +86,8 @@ public class TaskCommandService
             ITaskActivityLogRepository taskActivityLogRepository,
             ITaskDocumentRepository taskDocumentRepository,
             ITaskDependencyRepository taskDependencyRepository,
-            IFileDocumentRepository fileDocumentRepository) {
+            IFileDocumentRepository fileDocumentRepository,
+            ITaskAgileInfoRepository taskAgileInfoRepository) {
         super(repository, mapper, messageService, Task.class);
         this.taskListRepository = taskListRepository;
         this.taskCategoryRepository = taskCategoryRepository;
@@ -100,6 +103,7 @@ public class TaskCommandService
         this.taskDocumentRepository = taskDocumentRepository;
         this.taskDependencyRepository = taskDependencyRepository;
         this.fileDocumentRepository = fileDocumentRepository;
+        this.taskAgileInfoRepository = taskAgileInfoRepository;
     }
 
     @Override
@@ -386,6 +390,14 @@ public class TaskCommandService
             throw new BWCValidationException(MessageConstant.VALIDATE_CANCEL_ACTION);
         }
         task.setStatus(TaskStatus.CANCELLED);
+
+        // Remove from sprint if exists
+        taskAgileInfoRepository.findByTaskId(task.getId()).ifPresent(agileInfo -> {
+            if (agileInfo.getSprint() != null) {
+                agileInfo.setSprint(null);
+                taskAgileInfoRepository.save(agileInfo);
+            }
+        });
     }
 
     private void validateAction(Task task, TaskAction action, UUID userId) {

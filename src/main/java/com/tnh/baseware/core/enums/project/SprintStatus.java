@@ -10,22 +10,22 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
-public enum ProjectAction implements BaseEnum<String> {
-    PUBLISH("PUBLISH", "publish", "Đưa vào hoạt động"),
-    ARCHIVE("ARCHIVE", "archive", "Lưu trữ"),
-    ON_HOLD("ON_HOLD", "on_hold", "Tạm dừng"),
-    COMPLETED("COMPLETED", "completed", "Hoàn thành");
+public enum SprintStatus implements BaseEnum<String> {
+
+    PENDING("PENDING", "pending", "Chưa bắt đầu"),
+    ACTIVE("ACTIVE", "active", "Đang diễn ra"),
+    COMPLETED("COMPLETED", "completed", "Đã hoàn thành");
 
     private final String value;
     private final String name;
     private final String displayName;
 
-    public static ProjectAction fromValue(String value) {
-        for (ProjectAction status : ProjectAction.values()) {
+    public static SprintStatus fromValue(String value) {
+        for (SprintStatus status : SprintStatus.values()) {
             if (status.getValue().equalsIgnoreCase(value)) {
                 return status;
             }
         }
-        throw new BWCGenericRuntimeException("Unknown ProjectAction value: " + value);
+        throw new BWCGenericRuntimeException("Unknown SprintStatus value: " + value);
     }
 }

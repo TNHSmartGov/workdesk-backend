@@ -34,6 +34,9 @@ public class TaskDTO extends RepresentationModel<TaskDTO> implements Identifiabl
     TaskListDTO taskList;
     BasicTaskCategoryDTO taskCategory;
     Integer progress;
+
+    // Extensions
+    TaskAgileInfoDTO agileInfo;
     Instant createdAt;
     // Thông tin dành cho người dùng hiện tại
     MemberStatus memberStatus;

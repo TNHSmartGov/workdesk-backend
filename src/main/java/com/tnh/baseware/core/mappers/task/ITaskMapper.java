@@ -16,9 +16,10 @@ import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 
 import java.util.Optional;
 
+import com.tnh.baseware.core.mappers.task.ITaskAgileInfoMapper;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = { ITaskAgileInfoMapper.class })
 public interface ITaskMapper extends IGenericMapper<Task, TaskEditorForm, TaskDTO> {
 
         @Mapping(target = "taskList", expression = "java(form.getTaskListId() != null ? fetcher.formToEntity(taskListRepository, form.getTaskListId()) : null)")

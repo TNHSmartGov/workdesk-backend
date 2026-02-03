@@ -1,7 +1,6 @@
 package com.tnh.baseware.core.dtos.project;
 
 import com.tnh.baseware.core.dtos.basic.BasicUserDTO;
-import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,4 +21,6 @@ public class ProjectMemberDTO extends RepresentationModel<ProjectMemberDTO> impl
     BasicUserDTO user;
     String role;
     Instant joinedAt;
+    Integer totalTask;
+    Integer totalTaskCompleted;
 }

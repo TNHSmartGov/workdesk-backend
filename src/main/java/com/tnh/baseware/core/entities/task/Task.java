@@ -63,6 +63,9 @@ public class Task extends Auditable<String> {
     @Max(100)
     Integer progress = 0;
 
+    @OneToOne(mappedBy = "task", fetch = FetchType.LAZY)
+    TaskAgileInfo agileInfo;
+
     // bổ sung phân loại task
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_category_id")

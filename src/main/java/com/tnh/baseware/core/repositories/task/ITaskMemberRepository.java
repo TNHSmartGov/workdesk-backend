@@ -20,6 +20,8 @@ public interface ITaskMemberRepository
 
     List<TaskMember> findByTask_Id(UUID taskId);
 
+    List<TaskMember> findByTask_IdAndRole(UUID taskId, TaskMemberRole role);
+
     List<TaskMember> findByTask(Task task);
 
     boolean existsByTask_IdAndUser_Id(UUID taskId, UUID userId);

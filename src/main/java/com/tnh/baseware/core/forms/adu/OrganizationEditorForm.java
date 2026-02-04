@@ -32,6 +32,7 @@ public class OrganizationEditorForm {
     String description;
     Double latitude;
     Double longitude;
+    Boolean isUnit;
 
     @NotNull(message = "{level.not.null}")
     @Schema(description = "Values are retrieved from 'organizations/enums?name=OrganizationLevel'")

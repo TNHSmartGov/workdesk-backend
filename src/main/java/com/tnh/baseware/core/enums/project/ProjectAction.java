@@ -12,7 +12,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public enum ProjectAction implements BaseEnum<String> {
     PUBLISH("PUBLISH", "publish", "Đưa vào hoạt động"),
-    ARCHIVE("ARCHIVE", "archive", "Lưu trữ");
+    ARCHIVE("ARCHIVE", "archive", "Lưu trữ"),
+    ON_HOLD("ON_HOLD", "on_hold", "Tạm dừng"),
+    COMPLETED("COMPLETED", "completed", "Hoàn thành");
 
     private final String value;
     private final String name;

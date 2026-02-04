@@ -48,6 +48,8 @@ public class Organization extends Auditable<String> implements Serializable {
     Double longitude;
 
     Boolean isSystem;
+    // nếu là đơn vị chủ quản
+    Boolean isUnit;
 
     @Column(nullable = false)
     @Builder.Default

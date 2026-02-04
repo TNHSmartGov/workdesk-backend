@@ -166,16 +166,7 @@ public class DashboardService implements IDashboardService {
                 if (safeTo.isBefore(startOfToday)) {
                         UnitPerformanceDTO stats = dailyStatsRepository.aggregatePerformance(orgId, safeFrom, safeTo);
                         if (stats != null && stats.getTotalTasksCreated() != null) {
-                                // If needed, we can average the rates properly here, but repository query does
-                                // simple average.
-                                // For stricter accuracy we might need weighted average, but this is a good
-                                // improvement over live query
-                                // because live query misses tasks that were completed/deleted long ago outside
-                                // creation window?
-                                // Actually live query 'createdDate between' catches them if they were created
-                                // then.
-                                // But filtering 'Overdue' by createdDate is wrong for 'Stock'.
-                                // Stats table stores 'Stock' correctly at that time.
+                               
                                 return stats;
                         }
                 }

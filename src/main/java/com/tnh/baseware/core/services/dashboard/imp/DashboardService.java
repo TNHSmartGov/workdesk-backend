@@ -152,13 +152,17 @@ public class DashboardService implements IDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        @Cacheable(value = "dashboard_unit", key = "#orgId")
-        public UnitPerformanceDTO getUnitPerformance(UUID orgId) {
+        @Cacheable(value = "dashboard_unit", key = "{#orgId, #from, #to}")
+        public UnitPerformanceDTO getUnitPerformance(UUID orgId, Instant from, Instant to) {
                 // Default logic: User's organization
+                Instant safeFrom = from != null ? from : Instant.EPOCH;
+                Instant safeTo = to != null ? to : Instant.parse("2100-01-01T00:00:00Z");
 
-                long total = taskRepository.countByOrganizationId(orgId);
-                long completed = taskRepository.countByOrganizationIdAndStatus(orgId, TaskStatus.DONE);
-                long overdue = taskRepository.countByOrganizationIdOverdue(orgId, Instant.now());
+                long total = taskRepository.countByOrganizationIdTimeboxed(orgId, safeFrom, safeTo);
+                long completed = taskRepository.countByOrganizationIdAndStatusFinishedTimeboxed(orgId, TaskStatus.DONE,
+                                safeFrom, safeTo);
+                long overdue = taskRepository.countByOrganizationIdOverdueTimeboxed(orgId, Instant.now(), safeFrom,
+                                safeTo);
 
                 double completionRate = total == 0 ? 0.0 : ((double) completed / total) * 100.0;
                 double overdueRate = total == 0 ? 0.0 : ((double) overdue / total) * 100.0;
@@ -172,10 +176,15 @@ public class DashboardService implements IDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        @Cacheable(value = "dashboard_unit", key = "'workload:' + #orgId")
-        public java.util.List<UnitWorkloadDTO> getUnitWorkload(UUID orgId) {
-                return taskMemberRepository.getWorkloadDistribution(orgId, List.of(TaskMemberRole.ASSIGNEE, TaskMemberRole.LEAD, TaskMemberRole.OWNER, TaskMemberRole.REVIEWER), Instant.now(),
-                                TaskStatus.DONE);
+        @Cacheable(value = "dashboard_unit", key = "'workload:' + #orgId + ':' + #from + ':' + #to")
+        public java.util.List<UnitWorkloadDTO> getUnitWorkload(UUID orgId, Instant from, Instant to) {
+                Instant safeFrom = from != null ? from : Instant.EPOCH;
+                Instant safeTo = to != null ? to : Instant.parse("2100-01-01T00:00:00Z");
+                return taskMemberRepository.getWorkloadDistributionTimeboxed(orgId,
+                                List.of(TaskMemberRole.ASSIGNEE, TaskMemberRole.LEAD, TaskMemberRole.OWNER,
+                                                TaskMemberRole.REVIEWER),
+                                Instant.now(),
+                                TaskStatus.DONE, safeFrom, safeTo);
         }
 
         private boolean isUnitManager(UUID userId, UUID orgId) {

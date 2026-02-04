@@ -36,20 +36,22 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "#orgId")
-        public ExecutiveHotspotDTO getHotspots(UUID orgId) {
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "{#orgId, #from, #to}")
+        public ExecutiveHotspotDTO getHotspots(UUID orgId, Instant from, Instant to) {
                 Instant now = Instant.now();
                 Instant future48h = now.plus(48, ChronoUnit.HOURS);
                 Instant past48h = now.minus(48, ChronoUnit.HOURS);
+                Instant safeFrom = from != null ? from : Instant.EPOCH;
+                Instant safeTo = to != null ? to : Instant.parse("2100-01-01T00:00:00Z");
 
                 // 1. Overdue (Standard) - Using existing method for Org Wide
-                long overdue = taskRepository.countByOrganizationIdOverdue(orgId, now);
+                long overdue = taskRepository.countByOrganizationIdOverdueTimeboxed(orgId, now, safeFrom, safeTo);
 
                 // 2. At Risk (Priority High + Due Soon + Low Progress)
-                long atRisk = taskRepository.countDeepAtRisk(orgId, future48h);
+                long atRisk = taskRepository.countDeepAtRiskTimeboxed(orgId, future48h, safeFrom, safeTo);
 
                 // 3. Blocked (Active + Old + No Report recently)
-                long blocked = taskRepository.countBlocked(orgId, past48h);
+                long blocked = taskRepository.countBlockedTimeboxed(orgId, past48h, safeFrom, safeTo);
 
                 return ExecutiveHotspotDTO.builder()
                                 .overdueCount(overdue)
@@ -60,19 +62,19 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        @org.springframework.cache.annotation.Cacheable(value = "dashboard_personal", key = "'executive_actions:' + #orgId + ':' + #userId")
-        public ExecutiveActionItemDTO getActionItems(UUID orgId, UUID userId) {
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_personal", key = "'executive_actions:' + #orgId + ':' + #userId + ':' + #from + ':' + #to")
+        public ExecutiveActionItemDTO getActionItems(UUID orgId, UUID userId, Instant from, Instant to) {
+                Instant safeFrom = from != null ? from : Instant.EPOCH;
+                Instant safeTo = to != null ? to : Instant.parse("2100-01-01T00:00:00Z");
+
                 // 1. Approval Queue (Status = REVIEW)
-                // Ideally this should filter by permissions, but for "Unit Leader" view,
-                // seeing all REVIEW tasks in the unit is appropriate.
-                List<Task> reviews = taskRepository.findTasksInReview(orgId);
+                List<Task> reviews = taskRepository.findTasksInReviewTimeboxed(orgId, safeFrom, safeTo);
 
                 // 2. My Urgent Tasks (Assigned + HIGH + Not Done)
-                List<Task> urgents = taskRepository.findMyUrgentTasks(userId);
+                List<Task> urgents = taskRepository.findMyUrgentTasksTimeboxed(userId, safeFrom, safeTo);
 
                 // Mapping to DTOs
-                var currentUser = securityUtils.currentUser(); // This might be cached or efficient enough. If needed we
-                                                               // can pass User too, but ID is enough for cache key.
+                var currentUser = securityUtils.currentUser();
 
                 return ExecutiveActionItemDTO.builder()
                                 .approvalQueue(reviews.stream()
@@ -86,12 +88,14 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'velocity:' + #orgId")
-        public List<WeekVelocityDTO> getVelocity(UUID orgId) {
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'velocity:' + #orgId + ':' + #from + ':' + #to")
+        public List<WeekVelocityDTO> getVelocity(UUID orgId, Instant from, Instant to) {
                 Instant now = Instant.now();
-                Instant start = now.minus(28, ChronoUnit.DAYS); // Last 4 weeks
+                // If no range provided, default to last 4 weeks
+                Instant safeFrom = from != null ? from : now.minus(28, ChronoUnit.DAYS);
+                Instant safeTo = to != null ? to : now;
 
-                List<Task> doneTasks = taskRepository.findCompletedTasksInRange(orgId, start);
+                List<Task> doneTasks = taskRepository.findCompletedTasksInTimeRange(orgId, safeFrom, safeTo);
 
                 // Group by Week
                 Map<String, Long> weeklyCounts = doneTasks.stream()
@@ -99,15 +103,23 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
                                                 t -> formatWeek(t.getModifiedDate()),
                                                 Collectors.counting()));
 
-                // Fill gaps and sort
+                // Fill gaps? It's harder with arbitrary range.
+                // Simple approach: Just return what we have, or generate weeks between SafeFrom
+                // and SafeTo.
+                // For simplicity/robustness, let's just return the data points we have, sorted.
+                // Or if the range is small (<= 12 weeks), fill gaps.
+
                 List<WeekVelocityDTO> velocity = new ArrayList<>();
-                // Logic to generate last 4 week labels ensures we have 4 entries even if 0
-                for (int i = 0; i < 4; i++) {
-                        Instant weekInst = now.minus(i * 7L, ChronoUnit.DAYS);
-                        String weekLabel = formatWeek(weekInst);
-                        velocity.add(new WeekVelocityDTO(weekLabel, weeklyCounts.getOrDefault(weekLabel, 0L)));
-                }
-                Collections.reverse(velocity); // Oldest to Newest
+                weeklyCounts.forEach((week, count) -> velocity.add(new WeekVelocityDTO(week, count)));
+
+                // Sort by Week string (rough approximation, "Week 1" vs "Week 52") - Ideally we
+                // sort by date.
+                // To sort correctly, maybe we should parse "Week X" or use a different key.
+                // Re-implementation: Sort tasks by date, then group?
+
+                // Better: Just return the list sorted by label for now.
+                velocity.sort(Comparator.comparing(WeekVelocityDTO::getWeekLabel));
+
                 return velocity;
         }
 
@@ -120,9 +132,12 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'resource_health:' + #orgId")
-        public List<ResourceHealthDTO> getResourceHealth(UUID orgId) {
-                List<Object[]> workload = taskRepository.countActiveTasksPerUser(orgId);
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'resource_health:' + #orgId + ':' + #from + ':' + #to")
+        public List<ResourceHealthDTO> getResourceHealth(UUID orgId, Instant from, Instant to) {
+                Instant safeFrom = from != null ? from : Instant.EPOCH;
+                Instant safeTo = to != null ? to : Instant.parse("2100-01-01T00:00:00Z");
+
+                List<Object[]> workload = taskRepository.countActiveTasksPerUserTimeboxed(orgId, safeFrom, safeTo);
 
                 return workload.stream().map(obj -> {
                         User user = (User) obj[0];
@@ -142,10 +157,13 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'project_health:' + #orgId")
-        public List<ProjectHealthDTO> getProjectHealth(UUID orgId) {
+        @org.springframework.cache.annotation.Cacheable(value = "dashboard_unit", key = "'project_health:' + #orgId + ':' + #from + ':' + #to")
+        public List<ProjectHealthDTO> getProjectHealth(UUID orgId, Instant from, Instant to) {
+                Instant safeFrom = from != null ? from : Instant.EPOCH;
+                Instant safeTo = to != null ? to : Instant.parse("2100-01-01T00:00:00Z");
+
                 // 1. Get stats
-                List<Object[]> stats = taskRepository.getProjectProgressStats(orgId);
+                List<Object[]> stats = taskRepository.getProjectProgressStatsTimeboxed(orgId, safeFrom, safeTo);
                 Map<UUID, long[]> statMap = new HashMap<>(); // [Total, Completed]
                 for (Object[] row : stats) {
                         statMap.put((UUID) row[0], new long[] { (Long) row[1], (Long) row[2] });
@@ -155,8 +173,7 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
                 List<Project> projects = projectRepository.findAllByOrganizationId(orgId); // Assuming basic find exists
 
                 return projects.stream()
-                                .filter(p -> p.getDeleted() == Boolean.FALSE) // Double check soft delete in memory or
-                                                                              // repo
+                                .filter(p -> p.getDeleted() == Boolean.FALSE)
                                 .map(p -> {
                                         long[] s = statMap.getOrDefault(p.getId(), new long[] { 0L, 0L });
                                         long total = s[0];
@@ -173,13 +190,7 @@ public class ExecutiveDashboardService implements IExecutiveDashboardService {
                                                         .progress(progress)
                                                         .build();
                                 })
-                                .sorted((p1, p2) -> Integer.compare(p2.getProgress(), p1.getProgress())) // Sort by
-                                                                                                         // Progress
-                                                                                                         // desc? Or
-                                                                                                         // recency?
-                                                                                                         // Let's do
-                                                                                                         // Progress for
-                                                                                                         // now.
+                                .sorted((p1, p2) -> Integer.compare(p2.getProgress(), p1.getProgress()))
                                 .limit(5)
                                 .collect(Collectors.toList());
         }

@@ -28,7 +28,9 @@ public interface IDashboardService {
      */
     List<CalendarTaskDTO> getCalendarTasks(Instant startDate, Instant endDate);
 
-    com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO getUnitPerformance(java.util.UUID orgId);
+    com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO getUnitPerformance(java.util.UUID orgId,
+            java.time.Instant from, java.time.Instant to);
 
-    List<com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO> getUnitWorkload(java.util.UUID orgId);
+    List<com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO> getUnitWorkload(java.util.UUID orgId,
+            java.time.Instant from, java.time.Instant to);
 }

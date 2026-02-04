@@ -392,6 +392,26 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
       @Param("orgId") UUID orgId,
       @Param("future") java.time.Instant future);
 
+  @Query("""
+      SELECT COUNT(t)
+      FROM Task t
+      LEFT JOIN t.project p
+      LEFT JOIN p.organization o
+      WHERE (p IS NULL OR o.id = :orgId)
+        AND t.deleted = false
+        AND t.status != 'DONE' AND t.status != 'CANCELLED'
+        AND t.priority = 'HIGH'
+        AND t.dueDate <= :future
+        AND t.createdDate >= :from
+        AND t.createdDate <= :to
+        AND t.progress < 20
+      """)
+  long countDeepAtRiskTimeboxed(
+      @Param("orgId") UUID orgId,
+      @Param("future") java.time.Instant future,
+      @Param("from") java.time.Instant from,
+      @Param("to") java.time.Instant to);
+
   // 2. BLOCKED: Active AND Created > 48h AND No Report in last 48h
   @Query("""
       SELECT COUNT(t)
@@ -413,6 +433,30 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
       @Param("orgId") UUID orgId,
       @Param("past") java.time.Instant past);
 
+  @Query("""
+      SELECT COUNT(t)
+      FROM Task t
+      LEFT JOIN t.project p
+      LEFT JOIN p.organization o
+      WHERE (p IS NULL OR o.id = :orgId)
+        AND t.deleted = false
+        AND t.status != 'DONE' AND t.status != 'CANCELLED'
+        AND t.createdDate < :past
+        AND t.createdDate >= :from
+        AND t.createdDate <= :to
+        AND NOT EXISTS (
+            SELECT 1 FROM TaskComment c
+            WHERE c.task.id = t.id
+            AND c.type = 'REPORT'
+            AND c.createdDate > :past
+        )
+      """)
+  long countBlockedTimeboxed(
+      @Param("orgId") UUID orgId,
+      @Param("past") java.time.Instant past,
+      @Param("from") java.time.Instant from,
+      @Param("to") java.time.Instant to);
+
   // 3. URGENT TASKS FOR ME: Assigned to me AND High Priority AND Not Done
   @Query("""
       SELECT DISTINCT t
@@ -427,6 +471,24 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
       ORDER BY t.dueDate ASC
       """)
   List<Task> findMyUrgentTasks(@Param("userId") UUID userId);
+
+  @Query("""
+      SELECT DISTINCT t
+      FROM Task t
+      LEFT JOIN t.project p
+      LEFT JOIN p.organization o
+      JOIN TaskMember tm ON tm.task.id = t.id
+      WHERE tm.user.id = :userId
+        AND t.deleted = false
+        AND t.status != 'DONE' AND t.status != 'CANCELLED'
+        AND t.priority = 'HIGH'
+        AND t.createdDate >= :from
+        AND t.createdDate <= :to
+      ORDER BY t.dueDate ASC
+      """)
+  List<Task> findMyUrgentTasksTimeboxed(@Param("userId") UUID userId,
+      @Param("from") java.time.Instant from,
+      @Param("to") java.time.Instant to);
 
   // 4. APPROVAL QUEUE: Status = REVIEW AND (I am reviewer OR I am Unit Manager)
   // Note: Since 'reviewer' concept isn't strictly defined in Task entity yet,
@@ -446,6 +508,21 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
       """)
   List<Task> findTasksInReview(@Param("orgId") UUID orgId);
 
+  @Query("""
+      SELECT DISTINCT t
+      FROM Task t
+      LEFT JOIN t.project p
+      LEFT JOIN p.organization o
+      WHERE (p IS NULL OR o.id = :orgId)
+        AND t.deleted = false
+        AND t.status = 'REVIEW'
+        AND t.createdDate >= :from
+        AND t.createdDate <= :to
+      """)
+  List<Task> findTasksInReviewTimeboxed(@Param("orgId") UUID orgId,
+      @Param("from") java.time.Instant from,
+      @Param("to") java.time.Instant to);
+
   // 5. VELOCITY DATA: Completed tasks in range
   @Query("""
       SELECT t
@@ -460,6 +537,22 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
   List<Task> findCompletedTasksInRange(
       @Param("orgId") UUID orgId,
       @Param("startDate") java.time.Instant startDate);
+
+  @Query("""
+      SELECT t
+      FROM Task t
+      LEFT JOIN t.project p
+      LEFT JOIN p.organization o
+      WHERE (p IS NULL OR o.id = :orgId)
+        AND t.deleted = false
+        AND t.status = 'DONE'
+        AND t.modifiedDate >= :from
+        AND t.modifiedDate <= :to
+      """)
+  List<Task> findCompletedTasksInTimeRange(
+      @Param("orgId") UUID orgId,
+      @Param("from") java.time.Instant from,
+      @Param("to") java.time.Instant to);
 
   // 6. RESOURCE WORKLOAD AGGREGATION
   // Returns Object array: [User, Long count]
@@ -477,6 +570,24 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
       """)
   List<Object[]> countActiveTasksPerUser(@Param("orgId") UUID orgId);
 
+  @Query("""
+      SELECT tm.user, COUNT(distinct t.id)
+      FROM Task t
+      JOIN TaskMember tm ON tm.task.id = t.id
+      LEFT JOIN t.project p
+      LEFT JOIN p.organization o
+      WHERE (p IS NULL OR o.id = :orgId)
+        AND t.deleted = false
+        AND t.status != 'DONE' AND t.status != 'CANCELLED'
+        AND t.createdDate >= :from
+        AND t.createdDate <= :to
+      GROUP BY tm.user
+      ORDER BY COUNT(distinct t.id) DESC
+      """)
+  List<Object[]> countActiveTasksPerUserTimeboxed(@Param("orgId") UUID orgId,
+      @Param("from") java.time.Instant from,
+      @Param("to") java.time.Instant to);
+
   // 7. PROJECT PROGRESS STATS
   // Returns Object array: [ProjectId, TotalCount, CompletedCount]
   @Query("""
@@ -492,4 +603,22 @@ public interface ITaskRepository extends IGenericRepository<Task, UUID> {
       GROUP BY t.project.id
       """)
   List<Object[]> getProjectProgressStats(@Param("orgId") UUID orgId);
+
+  @Query("""
+      SELECT t.project.id,
+             COUNT(t.id),
+             SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END)
+      FROM Task t
+      LEFT JOIN t.project p
+      LEFT JOIN p.organization o
+      WHERE o.id = :orgId
+        AND t.project IS NOT NULL
+        AND t.deleted = false
+        AND t.createdDate >= :from
+        AND t.createdDate <= :to
+      GROUP BY t.project.id
+      """)
+  List<Object[]> getProjectProgressStatsTimeboxed(@Param("orgId") UUID orgId,
+      @Param("from") java.time.Instant from,
+      @Param("to") java.time.Instant to);
 }

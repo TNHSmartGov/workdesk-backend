@@ -5,6 +5,7 @@ import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserProfile;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
 import com.tnh.baseware.core.enums.task.TaskStatus;
+import com.tnh.baseware.core.exceptions.BWCBusinessException;
 import com.tnh.baseware.core.forms.user.UserProfileForm;
 import com.tnh.baseware.core.repositories.stats.UserStatsCalculationRepository;
 import com.tnh.baseware.core.repositories.user.IUserProfileRepository;
@@ -13,6 +14,8 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.storage.IStorageService;
 import com.tnh.baseware.core.services.user.IUserProfileService;
 import com.tnh.baseware.core.services.user.IUserService;
+import com.tnh.baseware.core.utils.SecurityUtils;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,13 +39,14 @@ public class UserProfileService implements IUserProfileService {
     IUserRepository userRepository;
     IUserService userService;
     MessageService messageService;
-
+    SecurityUtils securityUtils;
     @Qualifier("s3StorageService")
     IStorageService<String> storageService;
 
     @Override
     @Transactional
     public UserProfileDTO getProfile(UUID userId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException(messageService.getMessage("user.not.found", userId)));
 
@@ -55,13 +59,30 @@ public class UserProfileService implements IUserProfileService {
     @Override
     @Transactional
     public UserProfileDTO updateProfile(UUID userId, UserProfileForm form) {
+        var currentUser = securityUtils.currentUser();
+        if (!currentUser.getId().equals(userId)) {
+            throw new BWCBusinessException(messageService.getMessage("user.not.allowed"));
+        }
         userService.editProfile(userId, form);
+
+        UserProfile profile = profileRepository.findByUserId(userId)
+                .orElseGet(() -> createInitialProfile(userRepository.findById(userId).orElseThrow()));
+
+        if (form.getDescription() != null) {
+            profile.setDescription(form.getDescription());
+            profileRepository.save(profile);
+        }
+
         return getProfile(userId);
     }
 
     @Override
     @Transactional
     public String updateAvatar(UUID userId, MultipartFile file) {
+        var currentUser = securityUtils.currentUser();
+        if (!currentUser.getId().equals(userId)) {
+            throw new BWCBusinessException(messageService.getMessage("user.not.allowed"));
+        }
         String path = storageService.uploadFile(file);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException(messageService.getMessage("user.not.found", userId)));
@@ -73,6 +94,10 @@ public class UserProfileService implements IUserProfileService {
     @Override
     @Transactional
     public String updateCover(UUID userId, MultipartFile file) {
+        var currentUser = securityUtils.currentUser();
+        if (!currentUser.getId().equals(userId)) {
+            throw new BWCBusinessException(messageService.getMessage("user.not.allowed"));
+        }
         String path = storageService.uploadFile(file);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException(messageService.getMessage("user.not.found", userId)));
@@ -134,9 +159,15 @@ public class UserProfileService implements IUserProfileService {
                 .lastName(user.getLastName())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .phone(user.getPhone())
+                .birthday(user.getBirthday())
+                .address(user.getAddress())
+                .idn(user.getIdn())
+                .ial(user.getIal())
                 .avatarUrl(user.getAvatarUrl())
                 .coverUrl(profile.getCoverUrl())
                 .joinDate(profile.getJoinDate())
+                .description(profile.getDescription())
                 .totalTasks(profile.getTotalTasks())
                 .participatedTasks(profile.getParticipatedTasks())
                 .completedTasks(profile.getCompletedTasks())

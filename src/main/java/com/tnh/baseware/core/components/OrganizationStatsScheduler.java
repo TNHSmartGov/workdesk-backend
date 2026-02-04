@@ -2,7 +2,6 @@ package com.tnh.baseware.core.components;
 
 import com.tnh.baseware.core.configs.OrganizationStatsSchedulerConfig;
 import com.tnh.baseware.core.entities.adu.Organization;
-import com.tnh.baseware.core.enums.stats.SnapshotType;
 import com.tnh.baseware.core.exceptions.BWCGenericRuntimeException;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
 import com.tnh.baseware.core.services.stats.IOrganizationStatsService;
@@ -21,6 +20,7 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -53,10 +53,9 @@ public class OrganizationStatsScheduler implements SchedulingConfigurer {
                 enabledSchedules.size());
 
         for (OrganizationStatsSchedulerConfig.ScheduleConfig schedule : enabledSchedules) {
-            log.info("  - {}: {} ({})",
+            log.info("  - {}: {}",
                     schedule.getName(),
-                    schedule.getCron(),
-                    schedule.getSnapshotType());
+                    schedule.getCron());
         }
     }
 
@@ -70,10 +69,8 @@ public class OrganizationStatsScheduler implements SchedulingConfigurer {
             try {
                 CronExpression.parse(schedule.getCron());
 
-                SnapshotType snapshotType = SnapshotType.valueOf(schedule.getSnapshotType());
-
                 CronTask task = new CronTask(
-                        () -> generateStats(schedule.getName(), snapshotType),
+                        () -> generateStats(schedule.getName()),
                         schedule.getCron());
 
                 taskRegistrar.addCronTask(task);
@@ -93,10 +90,9 @@ public class OrganizationStatsScheduler implements SchedulingConfigurer {
      * This method is called by each configured schedule
      * 
      * @param scheduleName Name of the schedule (for logging)
-     * @param snapshotType Type of snapshot to generate
      */
     @Async
-    public void generateStats(String scheduleName, SnapshotType snapshotType) {
+    public void generateStats(String scheduleName) {
         LocalDate today = LocalDate.now();
 
         // Skip if today is weekend (extra safety check)
@@ -106,8 +102,8 @@ public class OrganizationStatsScheduler implements SchedulingConfigurer {
         }
 
         try {
-            log.info(LogStyleHelper.info("=== Starting {} ({}) stats generation for {} ==="),
-                    scheduleName, snapshotType, today);
+            log.info(LogStyleHelper.info("=== Starting {} stats generation for {} ==="),
+                    scheduleName, today);
 
             List<Organization> organizations = organizationRepository.findAll();
             log.info("Found {} organizations to process", organizations.size());
@@ -115,31 +111,28 @@ public class OrganizationStatsScheduler implements SchedulingConfigurer {
             int successCount = 0;
             int errorCount = 0;
 
+            // Normalize today to Start of Day (UTC) for the service call
+            Instant snapshotTime = today.atStartOfDay(java.time.ZoneId.of("UTC")).toInstant();
+
             for (Organization org : organizations) {
                 try {
-                    statsService.calculateAndSaveStats(org.getId(), today, snapshotType);
+                    statsService.calculateAndSaveStats(org.getId(), snapshotTime);
                     successCount++;
 
                     // Log sample message for first org
                     if (successCount == 1) {
-                        log.debug("Successfully calculated {} stats for org: {}",
-                                snapshotType, org.getName());
-                    }
-
-                    // TODO: Implement notification service integration for END_OF_DAY
-                    if (snapshotType == SnapshotType.END_OF_DAY) {
-                        // checkThresholdsAndNotify(org, today, stats);
+                        log.debug("Successfully calculated stats for org: {}", org.getName());
                     }
 
                 } catch (Exception ex) {
                     errorCount++;
-                    log.error(LogStyleHelper.error("Failed to generate {} stats for organization {}: {}"),
-                            snapshotType, org.getName(), ex.getMessage(), ex);
+                    log.error(LogStyleHelper.error("Failed to generate stats for organization {}: {}"),
+                            org.getName(), ex.getMessage(), ex);
                 }
             }
 
-            log.info(LogStyleHelper.info("=== {} ({}) stats generation completed: {} success, {} errors ==="),
-                    scheduleName, snapshotType, successCount, errorCount);
+            log.info(LogStyleHelper.info("=== {} stats generation completed: {} success, {} errors ==="),
+                    scheduleName, successCount, errorCount);
 
         } catch (Exception ex) {
             log.error(LogStyleHelper.error("Error during {} stats generation: {}"),

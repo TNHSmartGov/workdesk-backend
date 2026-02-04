@@ -59,6 +59,8 @@ public class User extends Auditable<String> implements Serializable {
 
     String avatarUrl;
 
+    Instant birthday;
+
     @Column(unique = false, nullable = true)
     @Builder.Default
     String idn = "";

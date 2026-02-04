@@ -2,13 +2,13 @@ package com.tnh.baseware.core.dtos.stats;
 
 import com.tnh.baseware.core.dtos.basic.BasicOrganizationDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
-import com.tnh.baseware.core.enums.stats.SnapshotType;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.time.Instant;
-import java.time.LocalDate;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,8 +27,7 @@ public class OrganizationDailyStatsDTO extends RepresentationModel<OrganizationD
 
     UUID id;
     BasicOrganizationDTO organization;
-    LocalDate snapshotDate;
-    SnapshotType snapshotType;
+    Instant snapshotTime;
 
     // Grouped metrics for better frontend consumption
     TaskMetricsDTO taskMetrics;

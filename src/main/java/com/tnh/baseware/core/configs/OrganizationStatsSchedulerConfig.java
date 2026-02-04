@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "baseware.organization-stats")
+@ConfigurationProperties(prefix = "baseware.core.system.organization-stats")
 public class OrganizationStatsSchedulerConfig {
 
     private boolean enabled = true;
@@ -22,8 +22,6 @@ public class OrganizationStatsSchedulerConfig {
         private String name;
 
         private String cron;
-
-        private String snapshotType;
 
         private Boolean enabled;
 

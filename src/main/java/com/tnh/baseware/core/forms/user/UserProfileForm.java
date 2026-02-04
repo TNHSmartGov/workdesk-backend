@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 @Builder
@@ -27,9 +29,12 @@ public class UserProfileForm {
     @NotBlank(message = "{phone.not.blank}")
     String phone;
 
+    String description;
+
     @NotBlank(message = "{email.not.blank}")
     String email;
     String avatarUrl;
+    Instant birthday;
     String address;
     @NotBlank(message = "{idn.not.blank}")
     String idn;

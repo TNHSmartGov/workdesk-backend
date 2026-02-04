@@ -14,6 +14,8 @@ public enum ProjectStatus implements BaseEnum<String> {
 
     DRAFT("DRAFT", "draft", "Mới tạo"),
     ACTIVE("ACTIVE", "active", "Đang hoạt động"),
+    ON_HOLD("ON_HOLD", "on_hold", "Tạm dừng"),
+    COMPLETED("COMPLETED", "completed", "Hoàn thành"),
     ARCHIVED("ARCHIVED", "archived", "Đã lưu trữ");
 
     private final String value;

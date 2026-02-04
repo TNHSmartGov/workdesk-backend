@@ -1,5 +1,6 @@
 package com.tnh.baseware.core.resources.user;
 
+import org.springframework.web.multipart.MultipartFile;
 import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.dtos.user.AuthenticationDTO;
@@ -13,7 +14,10 @@ import com.tnh.baseware.core.resources.GenericResource;
 import com.tnh.baseware.core.services.IGenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.user.IUserService;
+import com.tnh.baseware.core.services.user.IUserProfileService;
+import com.tnh.baseware.core.dtos.user.UserProfileDTO;
 import com.tnh.baseware.core.services.user.imp.AuthenticationService;
+import org.springframework.http.MediaType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,14 +43,17 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
 
         IUserService userService;
         AuthenticationService authenticationService;
+        IUserProfileService userProfileService;
 
         public UserResource(IGenericService<User, UserEditorForm, UserDTO, UUID> service,
                         MessageService messageService, IUserService userService,
-                            AuthenticationService authenticationService,
-                        SystemProperties systemProperties) {
+                        AuthenticationService authenticationService,
+                        SystemProperties systemProperties,
+                        IUserProfileService userProfileService) {
                 super(service, messageService, systemProperties.getApiPrefix() + "/users");
                 this.userService = userService;
                 this.authenticationService = authenticationService;
+                this.userProfileService = userProfileService;
         }
 
         @Operation(summary = "Edit user profile")
@@ -298,21 +305,60 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
                                 .build());
         }
 
+        @Operation(summary = "Get user extended profile")
+        @ApiOkResponse(value = UserProfileDTO.class, type = ApiResponseType.OBJECT)
+        @GetMapping("/{id}/profile")
+        public ResponseEntity<ApiMessageDTO<UserProfileDTO>> getProfile(@PathVariable UUID id) {
+                UserProfileDTO profile = userProfileService.getProfile(id);
+                return ResponseEntity.ok(ApiMessageDTO.<UserProfileDTO>builder()
+                                .data(profile)
+                                .result(true)
+                                .message(messageService.getMessage("user.retrieved"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @Operation(summary = "Update user avatar")
+        @ApiOkResponse(value = String.class, type = ApiResponseType.OBJECT)
+        @PostMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<ApiMessageDTO<String>> updateAvatar(@PathVariable UUID id,
+                        @RequestParam("file") MultipartFile file) {
+                String url = userProfileService.updateAvatar(id, file);
+                return ResponseEntity.ok(ApiMessageDTO.<String>builder()
+                                .data(url)
+                                .result(true)
+                                .message(messageService.getMessage("user.profile.updated"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @Operation(summary = "Update user cover image")
+        @ApiOkResponse(value = String.class, type = ApiResponseType.OBJECT)
+        @PostMapping(value = "/{id}/cover", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<ApiMessageDTO<String>> updateCover(@PathVariable UUID id,
+                        @RequestParam("file") MultipartFile file) {
+                String url = userProfileService.updateCover(id, file);
+                return ResponseEntity.ok(ApiMessageDTO.<String>builder()
+                                .data(url)
+                                .result(true)
+                                .message(messageService.getMessage("user.profile.updated"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
         @PostMapping("/switch-org")
         public ResponseEntity<ApiMessageDTO<AuthenticationDTO>> switchOrg(
-                @Valid @RequestBody SwitchOrgForm request,
-                HttpServletRequest httpRequest
-        ) {
-                AuthenticationDTO dto =
-                        authenticationService.switchOrganization(request.getOrganizationId(), httpRequest);
+                        @Valid @RequestBody SwitchOrgForm request,
+                        HttpServletRequest httpRequest) {
+                AuthenticationDTO dto = authenticationService.switchOrganization(request.getOrganizationId(),
+                                httpRequest);
 
                 return ResponseEntity.ok(
-                        ApiMessageDTO.<AuthenticationDTO>builder()
-                                .data(dto)
-                                .result(true)
-                                .message(messageService.getMessage("organization.switched"))
-                                .code(HttpStatus.OK.value())
-                                .build()
-                );
+                                ApiMessageDTO.<AuthenticationDTO>builder()
+                                                .data(dto)
+                                                .result(true)
+                                                .message(messageService.getMessage("organization.switched"))
+                                                .code(HttpStatus.OK.value())
+                                                .build());
         }
 }

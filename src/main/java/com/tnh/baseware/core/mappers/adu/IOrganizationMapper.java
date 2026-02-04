@@ -40,6 +40,7 @@ public interface IOrganizationMapper extends IGenericMapper<Organization, Organi
                         .description(parent.getDescription())
                         .latitude(parent.getLatitude())
                         .longitude(parent.getLongitude())
+                        .isUnit(parent.getIsUnit())
                         .level(parent.getLevel())
                         .build();
     }

@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -212,6 +213,7 @@ public class TaskMemberService extends
         @Override
         public List<TaskMemberDTO> getTaskMembers(UUID taskId) {
                 return repository.findByTask_Id(taskId).stream()
+                                .sorted(Comparator.comparing(m -> m.getRole().getOrder()))
                                 .map(mapper::entityToDTO)
                                 .toList();
         }

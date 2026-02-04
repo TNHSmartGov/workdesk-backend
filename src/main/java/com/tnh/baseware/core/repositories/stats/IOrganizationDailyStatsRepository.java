@@ -62,4 +62,20 @@ public interface IOrganizationDailyStatsRepository extends IGenericRepository<Or
                         "ORDER BY s.snapshotTime DESC " +
                         "LIMIT 1")
         Optional<OrganizationDailyStats> findLatestByOrganizationId(@Param("orgId") UUID organizationId);
+
+        @Query("""
+                        SELECT new com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO(
+                            CAST(COALESCE(SUM(s.newTasksToday), 0) AS long),
+                            CAST(COALESCE(AVG(s.completionRate), 0.0) AS double),
+                            CAST(COALESCE(AVG(s.overdueRate), 0.0) AS double)
+                        )
+                        FROM OrganizationDailyStats s
+                        WHERE s.organization.id = :orgId
+                        AND s.snapshotTime >= :from
+                        AND s.snapshotTime <= :to
+                        """)
+        com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO aggregatePerformance(
+                        @Param("orgId") UUID orgId,
+                        @Param("from") Instant from,
+                        @Param("to") Instant to);
 }

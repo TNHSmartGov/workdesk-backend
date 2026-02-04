@@ -36,6 +36,8 @@ public class UserProfile extends Auditable<String> implements Serializable {
 
     Instant joinDate;
 
+    String description;
+
     // --- Statistics (Cached) ---
 
     @Builder.Default
@@ -54,4 +56,5 @@ public class UserProfile extends Auditable<String> implements Serializable {
     Double performance = 0.0;
 
     Instant lastStatsUpdate;
+
 }

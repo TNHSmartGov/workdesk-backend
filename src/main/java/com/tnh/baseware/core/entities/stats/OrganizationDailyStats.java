@@ -2,7 +2,7 @@ package com.tnh.baseware.core.entities.stats;
 
 import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.entities.audit.Auditable;
-import com.tnh.baseware.core.enums.stats.SnapshotType;
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,27 +10,18 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
-import java.time.LocalDate;
+
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Entity lưu trữ thống kê hằng ngày cho từng Organization
- * 
- * Mỗi organization sẽ có 2 snapshot/ngày:
- * - MIDDAY (12:00 PM): Thống kê buổi sáng
- * - END_OF_DAY (17:30 PM): Thống kê cả ngày
- * 
- * Snapshot chỉ chạy vào các ngày làm việc (T2-T6)
- */
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "organization_daily_stats", uniqueConstraints = @UniqueConstraint(name = "uk_org_date_type", columnNames = {
-        "organization_id", "snapshot_date", "snapshot_type" }))
+@Table(name = "organization_daily_stats", uniqueConstraints = @UniqueConstraint(name = "uk_org_snapshot_time", columnNames = {
+        "organization_id", "snapshot_time" }))
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrganizationDailyStats extends Auditable<String> {
 
@@ -42,12 +33,8 @@ public class OrganizationDailyStats extends Auditable<String> {
     @JoinColumn(name = "organization_id", nullable = false)
     Organization organization;
 
-    @Column(nullable = false, name = "snapshot_date")
-    LocalDate snapshotDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, name = "snapshot_type", length = 20)
-    SnapshotType snapshotType;
+    @Column(nullable = false, name = "snapshot_time")
+    Instant snapshotTime;
 
     // ============ TASK METRICS ============
 

@@ -1,7 +1,6 @@
 package com.tnh.baseware.core.resources.stats;
 
 import com.tnh.baseware.core.dtos.stats.OrganizationDailyStatsDTO;
-import com.tnh.baseware.core.enums.stats.SnapshotType;
 import com.tnh.baseware.core.services.stats.IOrganizationStatsService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,18 +29,17 @@ public class OrganizationStatsResource {
     IOrganizationStatsService statsService;
 
     /**
-     * Get daily stats for a specific organization, date, and snapshot type
+     * Get daily stats for a specific organization and date
      * 
-     * GET /api/v1/organization-stats/{orgId}/daily?date=2026-02-02&type=END_OF_DAY
+     * GET /api/v1/organization-stats/{orgId}/daily?date=2026-02-02
      */
     @GetMapping("/{orgId}/daily")
     @PreAuthorize("@securityUtils.canAccessOrganizationStats(#orgId)")
     public ResponseEntity<OrganizationDailyStatsDTO> getDailyStats(
             @PathVariable UUID orgId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam SnapshotType type) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
-        OrganizationDailyStatsDTO stats = statsService.getStats(orgId, date, type);
+        OrganizationDailyStatsDTO stats = statsService.getStats(orgId, toInstant(date));
         return ResponseEntity.ok(stats);
     }
 
@@ -57,7 +55,7 @@ public class OrganizationStatsResource {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
 
-        List<OrganizationDailyStatsDTO> trend = statsService.getStatsTrend(orgId, from, to);
+        List<OrganizationDailyStatsDTO> trend = statsService.getStatsTrend(orgId, toInstant(from), toInstant(to));
         return ResponseEntity.ok(trend);
     }
 
@@ -66,7 +64,7 @@ public class OrganizationStatsResource {
      * User must have access to ALL requested organizations
      * 
      * POST /api/v1/organization-stats/compare
-     * Body: { "orgIds": [...], "date": "2026-02-02", "type": "END_OF_DAY" }
+     * Body: { "orgIds": [...], "date": "2026-02-02" }
      */
     @PostMapping("/compare")
     public ResponseEntity<List<OrganizationDailyStatsDTO>> compareOrganizations(
@@ -74,8 +72,7 @@ public class OrganizationStatsResource {
 
         List<OrganizationDailyStatsDTO> comparison = statsService.compareOrganizations(
                 request.orgIds(),
-                request.date(),
-                request.type());
+                toInstant(request.date()));
         return ResponseEntity.ok(comparison);
     }
 
@@ -96,30 +93,31 @@ public class OrganizationStatsResource {
      * Useful for backfill or fixing incorrect data
      * 
      * POST
-     * /api/v1/organization-stats/{orgId}/recalculate?date=2026-02-02&type=END_OF_DAY
+     * /api/v1/organization-stats/{orgId}/recalculate?date=2026-02-02
      */
     @PostMapping("/{orgId}/recalculate")
     @PreAuthorize("@securityUtils.canAccessOrganizationStats(#orgId)")
     public ResponseEntity<Map<String, Object>> recalculateStats(
             @PathVariable UUID orgId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam SnapshotType type) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
         // Trigger async recalculation
-        statsService.triggerRecalculationAsync(orgId, date, type);
+        statsService.triggerRecalculationAsync(orgId, toInstant(date));
 
         return ResponseEntity.accepted().body(Map.of(
                 "message", "Calculation started in background. Please check back later.",
                 "status", "ACCEPTED",
                 "orgId", orgId,
-                "date", date,
-                "type", type));
+                "date", date));
+    }
+
+    private java.time.Instant toInstant(LocalDate date) {
+        return date.atStartOfDay(java.time.ZoneId.of("UTC")).toInstant();
     }
 
     // DTO for compare request
     record CompareRequest(
             List<UUID> orgIds,
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            SnapshotType type) {
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
     }
 }

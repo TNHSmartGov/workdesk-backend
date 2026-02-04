@@ -17,6 +17,8 @@ import com.tnh.baseware.core.services.user.IUserService;
 import com.tnh.baseware.core.services.user.IUserProfileService;
 import com.tnh.baseware.core.dtos.user.UserProfileDTO;
 import com.tnh.baseware.core.services.user.imp.AuthenticationService;
+import com.tnh.baseware.core.utils.SecurityUtils;
+
 import org.springframework.http.MediaType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,26 +46,30 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         IUserService userService;
         AuthenticationService authenticationService;
         IUserProfileService userProfileService;
+        SecurityUtils securityUtils;
 
         public UserResource(IGenericService<User, UserEditorForm, UserDTO, UUID> service,
                         MessageService messageService, IUserService userService,
                         AuthenticationService authenticationService,
                         SystemProperties systemProperties,
+                        SecurityUtils securityUtils,
                         IUserProfileService userProfileService) {
                 super(service, messageService, systemProperties.getApiPrefix() + "/users");
                 this.userService = userService;
                 this.authenticationService = authenticationService;
                 this.userProfileService = userProfileService;
+                this.securityUtils = securityUtils;
         }
 
         @Operation(summary = "Edit user profile")
-        @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.OBJECT)
+        @ApiOkResponse(value = UserProfileDTO.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/profile")
-        public ResponseEntity<ApiMessageDTO<UserDTO>> editProfile(@PathVariable UUID id,
+        public ResponseEntity<ApiMessageDTO<UserProfileDTO>> editProfile(@PathVariable UUID id,
                         @Valid @RequestBody UserProfileForm form) {
-                var userDTO = userService.editProfile(id, form);
-                return ResponseEntity.ok(ApiMessageDTO.<UserDTO>builder()
-                                .data(userDTO)
+
+                var userProfileDTO = userProfileService.updateProfile(id, form);
+                return ResponseEntity.ok(ApiMessageDTO.<UserProfileDTO>builder()
+                                .data(userProfileDTO)
                                 .result(true)
                                 .message(messageService.getMessage("user.profile.updated"))
                                 .code(HttpStatus.OK.value())

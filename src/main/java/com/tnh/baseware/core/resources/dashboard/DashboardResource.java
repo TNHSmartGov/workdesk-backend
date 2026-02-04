@@ -90,9 +90,11 @@ public class DashboardResource {
         @Operation(summary = "Get unit performance statistics")
         @ApiOkResponse(value = UnitPerformanceDTO.class)
         @GetMapping("/unit/performance")
-        public ResponseEntity<ApiMessageDTO<UnitPerformanceDTO>> getUnitPerformance() {
+        public ResponseEntity<ApiMessageDTO<UnitPerformanceDTO>> getUnitPerformance(
+                        @RequestParam(required = false) java.time.Instant fromDate,
+                        @RequestParam(required = false) java.time.Instant toDate) {
                 var orgId = securityUtils.currentOrgId();
-                var stats = dashboardService.getUnitPerformance(orgId);
+                var stats = dashboardService.getUnitPerformance(orgId, fromDate, toDate);
                 return ResponseEntity.ok(ApiMessageDTO.<UnitPerformanceDTO>builder()
                                 .data(stats)
                                 .result(true)
@@ -104,9 +106,11 @@ public class DashboardResource {
         @Operation(summary = "Get unit workload distribution")
         @ApiOkResponse(value = UnitWorkloadDTO.class)
         @GetMapping("/unit/workload")
-        public ResponseEntity<ApiMessageDTO<List<UnitWorkloadDTO>>> getUnitWorkload() {
+        public ResponseEntity<ApiMessageDTO<List<UnitWorkloadDTO>>> getUnitWorkload(
+                        @RequestParam(required = false) java.time.Instant fromDate,
+                        @RequestParam(required = false) java.time.Instant toDate) {
                 var orgId = securityUtils.currentOrgId();
-                var workload = dashboardService.getUnitWorkload(orgId);
+                var workload = dashboardService.getUnitWorkload(orgId, fromDate, toDate);
                 return ResponseEntity.ok(ApiMessageDTO.<List<UnitWorkloadDTO>>builder()
                                 .data(workload)
                                 .result(true)

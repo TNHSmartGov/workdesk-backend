@@ -120,27 +120,29 @@ public class ProjectService
     @Override
     @Transactional(readOnly = true)
     public ProjectDTO findById(UUID id) {
+        var currentUser = getCurrentUser();
         Boolean isSystem = isUserSystem();
         if (isSystem) {
             return repository.findById(id)
-                    .map(mapper::entityToDTO)
+                    .map(e -> mapper.entityToDTO(e, currentUser, projectMemberRepository))
                     .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
         }
         UUID orgId = securityUtils.currentOrgId();
 
         return repository.findByIdAndOrganizationId(id, orgId)
-                .map(mapper::entityToDTO)
+                .map(e -> mapper.entityToDTO(e, currentUser, projectMemberRepository))
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("project.not.found")));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
+        var currentUser = getCurrentUser();
         Boolean isSystem = isUserSystem();
         if (isSystem) {
             return repository.findAll()
                     .stream()
-                    .map(mapper::entityToDTO)
+                    .map(e -> mapper.entityToDTO(e, currentUser, projectMemberRepository))
                     .toList();
         }
 
@@ -148,7 +150,7 @@ public class ProjectService
 
         return repository.findByOrganizationId(orgId, Sort.by(Sort.Order.desc("createdDate")))
                 .stream()
-                .map(mapper::entityToDTO)
+                .map(e -> mapper.entityToDTO(e, currentUser, projectMemberRepository))
                 .toList();
     }
 
@@ -156,19 +158,21 @@ public class ProjectService
     @Transactional(readOnly = true)
     public Page<ProjectDTO> findAll(Pageable pageable) {
 
+        var currentUser = getCurrentUser();
         Boolean isSystem = isUserSystem();
         if (isSystem) {
             return repository.findAll(pageable)
-                    .map(mapper::entityToDTO);
+                    .map(e -> mapper.entityToDTO(e, currentUser, projectMemberRepository));
         }
         UUID orgId = securityUtils.currentOrgId();
         return repository.findByOrganizationId(orgId, pageable)
-                .map(mapper::entityToDTO);
+                .map(e -> mapper.entityToDTO(e, currentUser, projectMemberRepository));
     }
 
     @Override
     @Transactional
     public ProjectDTO create(ProjectEditorForm form) {
+        var currentUser = getCurrentUser();
         UUID orgId = securityUtils.currentOrgId();
 
         Project project = mapper.formToEntity(form);
@@ -196,11 +200,11 @@ public class ProjectService
 
         var member = ProjectMember.builder()
                 .project(project)
-                .user(getCurrentUser())
+                .user(currentUser)
                 .role(ProjectMemberRole.OWNER)
                 .build();
         projectMemberRepository.save(member);
-        return mapper.entityToDTO(repository.save(project));
+        return mapper.entityToDTO(repository.save(project), currentUser, projectMemberRepository);
     }
 
     @Override
@@ -223,7 +227,7 @@ public class ProjectService
 
         mapper.formToEntity(form, project);
 
-        return mapper.entityToDTO(repository.save(project));
+        return mapper.entityToDTO(repository.save(project), currentUser, projectMemberRepository);
     }
 
     @Override

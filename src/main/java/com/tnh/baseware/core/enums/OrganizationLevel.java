@@ -12,9 +12,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public enum OrganizationLevel implements BaseEnum<Integer> {
     PROVINCE(1, "province", "Tỉnh/Thành phố"),
-    COMMUNE(2, "commune", "Xã/Phường"),
+    COMMUNE(2, "commune", "Xã/Phường/Đặc khu"),
     DEPARTMENT(3, "department", "Sở/Ban/Ngành"),
-    COMPANY(4, "company", "Doanh nghiệp");
+    SECTION(4, "section", "Bộ phận/Phòng ban"),
+    COMPANY(5, "company", "Doanh nghiệp");
 
     Integer value;
     String name;

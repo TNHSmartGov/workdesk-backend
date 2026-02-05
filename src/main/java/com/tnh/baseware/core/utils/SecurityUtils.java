@@ -1,10 +1,9 @@
 package com.tnh.baseware.core.utils;
 
 import com.tnh.baseware.core.entities.adu.Organization;
-import com.tnh.baseware.core.entities.audit.Category;
 import com.tnh.baseware.core.entities.user.CustomUserDetails;
 import com.tnh.baseware.core.entities.user.User;
-import com.tnh.baseware.core.enums.CategoryCode;
+import com.tnh.baseware.core.enums.OrganizationRole;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
 import com.tnh.baseware.core.services.MessageService;
@@ -161,15 +160,9 @@ public final class SecurityUtils {
                     .filter(userOrg -> userOrg.getOrganization().getId().equals(orgId))
                     .filter(userOrg -> userOrg.getTitle() != null)
                     .anyMatch(userOrg -> {
-                        Category title = userOrg.getTitle();
-                        // Check category code is ORGANIZATION_TITLE
-                        if (title.getCode() == null ||
-                                title.getCode() != CategoryCode.ORGANIZATION_TITLE) {
-                            return false;
-                        }
-                        // Check title name is UNIT_LEADER or DEPUTY
-                        String titleName = title.getName();
-                        return "UNIT_LEADER".equals(titleName) || "DEPUTY".equals(titleName);
+                        OrganizationRole role = userOrg.getOrganizationRole();
+                        return role == OrganizationRole.UNIT_LEADER ||
+                                role == OrganizationRole.DEPUTY;
                     });
         } catch (Exception e) {
             return false;

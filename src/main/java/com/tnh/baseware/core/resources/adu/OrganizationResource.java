@@ -106,7 +106,7 @@ public class OrganizationResource extends
         public ResponseEntity<ApiMessageDTO<Integer>> changeTitle(@PathVariable UUID orgId,
                         @PathVariable UUID userId,
                         @RequestBody ChangeUserTitleEditorForm request) {
-                organizationService.changeTitle(orgId, userId, request.getTitleId());
+                organizationService.changeTitle(orgId, userId, request.getOrganizationRole(), request.getTitleId());
                 return ResponseEntity.ok(ApiMessageDTO.<Integer>builder()
                                 .data(1)
                                 .result(true)

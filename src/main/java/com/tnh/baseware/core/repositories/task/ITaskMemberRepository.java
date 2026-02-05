@@ -29,6 +29,35 @@ public interface ITaskMemberRepository
     boolean existsByTask_IdAndRole(UUID taskId, TaskMemberRole role);
 
     @Query("""
+            SELECT tm
+            FROM TaskMember tm
+            JOIN tm.task t
+            WHERE tm.role = :role
+              AND tm.deleted = false
+              AND t.deleted = false
+              AND t.status != 'DONE' AND t.status != 'CANCELLED'
+              AND t.dueDate IS NOT NULL
+              AND t.dueDate >= :now AND t.dueDate <= :future
+            """)
+    List<TaskMember> findAssigneesDueSoon(@Param("role") TaskMemberRole role,
+            @Param("now") java.time.Instant now,
+            @Param("future") java.time.Instant future);
+
+    @Query("""
+            SELECT tm
+            FROM TaskMember tm
+            JOIN tm.task t
+            WHERE tm.role = :role
+              AND tm.deleted = false
+              AND t.deleted = false
+              AND t.status != 'DONE' AND t.status != 'CANCELLED'
+              AND t.dueDate IS NOT NULL
+              AND t.dueDate < :now
+            """)
+    List<TaskMember> findAssigneesOverdue(@Param("role") TaskMemberRole role,
+            @Param("now") java.time.Instant now);
+
+    @Query("""
             SELECT new com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO(
                 u.id, u.fullName, u.avatarUrl,
                 COUNT(t),

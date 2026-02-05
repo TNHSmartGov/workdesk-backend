@@ -25,6 +25,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -146,6 +147,14 @@ public class CacheConfiguration {
                 template.setEnableTransactionSupport(false);
                 template.afterPropertiesSet();
 
+                return template;
+        }
+
+        @Bean
+        public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+                var template = new StringRedisTemplate();
+                template.setConnectionFactory(redisConnectionFactory);
+                template.afterPropertiesSet();
                 return template;
         }
 

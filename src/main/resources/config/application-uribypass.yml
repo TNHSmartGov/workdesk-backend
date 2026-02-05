@@ -3,6 +3,7 @@ baseware:
     uri:
       bypass:
         - "/api/v1/auth/**"
+        - "/api/v1/notifications/stream"
         - "/api/v1/payment/viettin/confirm"
         - "/actuator/**"
         - "/v3/api-docs/**"

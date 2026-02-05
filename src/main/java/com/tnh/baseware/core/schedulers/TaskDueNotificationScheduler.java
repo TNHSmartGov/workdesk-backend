@@ -1,4 +1,4 @@
-package com.tnh.baseware.core.components;
+package com.tnh.baseware.core.schedulers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -9,6 +9,7 @@ import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
 import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
+import com.tnh.baseware.core.repositories.stats.IOrganizationDailyStatsRepository;
 import com.tnh.baseware.core.services.dashboard.imp.DashboardService;
 import com.tnh.baseware.core.utils.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +44,8 @@ public class DashboardServiceTest {
     @Mock
     ITaskMemberRepository taskMemberRepository;
     @Mock
+    IOrganizationDailyStatsRepository dailyStatsRepository;
+    @Mock
     SecurityUtils securityUtils;
 
     @InjectMocks
@@ -62,6 +65,7 @@ public class DashboardServiceTest {
         Instant from = Instant.parse("2023-01-01T00:00:00Z");
         Instant to = Instant.parse("2023-01-31T23:59:59Z");
 
+        when(dailyStatsRepository.aggregatePerformance(eq(orgId), eq(from), eq(to))).thenReturn(null);
         when(taskRepository.countByOrganizationIdTimeboxed(eq(orgId), eq(from), eq(to))).thenReturn(10L);
         when(taskRepository.countByOrganizationIdAndStatusFinishedTimeboxed(eq(orgId), eq(TaskStatus.DONE), eq(from),
                 eq(to))).thenReturn(5L);

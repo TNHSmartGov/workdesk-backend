@@ -168,7 +168,8 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
             }
             user.setIdn(form.getIdn());
         }
-
+        user.setAddress(form.getAddress());
+        user.setBirthday(form.getBirthday());
         user.setFirstName(form.getFirstName());
         user.setLastName(form.getLastName());
         user.setFullName(form.getFullName());

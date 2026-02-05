@@ -9,6 +9,8 @@ import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.enums.ApiResponseType;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.dashboard.IDashboardService;
+import com.tnh.baseware.core.utils.SecurityUtils;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -37,7 +39,7 @@ public class DashboardResource {
 
         IDashboardService dashboardService;
         MessageService messageService;
-        com.tnh.baseware.core.utils.SecurityUtils securityUtils;
+        SecurityUtils securityUtils;
 
         @Operation(summary = "Get personal statistics")
         @ApiOkResponse(value = TaskStatisticDTO.class)

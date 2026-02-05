@@ -3,7 +3,7 @@ package com.tnh.baseware.core.services.stats.imp;
 import com.tnh.baseware.core.dtos.stats.OrganizationDailyStatsDTO;
 import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.entities.stats.OrganizationDailyStats;
-import com.tnh.baseware.core.enums.stats.SnapshotType;
+
 import com.tnh.baseware.core.exceptions.BWCGenericRuntimeException;
 import com.tnh.baseware.core.mappers.stats.IOrganizationDailyStatsMapper;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalDate;
+
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -41,32 +41,32 @@ public class OrganizationStatsService implements IOrganizationStatsService {
     @Transactional
     public OrganizationDailyStatsDTO calculateAndSaveStats(
             UUID orgId,
-            LocalDate snapshotDate,
-            SnapshotType snapshotType) {
+            Instant inputTime) {
 
-        log.debug("Calculating {} stats for organization {} on {}",
-                snapshotType, orgId, snapshotDate);
+        // Normalize to Start of Day (UTC) to ensure uniqueness
+        Instant snapshotTime = normalizeToStartOfDay(inputTime);
+        log.debug("Calculating stats for organization {} on {} (normalized)", orgId, snapshotTime);
 
         // Verify organization exists
         Organization org = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new BWCGenericRuntimeException("Organization not found: " + orgId));
 
-        // Define snapshot time based on type
-        Instant snapshotTime = calculateSnapshotTime(snapshotDate, snapshotType);
         Instant threeDaysLater = snapshotTime.plus(3, ChronoUnit.DAYS);
+
+        String dateString = snapshotTime.atZone(ZoneId.of("UTC")).toLocalDate().toString();
 
         // === Calculate Task Metrics ===
         TaskStatsProjection taskStats = calculationRepository.calculateTaskStats(
-                orgId, snapshotTime, snapshotDate.toString(), threeDaysLater);
+                orgId, snapshotTime, dateString, threeDaysLater);
 
         // === Calculate Project Metrics ===
         ProjectStatsProjection projectStats = calculationRepository.calculateProjectStats(
-                orgId, snapshotTime, snapshotDate.toString());
+                orgId, snapshotTime, dateString);
 
         // === Calculate Performance Metrics ===
-        Integer activeUsers = calculationRepository.countActiveUsers(orgId, snapshotDate.toString());
+        Integer activeUsers = calculationRepository.countActiveUsers(orgId, dateString);
         Double avgCompletionTime = calculationRepository.calculateAvgCompletionTimeHours(
-                orgId, snapshotDate.toString());
+                orgId, dateString);
 
         // Calculate derived metrics
         Double completionRate = calculateCompletionRate(
@@ -78,45 +78,42 @@ public class OrganizationStatsService implements IOrganizationStatsService {
                 taskStats.getOverdueTasks());
 
         // === Calculate Extended Metrics (Optional) ===
-        Map<String, Object> extendedMetrics = calculateExtendedMetrics(orgId, snapshotDate);
+        Map<String, Object> extendedMetrics = calculateExtendedMetrics(orgId, snapshotTime);
 
-        // Delete existing stats if already exists (for recalculation)
-        statsRepository.findByOrganizationIdAndSnapshotDateAndSnapshotType(
-                orgId, snapshotDate, snapshotType).ifPresent(statsRepository::delete);
+        // Check if stats already exist for this day (normalized time)
+        OrganizationDailyStats entity = statsRepository.findByOrganizationIdAndSnapshotTime(orgId, snapshotTime)
+                .orElse(OrganizationDailyStats.builder()
+                        .organization(org)
+                        .snapshotTime(snapshotTime)
+                        .build());
 
-        // Build and save entity
-        OrganizationDailyStats entity = OrganizationDailyStats.builder()
-                .organization(org)
-                .snapshotDate(snapshotDate)
-                .snapshotType(snapshotType)
-                // Task metrics
-                .totalTasks(safeIntValue(taskStats.getTotalTasks()))
-                .newTasksToday(safeIntValue(taskStats.getNewTasksToday()))
-                .completedToday(safeIntValue(taskStats.getCompletedToday()))
-                .overdueTasks(safeIntValue(taskStats.getOverdueTasks()))
-                .dueInNext3Days(safeIntValue(taskStats.getDueInNext3Days()))
-                .inProgressTasks(safeIntValue(taskStats.getInProgressTasks()))
-                .avgProgressRate(taskStats.getAvgProgressRate())
-                // Project metrics
-                .totalProjects(safeIntValue(projectStats.getTotalProjects()))
-                .activeProjects(safeIntValue(projectStats.getActiveProjects()))
-                .overdueProjects(safeIntValue(projectStats.getOverdueProjects()))
-                .completedProjectsToday(safeIntValue(projectStats.getCompletedProjectsToday()))
-                // Performance metrics
-                .completionRate(completionRate)
-                .overdueRate(overdueRate)
-                .activeUserCount(activeUsers != null ? activeUsers : 0)
-                .avgCompletionTimeHours(avgCompletionTime)
-                // Extended & metadata
-                .extendedMetrics(extendedMetrics)
-                .calculatedAt(Instant.now())
-                .isArchived(false)
-                .build();
+        // Update fields
+        entity.setTotalTasks(safeIntValue(taskStats.getTotalTasks()));
+        entity.setNewTasksToday(safeIntValue(taskStats.getNewTasksToday()));
+        entity.setCompletedToday(safeIntValue(taskStats.getCompletedToday()));
+        entity.setOverdueTasks(safeIntValue(taskStats.getOverdueTasks()));
+        entity.setDueInNext3Days(safeIntValue(taskStats.getDueInNext3Days()));
+        entity.setInProgressTasks(safeIntValue(taskStats.getInProgressTasks()));
+        entity.setAvgProgressRate(taskStats.getAvgProgressRate());
+
+        entity.setTotalProjects(safeIntValue(projectStats.getTotalProjects()));
+        entity.setActiveProjects(safeIntValue(projectStats.getActiveProjects()));
+        entity.setOverdueProjects(safeIntValue(projectStats.getOverdueProjects()));
+        entity.setCompletedProjectsToday(safeIntValue(projectStats.getCompletedProjectsToday()));
+
+        entity.setCompletionRate(completionRate);
+        entity.setOverdueRate(overdueRate);
+        entity.setActiveUserCount(activeUsers != null ? activeUsers : 0);
+        entity.setAvgCompletionTimeHours(avgCompletionTime);
+
+        entity.setExtendedMetrics(extendedMetrics);
+        entity.setCalculatedAt(Instant.now());
+        // entity.setIsArchived(false); // Default
 
         OrganizationDailyStats saved = statsRepository.save(entity);
 
-        log.info("Successfully calculated and saved {} stats for org {} on {}: {} total tasks, {} new, {} completed",
-                snapshotType, orgId, snapshotDate, saved.getTotalTasks(),
+        log.info("Successfully calculated and saved stats for org {} on {}: {} total tasks, {} new, {} completed",
+                orgId, snapshotTime, saved.getTotalTasks(),
                 saved.getNewTasksToday(), saved.getCompletedToday());
 
         return mapper.entityToDTO(saved);
@@ -124,17 +121,21 @@ public class OrganizationStatsService implements IOrganizationStatsService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrganizationDailyStatsDTO getStats(UUID orgId, LocalDate date, SnapshotType snapshotType) {
-        return statsRepository.findByOrganizationIdAndSnapshotDateAndSnapshotType(orgId, date, snapshotType)
+    public OrganizationDailyStatsDTO getStats(UUID orgId, Instant date) {
+        Instant normalizedDate = normalizeToStartOfDay(date);
+        return statsRepository.findByOrganizationIdAndSnapshotTime(orgId, normalizedDate)
                 .map(mapper::entityToDTO)
                 .orElse(null);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrganizationDailyStatsDTO> getStatsTrend(UUID orgId, LocalDate startDate, LocalDate endDate) {
-        return statsRepository.findByOrganizationIdAndSnapshotDateBetweenOrderBySnapshotDateDescSnapshotTypeAsc(
-                orgId, startDate, endDate).stream()
+    public List<OrganizationDailyStatsDTO> getStatsTrend(UUID orgId, Instant from, Instant to) {
+        Instant normalizedFrom = normalizeToStartOfDay(from);
+        Instant normalizedTo = normalizeToStartOfDay(to);
+
+        return statsRepository.findByOrganizationIdAndSnapshotTimeBetweenOrderBySnapshotTimeDesc(
+                orgId, normalizedFrom, normalizedTo).stream()
                 .map(mapper::entityToDTO)
                 .toList();
     }
@@ -143,10 +144,10 @@ public class OrganizationStatsService implements IOrganizationStatsService {
     @Transactional(readOnly = true)
     public List<OrganizationDailyStatsDTO> compareOrganizations(
             List<UUID> orgIds,
-            LocalDate date,
-            SnapshotType snapshotType) {
-        return statsRepository.findByOrganizationIdInAndSnapshotDateAndSnapshotType(
-                orgIds, date, snapshotType).stream()
+            Instant date) {
+        Instant normalizedDate = normalizeToStartOfDay(date);
+        return statsRepository.findByOrganizationIdInAndSnapshotTime(
+                orgIds, normalizedDate).stream()
                 .map(mapper::entityToDTO)
                 .toList();
     }
@@ -161,10 +162,10 @@ public class OrganizationStatsService implements IOrganizationStatsService {
 
     @Override
     @Async
-    public void triggerRecalculationAsync(UUID orgId, LocalDate date, SnapshotType snapshotType) {
-        log.info("Async recalculation triggered for org {} on {} ({})", orgId, date, snapshotType);
+    public void triggerRecalculationAsync(UUID orgId, Instant date) {
+        log.info("Async recalculation triggered for org {} on {}", orgId, date);
         try {
-            calculateAndSaveStats(orgId, date, snapshotType);
+            calculateAndSaveStats(orgId, date);
         } catch (Exception e) {
             log.error("Failed to recalculate stats asynchronously for org {}: {}", orgId, e.getMessage(), e);
         }
@@ -172,21 +173,22 @@ public class OrganizationStatsService implements IOrganizationStatsService {
 
     @Override
     @Transactional
-    public OrganizationDailyStatsDTO recalculateStats(UUID orgId, LocalDate date, SnapshotType snapshotType) {
-        log.info("Recalculating stats for org {} on {} ({})", orgId, date, snapshotType);
-        return calculateAndSaveStats(orgId, date, snapshotType);
+    public OrganizationDailyStatsDTO recalculateStats(UUID orgId, Instant date) {
+        log.info("Recalculating stats for org {} on {}", orgId, date);
+        return calculateAndSaveStats(orgId, date);
     }
 
     // ============ HELPER METHODS ============
 
     /**
-     * Calculate snapshot time based on snapshot type
+     * Normalize Instant to Start of Day (UTC)
      */
-    private Instant calculateSnapshotTime(LocalDate date, SnapshotType snapshotType) {
-        return switch (snapshotType) {
-            case MIDDAY -> date.atTime(12, 0).atZone(ZoneId.systemDefault()).toInstant();
-            case END_OF_DAY -> date.atTime(17, 30).atZone(ZoneId.systemDefault()).toInstant();
-        };
+    private Instant normalizeToStartOfDay(Instant instant) {
+        if (instant == null)
+            return null;
+        return instant.atZone(ZoneId.of("UTC"))
+                .truncatedTo(ChronoUnit.DAYS)
+                .toInstant();
     }
 
     /**
@@ -215,15 +217,8 @@ public class OrganizationStatsService implements IOrganizationStatsService {
      * Calculate extended metrics (flexible JSON field)
      * This can be extended based on business needs
      */
-    private Map<String, Object> calculateExtendedMetrics(UUID orgId, LocalDate snapshotDate) {
+    private Map<String, Object> calculateExtendedMetrics(UUID orgId, Instant snapshotTime) {
         Map<String, Object> extended = new HashMap<>();
-
-        // Example: Add more metrics here as needed
-        // extended.put("tasksByPriority", calculateTasksByPriority(orgId,
-        // snapshotDate));
-        // extended.put("tasksByCategory", calculateTasksByCategory(orgId,
-        // snapshotDate));
-
         return extended;
     }
 

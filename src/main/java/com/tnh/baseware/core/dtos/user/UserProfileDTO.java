@@ -22,7 +22,12 @@ public class UserProfileDTO {
     String email;
     String coverUrl;
     Instant joinDate;
-
+    String description;
+    String phone;
+    Instant birthday;
+    String address;
+    String idn;
+    Integer ial;
     // Stats
     Integer totalTasks;
     Integer participatedTasks;

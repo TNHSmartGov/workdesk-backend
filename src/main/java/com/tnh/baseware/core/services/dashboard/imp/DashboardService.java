@@ -38,6 +38,7 @@ public class DashboardService implements IDashboardService {
         ITaskActivityLogRepository activityLogRepository;
         IUserOrganizationRepository userOrganizationRepository;
         ITaskMemberRepository taskMemberRepository;
+        com.tnh.baseware.core.repositories.stats.IOrganizationDailyStatsRepository dailyStatsRepository;
         SecurityUtils securityUtils;
 
         @Override
@@ -154,14 +155,30 @@ public class DashboardService implements IDashboardService {
         @Transactional(readOnly = true)
         @Cacheable(value = "dashboard_unit", key = "{#orgId, #from, #to}")
         public UnitPerformanceDTO getUnitPerformance(UUID orgId, Instant from, Instant to) {
-                // Default logic: User's organization
+                Instant now = Instant.now();
                 Instant safeFrom = from != null ? from : Instant.EPOCH;
                 Instant safeTo = to != null ? to : Instant.parse("2100-01-01T00:00:00Z");
+
+                // Determine "Today" start (UTC)
+                Instant startOfToday = java.time.LocalDate.now().atStartOfDay(java.time.ZoneId.of("UTC")).toInstant();
+
+                // 1. Try Historical Stats if range is fully in the past
+                if (safeTo.isBefore(startOfToday)) {
+                        UnitPerformanceDTO stats = dailyStatsRepository.aggregatePerformance(orgId, safeFrom, safeTo);
+                        if (stats != null && stats.getTotalTasksCreated() != null) {
+                               
+                                return stats;
+                        }
+                }
+
+                // 2. Fallback to Live Calculation (For Today, Future, or Missing Stats)
+                // This preserves current behavior for "Current/Recent" views which is usually
+                // acceptable.
 
                 long total = taskRepository.countByOrganizationIdTimeboxed(orgId, safeFrom, safeTo);
                 long completed = taskRepository.countByOrganizationIdAndStatusFinishedTimeboxed(orgId, TaskStatus.DONE,
                                 safeFrom, safeTo);
-                long overdue = taskRepository.countByOrganizationIdOverdueTimeboxed(orgId, Instant.now(), safeFrom,
+                long overdue = taskRepository.countByOrganizationIdOverdueTimeboxed(orgId, now, safeFrom,
                                 safeTo);
 
                 double completionRate = total == 0 ? 0.0 : ((double) completed / total) * 100.0;

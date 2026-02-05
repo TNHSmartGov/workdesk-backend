@@ -32,6 +32,7 @@ public class UserDTO extends RepresentationModel<UserDTO> implements Identifiabl
     String email;
     String avatarUrl;
     String idn;
+    Instant birthday;
     String address;
     Integer ial;
     Boolean enabled;

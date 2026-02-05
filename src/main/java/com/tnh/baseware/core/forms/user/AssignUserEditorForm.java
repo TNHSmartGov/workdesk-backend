@@ -18,6 +18,7 @@ import java.util.UUID;
 public class AssignUserEditorForm {
     @NotBlank
     private UUID userId;
-    @NotBlank
     private UUID titleId;
+    @NotBlank
+    private String organizationRole;
 }

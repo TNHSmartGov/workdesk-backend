@@ -57,12 +57,12 @@
             </encoder>
         </appender>
 
-        <logger name="com.tnh.baseware.core.components" level="DEBUG" additivity="false">
+        <logger name="com.tnh.baseware.core.schedulers" level="DEBUG" additivity="false">
                 <appender-ref ref="SCHEDULE_FILE"/>
                 <appender-ref ref="CONSOLE"/>
         </logger>
     </springProfile>
-
+ 
     <!-- Environment: Production -->
     <springProfile name="prod">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -122,7 +122,7 @@
         <!-- Main application loggers -->
         <logger name="org.springframework" level="WARN"/>
         <logger name="com.tnh.baseware.core" level="INFO"/>
-        <logger name="com.tnh.baseware.core.components" level="INFO" additivity="false">
+        <logger name="com.tnh.baseware.core.schedulers" level="INFO" additivity="false">
                 <appender-ref ref="SCHEDULE_FILE"/>
                 <appender-ref ref="CONSOLE"/>
         </logger>

@@ -6,7 +6,7 @@ import com.tnh.baseware.core.entities.audit.Category;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.CategoryCode;
-import com.tnh.baseware.core.enums.TitleDefault;
+import com.tnh.baseware.core.enums.OrganizationRole;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.forms.adu.OrganizationEditorForm;
 import com.tnh.baseware.core.forms.user.AssignUserEditorForm;
@@ -143,39 +143,43 @@ public class OrganizationService extends
                                                 (existing, replacement) -> replacement));
                 Collection<AssignUserEditorForm> distinctForms = distinctFormsMap.values();
                 Set<UUID> userIds = distinctFormsMap.keySet();
-                Set<UUID> titleIds = distinctForms.stream()
-                                .map(AssignUserEditorForm::getTitleId)
-                                .collect(Collectors.toSet());
+
                 Map<UUID, User> userMap = userRepository.findAllById(userIds)
                                 .stream()
                                 .collect(Collectors.toMap(User::getId, Function.identity()));
                 if (userMap.size() != userIds.size()) {
                         throw new BWCNotFoundException(messageService.getMessage("user.not.found"));
                 }
-                Map<UUID, Category> titleMap = categoryRepository.findByCodeAndIdIn(
-                                CategoryCode.ORGANIZATION_TITLE, titleIds).stream()
-                                .collect(Collectors.toMap(Category::getId, Function.identity()));
-                if (titleMap.size() != titleIds.size()) {
-                        throw new BWCNotFoundException(messageService.getMessage("title.not.found"));
-                }
+
+                Set<UUID> titleIds = distinctForms.stream()
+                                .map(AssignUserEditorForm::getTitleId)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet());
+                Map<UUID, Category> titleMap = titleIds.isEmpty() ? Collections.emptyMap()
+                                : categoryRepository.findByCodeAndIdIn(CategoryCode.ORGANIZATION_TITLE, titleIds)
+                                                .stream()
+                                                .collect(Collectors.toMap(Category::getId, Function.identity()));
+
                 List<UserOrganization> existingAssignments = userOrganizationRepository
                                 .findByOrganizationIdAndUserIdInAndActiveTrue(id, userIds);
                 Map<UUID, UserOrganization> existingMap = existingAssignments.stream()
                                 .collect(Collectors.toMap(uo -> uo.getUser().getId(), Function.identity()));
 
-                boolean hasUnitLeader = userOrganizationRepository.existsByOrganization_IdAndTitle_Name(
-                                id, TitleDefault.UNIT_LEADER.getValue());
+                boolean hasUnitLeader = userOrganizationRepository.existsByOrganization_IdAndOrganizationRole(
+                                id, OrganizationRole.UNIT_LEADER);
                 List<UserOrganization> toSave = new ArrayList<>();
                 for (AssignUserEditorForm form : distinctForms) {
                         UserOrganization uo = existingMap.get(form.getUserId());
 
-                        Category formTitle = titleMap.get(form.getTitleId());
+                        String formRoleValue = form.getOrganizationRole();
+                        OrganizationRole roleEnum = formRoleValue != null ? OrganizationRole.fromValue(formRoleValue)
+                                        : null;
 
-                        if (hasUnitLeader && formTitle.getName().equals(TitleDefault.UNIT_LEADER.getValue())) {
+                        if (hasUnitLeader && OrganizationRole.UNIT_LEADER.equals(roleEnum)) {
                                 if (uo == null) {
                                         continue;
                                 }
-                                if (!uo.getTitle().getName().equals(TitleDefault.UNIT_LEADER.getValue())) {
+                                if (!OrganizationRole.UNIT_LEADER.equals(uo.getOrganizationRole())) {
                                         continue;
                                 }
                         }
@@ -184,13 +188,30 @@ public class OrganizationService extends
                                 uo = UserOrganization.builder()
                                                 .user(userMap.get(form.getUserId()))
                                                 .organization(organization)
-                                                .title(titleMap.get(form.getTitleId()))
+                                                .organizationRole(roleEnum)
+                                                .title(form.getTitleId() != null ? titleMap.get(form.getTitleId())
+                                                                : null)
                                                 .active(true)
                                                 .build();
                                 toSave.add(uo);
                         } else {
-                                if (!uo.getTitle().getId().equals(form.getTitleId())) {
-                                        uo.setTitle(titleMap.get(form.getTitleId()));
+                                boolean modified = false;
+                                if (!Objects.equals(uo.getOrganizationRole(), roleEnum)) {
+                                        uo.setOrganizationRole(roleEnum);
+                                        modified = true;
+                                }
+                                if (form.getTitleId() != null) {
+                                        Category newTitle = titleMap.get(form.getTitleId());
+                                        if (!Objects.equals(uo.getTitle(), newTitle)) {
+                                                uo.setTitle(newTitle);
+                                                modified = true;
+                                        }
+                                } else if (uo.getTitle() != null) {
+                                        uo.setTitle(null);
+                                        modified = true;
+                                }
+
+                                if (modified) {
                                         uo.setActive(true);
                                         toSave.add(uo);
                                 }
@@ -227,23 +248,35 @@ public class OrganizationService extends
 
         @Override
         @Transactional(isolation = Isolation.READ_COMMITTED)
-        public void changeTitle(UUID orgId, UUID userId, UUID titleId) {
+        public void changeTitle(UUID orgId, UUID userId, String roleValue, UUID titleId) {
 
                 UserOrganization uo = userOrganizationRepository
                                 .findByUserIdAndOrganizationIdAndActiveTrue(userId, orgId)
                                 .orElseThrow(() -> new BWCNotFoundException(
                                                 messageService.getMessage("user.not.in.organization", userId, orgId)));
 
-                if (uo.getTitle().getId().equals(titleId)) {
-                        return;
+                boolean modified = false;
+                OrganizationRole roleEnum = roleValue != null ? OrganizationRole.fromValue(roleValue) : null;
+                if (!Objects.equals(uo.getOrganizationRole(), roleEnum)) {
+                        uo.setOrganizationRole(roleEnum);
+                        modified = true;
                 }
 
-                Category titleCategory = categoryRepository
-                                .findByCodeAndId(CategoryCode.ORGANIZATION_TITLE, titleId)
-                                .orElseThrow(() -> new BWCNotFoundException(
-                                                messageService.getMessage("title.not.found", titleId)));
-
-                uo.setTitle(titleCategory);
+                if (!Objects.equals(uo.getTitle() != null ? uo.getTitle().getId() : null, titleId)) {
+                        if (titleId != null) {
+                                Category titleCategory = categoryRepository
+                                                .findByCodeAndId(CategoryCode.ORGANIZATION_TITLE, titleId)
+                                                .orElseThrow(() -> new BWCNotFoundException(
+                                                                messageService.getMessage("title.not.found", titleId)));
+                                uo.setTitle(titleCategory);
+                        } else {
+                                uo.setTitle(null);
+                        }
+                        modified = true;
+                }
+                if (modified) {
+                        userOrganizationRepository.save(uo);
+                }
         }
 
         @Override
@@ -271,7 +304,7 @@ public class OrganizationService extends
                 if (userOrg.getOrganization().getIsSystem()) {
                         return true;
                 }
-                if (userOrg.getTitle().getName().equals(TitleDefault.UNIT_LEADER.getValue())) {
+                if (OrganizationRole.UNIT_LEADER.equals(userOrg.getOrganizationRole())) {
                         isSupervisor = true;
                 }
 

@@ -1,4 +1,4 @@
-package com.tnh.baseware.core.components;
+package com.tnh.baseware.core.schedulers;
 
 import com.tnh.baseware.core.repositories.notification.INotificationRepository;
 import com.tnh.baseware.core.utils.LogStyleHelper;

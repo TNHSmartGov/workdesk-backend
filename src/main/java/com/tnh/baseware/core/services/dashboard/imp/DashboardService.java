@@ -1,18 +1,20 @@
 package com.tnh.baseware.core.services.dashboard.imp;
 
 import com.tnh.baseware.core.dtos.task.ActivityLogDTO;
+import com.tnh.baseware.core.dtos.task.CalendarTaskDTO;
 import com.tnh.baseware.core.dtos.task.TaskStatisticDTO;
 import com.tnh.baseware.core.dtos.dashboard.UnitPerformanceDTO;
 import com.tnh.baseware.core.dtos.dashboard.UnitWorkloadDTO;
 import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.enums.task.TaskStatus;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
+import com.tnh.baseware.core.repositories.stats.IOrganizationDailyStatsRepository;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
 import com.tnh.baseware.core.services.dashboard.IDashboardService;
 import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
-import com.tnh.baseware.core.enums.TitleDefault;
+import com.tnh.baseware.core.enums.OrganizationRole;
 import com.tnh.baseware.core.utils.SecurityUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +42,7 @@ public class DashboardService implements IDashboardService {
         ITaskActivityLogRepository activityLogRepository;
         IUserOrganizationRepository userOrganizationRepository;
         ITaskMemberRepository taskMemberRepository;
-        com.tnh.baseware.core.repositories.stats.IOrganizationDailyStatsRepository dailyStatsRepository;
+        IOrganizationDailyStatsRepository dailyStatsRepository;
         SecurityUtils securityUtils;
 
         @Override
@@ -131,13 +135,13 @@ public class DashboardService implements IDashboardService {
 
         @Override
         @Transactional(readOnly = true)
-        public java.util.List<com.tnh.baseware.core.dtos.task.CalendarTaskDTO> getCalendarTasks(Instant startDate,
+        public java.util.List<CalendarTaskDTO> getCalendarTasks(Instant startDate,
                         Instant endDate) {
                 UUID orgId = securityUtils.currentOrgId();
                 UUID userId = securityUtils.currentUser().getId();
 
                 return taskRepository.findAccessibleByDueDateRange(orgId, userId, startDate, endDate).stream()
-                                .map(task -> com.tnh.baseware.core.dtos.task.CalendarTaskDTO.builder()
+                                .map(task -> CalendarTaskDTO.builder()
                                                 .id(task.getId())
                                                 .title(task.getTitle())
                                                 .startDate(task.getStartDate())
@@ -160,13 +164,13 @@ public class DashboardService implements IDashboardService {
                 Instant safeTo = to != null ? to : Instant.parse("2100-01-01T00:00:00Z");
 
                 // Determine "Today" start (UTC)
-                Instant startOfToday = java.time.LocalDate.now().atStartOfDay(java.time.ZoneId.of("UTC")).toInstant();
+                Instant startOfToday = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
                 // 1. Try Historical Stats if range is fully in the past
                 if (safeTo.isBefore(startOfToday)) {
                         UnitPerformanceDTO stats = dailyStatsRepository.aggregatePerformance(orgId, safeFrom, safeTo);
                         if (stats != null && stats.getTotalTasksCreated() != null) {
-                               
+
                                 return stats;
                         }
                 }
@@ -206,10 +210,10 @@ public class DashboardService implements IDashboardService {
 
         private boolean isUnitManager(UUID userId, UUID orgId) {
                 return userOrganizationRepository.findByUserIdAndOrganizationId(userId, orgId)
-                                .map(uo -> uo.getTitle() != null
-                                                && (TitleDefault.UNIT_LEADER.getValue().equals(uo.getTitle().getName())
-                                                                || TitleDefault.DEPUTY.getValue()
-                                                                                .equals(uo.getTitle().getName())))
+                                .map(uo -> {
+                                        OrganizationRole role = uo.getOrganizationRole();
+                                        return role == OrganizationRole.UNIT_LEADER || role == OrganizationRole.DEPUTY;
+                                })
                                 .orElse(false);
         }
 }

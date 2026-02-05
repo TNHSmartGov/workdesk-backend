@@ -1,19 +1,22 @@
 package com.tnh.baseware.core.services.task.imp;
 
 import com.tnh.baseware.core.dtos.task.TaskDTO;
+import com.tnh.baseware.core.entities.adu.Organization;
+import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.entities.task.TaskMember;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.enums.task.TaskStatus;
+import com.tnh.baseware.core.exceptions.BWCBusinessException;
 import com.tnh.baseware.core.forms.task.TaskEditorForm;
 import com.tnh.baseware.core.mappers.task.ITaskMapper;
 
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.task.ITaskRepository;
 import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
-import com.tnh.baseware.core.enums.TitleDefault;
+import com.tnh.baseware.core.enums.OrganizationRole;
 
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
@@ -21,6 +24,8 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.task.ITaskQueryService;
 import com.tnh.baseware.core.specs.*;
 import com.tnh.baseware.core.utils.SecurityUtils;
+
+import jakarta.persistence.criteria.JoinType;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
@@ -30,6 +35,7 @@ import org.springframework.stereotype.Service;
 import com.tnh.baseware.core.enums.task.LogActionType;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -160,10 +166,10 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
 
         private boolean isUnitManager(UUID userId, UUID orgId) {
                 return userOrganizationRepository.findByUserIdAndOrganizationId(userId, orgId)
-                                .map(uo -> uo.getTitle() != null
-                                                && (TitleDefault.UNIT_LEADER.getValue().equals(uo.getTitle().getName())
-                                                                || TitleDefault.DEPUTY.getValue()
-                                                                                .equals(uo.getTitle().getName())))
+                                .map(uo -> {
+                                        OrganizationRole role = uo.getOrganizationRole();
+                                        return role == OrganizationRole.UNIT_LEADER || role == OrganizationRole.DEPUTY;
+                                })
                                 .orElse(false);
         }
 
@@ -216,10 +222,10 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
                                 return cb.conjunction();
                         }
-                        var projectJoin = root.<Task, com.tnh.baseware.core.entities.project.Project>join("project",
-                                        jakarta.persistence.criteria.JoinType.LEFT);
-                        var orgJoin = projectJoin.<com.tnh.baseware.core.entities.project.Project, com.tnh.baseware.core.entities.adu.Organization>join(
-                                        "organization", jakarta.persistence.criteria.JoinType.LEFT);
+                        var projectJoin = root.<Task, Project>join("project",
+                                        JoinType.LEFT);
+                        var orgJoin = projectJoin.<Project, Organization>join(
+                                        "organization", JoinType.LEFT);
                         return cb.or(
                                         cb.isNull(root.get("project")),
                                         cb.equal(orgJoin.get("id"), orgId));
@@ -263,10 +269,10 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
                                 return cb.conjunction();
                         }
-                        var projectJoin = root.<Task, com.tnh.baseware.core.entities.project.Project>join("project",
-                                        jakarta.persistence.criteria.JoinType.LEFT);
-                        var orgJoin = projectJoin.<com.tnh.baseware.core.entities.project.Project, com.tnh.baseware.core.entities.adu.Organization>join(
-                                        "organization", jakarta.persistence.criteria.JoinType.LEFT);
+                        var projectJoin = root.<Task, Project>join("project",
+                                        JoinType.LEFT);
+                        var orgJoin = projectJoin.<Project, Organization>join(
+                                        "organization", JoinType.LEFT);
                         return cb.or(
                                         cb.isNull(root.get("project")),
                                         cb.equal(orgJoin.get("id"), orgId));
@@ -366,9 +372,9 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                         if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
                                 return deletedPredicate;
                         }
-                        var projectJoin = root.<Task, com.tnh.baseware.core.entities.project.Project>join("project",
+                        var projectJoin = root.<Task, Project>join("project",
                                         jakarta.persistence.criteria.JoinType.LEFT);
-                        var orgJoin = projectJoin.<com.tnh.baseware.core.entities.project.Project, com.tnh.baseware.core.entities.adu.Organization>join(
+                        var orgJoin = projectJoin.<Project, Organization>join(
                                         "organization", jakarta.persistence.criteria.JoinType.LEFT);
 
                         var orgPredicate = cb.or(
@@ -503,6 +509,61 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 .page(pageable.getPageNumber())
                                 .size(pageable.getPageSize())
                                 .build());
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<TaskDTO> getTasksViewingForUser(UUID userId, Instant from, Instant to) {
+                // hiển thị các task trạng thái chờ duyệt lấy theo ngày tạo
+                var currentUser = getCurrentUser();
+                if (!currentUser.getId().equals(userId)) {
+                        throw new BWCBusinessException("Bạn không có quyền truy cập tài nguyên này");
+                }
+                List<FilterRequest> filters = new ArrayList<>();
+                filters.add(FilterRequest.builder()
+                                .key("status")
+                                .operator(Operator.EQUAL)
+                                .fieldType(FieldType.STRING)
+                                .value(TaskStatus.REVIEW.getValue())
+                                .build());
+                filters.add(FilterRequest.builder()
+                                .key("createdDate")
+                                .operator(Operator.GREATER_THAN_OR_EQUAL)
+                                .fieldType(FieldType.DATE)
+                                .value(from.toString())
+                                .build());
+                filters.add(FilterRequest.builder()
+                                .key("createdDate")
+                                .operator(Operator.LESS_THAN_OR_EQUAL)
+                                .fieldType(FieldType.DATE)
+                                .value(to.toString())
+                                .build());
+                List<SortRequest> sorts = new ArrayList<>();
+                sorts.add(SortRequest.builder()
+                                .key("createdDate")
+                                .direction(SortDirection.DESC)
+                                .build());
+
+                SearchRequest searchRequest = SearchRequest.builder()
+                                .filters(filters)
+                                .sorts(sorts)
+                                .build();
+                var baseSpec = new GenericSpecification<Task>(searchRequest);
+
+                Specification<Task> accessSpec = (root, query, cb) -> {
+                        var subquery = query.subquery(UUID.class);
+                        var taskMember = subquery.from(TaskMember.class);
+                        subquery.select(taskMember.get("task").get("id"))
+                                        .where(
+                                                        cb.equal(taskMember.get("user").get("id"), userId),
+                                                        taskMember.get("role").in(TaskMemberRole.LEAD,
+                                                                        TaskMemberRole.OWNER));
+                        return root.get("id").in(subquery);
+                };
+
+                return repository.findAll(baseSpec.and(accessSpec)).stream()
+                                .map(mapper::entityToDTO)
+                                .toList();
         }
 
         private TimelineActivityLogDTO toTimelineLogDTO(TaskActivityLogDTO dto) {

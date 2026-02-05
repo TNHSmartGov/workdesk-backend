@@ -29,7 +29,7 @@ public interface IOrganizationService
 
     void removeUsers(UUID id, List<UUID> ids);
 
-    void changeTitle(UUID orgId, UUID userId, UUID titleId);
+    void changeTitle(UUID orgId, UUID userId, String roleValue, UUID titleId);
 
     boolean isSupervisor(UUID orgId, UUID userId);
 

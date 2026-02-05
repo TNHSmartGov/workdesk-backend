@@ -315,15 +315,16 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found", id)));
         Set<UserOrganization> userOrgs = userOrganizationRepository
                 .findByOrganizationIdAndActiveTrue(organization.getId());
-        List<UserDTO> usersDTO = userOrgs.stream()
-                .map(UserOrganization::getUser)
-                .map(mapper::entityToDTO)
+
+        return userOrgs.stream()
+                .map(uo -> {
+                    UserDTO dto = mapper.entityToDTO(uo.getUser());
+                    dto.setLevel(categoryMapper.entityToDTO(uo.getTitle()));
+                    dto.setOrganizationRole(
+                            uo.getOrganizationRole() != null ? uo.getOrganizationRole().getValue() : null);
+                    return dto;
+                })
                 .toList();
-        for (int i = 0; i < usersDTO.size(); i++) {
-            usersDTO.get(i).setLevel(
-                    categoryMapper.entityToDTO(userOrgs.toArray(new UserOrganization[0])[i].getTitle()));
-        }
-        return usersDTO;
     }
 
     @Override
@@ -333,15 +334,17 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found", id)));
         Page<UserOrganization> userOrgs = userOrganizationRepository
                 .findByOrganizationIdAndActiveTrue(organization.getId(), pageable);
+
         List<UserDTO> usersDTO = userOrgs.stream()
-                .map(UserOrganization::getUser)
-                .map(mapper::entityToDTO)
+                .map(uo -> {
+                    UserDTO dto = mapper.entityToDTO(uo.getUser());
+                    dto.setLevel(categoryMapper.entityToDTO(uo.getTitle()));
+                    dto.setOrganizationRole(
+                            uo.getOrganizationRole() != null ? uo.getOrganizationRole().getValue() : null);
+                    return dto;
+                })
                 .toList();
-        // set title for each userDTO
-        for (int i = 0; i < usersDTO.size(); i++) {
-            usersDTO.get(i).setLevel(
-                    categoryMapper.entityToDTO(userOrgs.getContent().get(i).getTitle()));
-        }
+
         return PageableExecutionUtils.getPage(
                 usersDTO,
                 pageable,

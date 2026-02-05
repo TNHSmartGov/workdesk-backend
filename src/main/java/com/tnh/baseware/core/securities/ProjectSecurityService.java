@@ -11,7 +11,7 @@ import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectMember;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
-import com.tnh.baseware.core.enums.TitleDefault;
+import com.tnh.baseware.core.enums.OrganizationRole;
 import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.enums.project.ProjectPermission;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
@@ -42,15 +42,12 @@ public class ProjectSecurityService {
             System.out.println("User org not found");
             return false;
         }
-        if (userOrg.getTitle().getName().equals(TitleDefault.UNIT_LEADER.getValue()) ||
-                userOrg.getTitle().getName().equals(TitleDefault.DEPUTY.getValue())) {
+        if (userOrg.getOrganizationRole() == OrganizationRole.UNIT_LEADER ||
+                userOrg.getOrganizationRole() == OrganizationRole.DEPUTY) {
             System.out.println("User is unit leader or deputy");
             return true;
         }
         ProjectMemberRole role = member.getRole();
-        System.out.println("User role: " + role);
-        System.out.println("Permission: " + permission);
-        System.out.println("Has permission: " + role.hasPermission(permission));
         return role.hasPermission(permission);
     }
 

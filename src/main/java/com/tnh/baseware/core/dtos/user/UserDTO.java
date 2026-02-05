@@ -43,5 +43,6 @@ public class UserDTO extends RepresentationModel<UserDTO> implements Identifiabl
     Boolean superAdmin;
     String userType;
     CategoryDTO level;
+    String organizationRole;
     List<RoleDTO> roles;
 }

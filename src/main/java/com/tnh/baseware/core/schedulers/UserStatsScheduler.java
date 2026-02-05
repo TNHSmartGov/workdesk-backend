@@ -1,4 +1,4 @@
-package com.tnh.baseware.core.components;
+package com.tnh.baseware.core.schedulers;
 
 import com.tnh.baseware.core.configs.UserStatsSchedulerConfig;
 import com.tnh.baseware.core.entities.user.User;

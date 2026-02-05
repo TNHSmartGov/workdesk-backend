@@ -1,4 +1,4 @@
-package com.tnh.baseware.core.components;
+package com.tnh.baseware.core.schedulers;
 
 import com.tnh.baseware.core.exceptions.BWCGenericRuntimeException;
 import com.tnh.baseware.core.repositories.user.ITokenRepository;
@@ -26,7 +26,8 @@ public class TokenCleanupScheduler {
     public void cleanExpiredAndRevokedTokens() {
         try {
             var deletedCount = tokenRepository.deleteByExpiredTrueOrExpirationBefore(Instant.now());
-            log.debug(LogStyleHelper.debug("Token cleanup task ran successfully. Deleted {} expired/revoked tokens."), deletedCount);
+            log.debug(LogStyleHelper.debug("Token cleanup task ran successfully. Deleted {} expired/revoked tokens."),
+                    deletedCount);
         } catch (Exception ex) {
             log.error(LogStyleHelper.error("Error during token cleanup: {}"), ex.getMessage());
             throw new BWCGenericRuntimeException("Error during token cleanup", ex);

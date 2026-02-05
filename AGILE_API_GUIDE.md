@@ -158,12 +158,14 @@ Khi người dùng thay đổi thứ tự thẻ trên Board, Frontend gửi fiel
 
 **Logic sắp xếp:**
 - Khi lấy danh sách, Sort theo `board_position` ASC.
+- Giá trị này là kiểu số thực (`Double`).
+- Khi thêm mới vào cuối danh sách: `board_position = max_current_position + 60000` (hoặc bước nhảy an toàn khác như 10000). Giá trị khởi điểm nên bắt đầu từ mốc lớn (ví dụ `60000`).
 - Khi chèn giữa thẻ A và thẻ B: `board_position = (posA + posB) / 2`.
 - Payload cập nhật:
   ```json
   PUT /api/v1/task-agile-info/by-task/{taskId}
   {
-    "board_position": 150.5
+    "board_position": 150000.0
   }
   ```
 

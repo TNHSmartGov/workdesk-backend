@@ -9,6 +9,7 @@ import com.tnh.baseware.core.specs.SearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,5 +44,7 @@ public interface ITaskQueryService extends ITaskService {
     Page<TaskDTO> searchByStatus(TaskStatus status, SearchRequest searchRequest);
 
     List<TaskTimelineItemDTO> getTaskTimeline(UUID taskId);
+
+    List<TaskDTO> getTasksViewingForUser(UUID userId, Instant from, Instant to);
 
 }

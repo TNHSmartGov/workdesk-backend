@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnh.baseware.core.dtos.notification.NotificationMessage;
 import com.tnh.baseware.core.entities.task.TaskActivityLog;
+import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.notification.NotificationType;
+import com.tnh.baseware.core.enums.task.LogActionType;
 import com.tnh.baseware.core.events.type.TaskActivityEvent;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
@@ -62,9 +64,10 @@ public class TaskActivityEventListener {
                 ? userRepository.findByUsername(event.actor()).orElse(null)
                 : null;
 
-        boolean isAssignMember = event.actionType() == com.tnh.baseware.core.enums.task.LogActionType.ASSIGN_MEMBER
+        boolean isAssignMember = event.actionType() == LogActionType.ASSIGN_MEMBER
                 && "member".equals(event.targetField());
-        boolean isAssignRequirement = event.actionType() == com.tnh.baseware.core.enums.task.LogActionType.ASSIGN_REQUIREMENT
+        boolean isAssignRequirement = event
+                .actionType() == LogActionType.ASSIGN_REQUIREMENT
                 && event.targetField() != null
                 && event.targetField().startsWith("requirement:");
 
@@ -87,7 +90,7 @@ public class TaskActivityEventListener {
         }
     }
 
-    private void notifyTaskMembers(TaskActivityEvent event, com.tnh.baseware.core.entities.user.User actorUser,
+    private void notifyTaskMembers(TaskActivityEvent event, User actorUser,
             NotificationType type) {
         var members = taskMemberRepository.findByTask_Id(event.task().getId());
         for (var member : members) {
@@ -102,7 +105,7 @@ public class TaskActivityEventListener {
         }
     }
 
-    private void notifySingleRecipient(TaskActivityEvent event, com.tnh.baseware.core.entities.user.User actorUser,
+    private void notifySingleRecipient(TaskActivityEvent event, User actorUser,
             NotificationType type, String username) {
         if (username == null) {
             return;
@@ -118,7 +121,7 @@ public class TaskActivityEventListener {
         createAndPublish(event, type, recipient, actorUser);
     }
 
-    private void notifyFromTargetField(TaskActivityEvent event, com.tnh.baseware.core.entities.user.User actorUser,
+    private void notifyFromTargetField(TaskActivityEvent event, User actorUser,
             NotificationType type, String prefix) {
         if (event.targetField() == null || !event.targetField().startsWith(prefix)) {
             return;
@@ -128,8 +131,8 @@ public class TaskActivityEventListener {
     }
 
     private void createAndPublish(TaskActivityEvent event, NotificationType type,
-            com.tnh.baseware.core.entities.user.User recipient,
-            com.tnh.baseware.core.entities.user.User actorUser) {
+            User recipient,
+            User actorUser) {
         String contentJson = buildContent(event);
         if (contentJson == null) {
             return;

@@ -494,4 +494,19 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
                                 .build());
         }
 
+        @Operation(summary = "Search tasks reviewing by me")
+        @ApiOkResponse(value = TaskDTO.class, type = ApiResponseType.HATEOAS_PAGE)
+        @PostMapping("/reviewing-by-me/search")
+        public ResponseEntity<ApiMessageDTO<PagedModel<TaskDTO>>> searchTasksReviewingByMe(
+                        @RequestBody(required = false) SearchRequest searchRequest,
+                        PagedResourcesAssembler<TaskDTO> assembler) {
+                var tasks = taskQueryService.searchTasksReviewingByMe(searchRequest);
+                var pagedModel = assembler.toModel(tasks, this::toModel);
+                return ResponseEntity.ok(ApiMessageDTO.<PagedModel<TaskDTO>>builder()
+                                .data(pagedModel)
+                                .result(true)
+                                .message(messageService.getMessage("tasks.found"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
 }

@@ -45,6 +45,6 @@ public interface ITaskQueryService extends ITaskService {
 
     List<TaskTimelineItemDTO> getTaskTimeline(UUID taskId);
 
-    List<TaskDTO> getTasksViewingForUser(UUID userId, Instant from, Instant to);
+    Page<TaskDTO> searchTasksReviewingByMe(SearchRequest searchRequest);
 
 }

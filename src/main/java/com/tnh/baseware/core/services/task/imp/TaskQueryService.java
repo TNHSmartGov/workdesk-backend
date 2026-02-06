@@ -513,57 +513,47 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
 
         @Override
         @Transactional(readOnly = true)
-        public List<TaskDTO> getTasksViewingForUser(UUID userId, Instant from, Instant to) {
-                // hiển thị các task trạng thái chờ duyệt lấy theo ngày tạo
-                var currentUser = getCurrentUser();
-                if (!currentUser.getId().equals(userId)) {
-                        throw new BWCBusinessException("Bạn không có quyền truy cập tài nguyên này");
-                }
+        public Page<TaskDTO> searchTasksReviewingByMe(SearchRequest searchRequest) {
+                User currentUser = getCurrentUser();
+                UUID orgId = securityUtils.currentOrgId();
                 List<FilterRequest> filters = new ArrayList<>();
+                if (searchRequest != null && searchRequest.getFilters() != null) {
+                        filters.addAll(searchRequest.getFilters());
+                }
+                // Bắt buộc lọc theo trạng thái REVIEW
+                // Nếu muốn tìm linh hoạt thì bỏ đoạn này và để Client truyền filter
                 filters.add(FilterRequest.builder()
                                 .key("status")
                                 .operator(Operator.EQUAL)
                                 .fieldType(FieldType.STRING)
                                 .value(TaskStatus.REVIEW.getValue())
                                 .build());
-                filters.add(FilterRequest.builder()
-                                .key("createdDate")
-                                .operator(Operator.GREATER_THAN_OR_EQUAL)
-                                .fieldType(FieldType.DATE)
-                                .value(from.toString())
-                                .build());
-                filters.add(FilterRequest.builder()
-                                .key("createdDate")
-                                .operator(Operator.LESS_THAN_OR_EQUAL)
-                                .fieldType(FieldType.DATE)
-                                .value(to.toString())
-                                .build());
-                List<SortRequest> sorts = new ArrayList<>();
-                sorts.add(SortRequest.builder()
-                                .key("createdDate")
-                                .direction(SortDirection.DESC)
-                                .build());
-
-                SearchRequest searchRequest = SearchRequest.builder()
+                SearchRequest securedRequest = SearchRequest.builder()
                                 .filters(filters)
-                                .sorts(sorts)
+                                .sorts(searchRequest != null ? searchRequest.getSorts() : null)
+                                .page(searchRequest != null ? searchRequest.getPage() : null)
+                                .size(searchRequest != null ? searchRequest.getSize() : null)
                                 .build();
-                var baseSpec = new GenericSpecification<Task>(searchRequest);
 
-                Specification<Task> accessSpec = (root, query, cb) -> {
+                var baseSpec = new GenericSpecification<Task>(securedRequest);
+                // Spec lọc theo Role: OWNER hoặc LEAD
+                Specification<Task> reviewingSpec = (root, query, cb) -> {
                         var subquery = query.subquery(UUID.class);
                         var taskMember = subquery.from(TaskMember.class);
                         subquery.select(taskMember.get("task").get("id"))
                                         .where(
-                                                        cb.equal(taskMember.get("user").get("id"), userId),
-                                                        taskMember.get("role").in(TaskMemberRole.LEAD,
-                                                                        TaskMemberRole.OWNER));
+                                                        cb.equal(taskMember.get("user").get("id"), currentUser.getId()),
+                                                        taskMember.get("role").in(TaskMemberRole.OWNER,
+                                                                        TaskMemberRole.LEAD));
                         return root.get("id").in(subquery);
                 };
+                // Spec lọc theo Organization
+                Specification<Task> orgSpec = getOrgSpec(orgId);
+                var combinedSpec = baseSpec.and(reviewingSpec).and(orgSpec);
+                var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
 
-                return repository.findAll(baseSpec.and(accessSpec)).stream()
-                                .map(mapper::entityToDTO)
-                                .toList();
+                return repository.findAll(combinedSpec, pageable)
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 
         private TimelineActivityLogDTO toTimelineLogDTO(TaskActivityLogDTO dto) {

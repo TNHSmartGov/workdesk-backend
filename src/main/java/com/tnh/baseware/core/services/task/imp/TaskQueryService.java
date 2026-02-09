@@ -136,14 +136,21 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
 
-                if (isUnitManager(currentUser.getId(), orgId)) {
-                        return repository.findByOrganizationId(orgId).stream()
-                                        .map(mapper::entityToDTO)
-                                        .toList();
-                }
+                Specification<Task> orgSpec = getOrgSpec(orgId);
+                Specification<Task> accessSpec = (root, query, cb) -> {
+                        var deletedPredicate = cb.equal(root.get("deleted"), false);
+                        var subquery = query.subquery(UUID.class);
+                        var taskMember = subquery.from(TaskMember.class);
+                        subquery.select(taskMember.get("task").get("id"))
+                                        .where(cb.equal(taskMember.get("user").get("id"), currentUser.getId()));
+                        return cb.and(deletedPredicate, root.get("id").in(subquery));
+                };
 
-                UUID userId = currentUser.getId();
-                return repository.findAccessibleByUser(orgId, userId).stream()
+                Specification<Task> combinedSpec = isUnitManager(currentUser.getId(), orgId)
+                                ? orgSpec.or(accessSpec)
+                                : accessSpec;
+
+                return repository.findAll(combinedSpec).stream()
                                 .map(mapper::entityToDTO)
                                 .toList();
         }
@@ -154,13 +161,21 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 User currentUser = getCurrentUser();
                 UUID orgId = securityUtils.currentOrgId();
 
-                if (isUnitManager(currentUser.getId(), orgId)) {
-                        return repository.findByOrganizationId(orgId, pageable)
-                                        .map(mapper::entityToDTO);
-                }
+                Specification<Task> orgSpec = getOrgSpec(orgId);
+                Specification<Task> accessSpec = (root, query, cb) -> {
+                        var deletedPredicate = cb.equal(root.get("deleted"), false);
+                        var subquery = query.subquery(UUID.class);
+                        var taskMember = subquery.from(TaskMember.class);
+                        subquery.select(taskMember.get("task").get("id"))
+                                        .where(cb.equal(taskMember.get("user").get("id"), currentUser.getId()));
+                        return cb.and(deletedPredicate, root.get("id").in(subquery));
+                };
 
-                UUID userId = currentUser.getId();
-                return repository.findAccessibleByUser(orgId, userId, pageable)
+                Specification<Task> combinedSpec = isUnitManager(currentUser.getId(), orgId)
+                                ? orgSpec.or(accessSpec)
+                                : accessSpec;
+
+                return repository.findAll(combinedSpec, pageable)
                                 .map(mapper::entityToDTO);
         }
 
@@ -231,8 +246,11 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                         cb.equal(orgJoin.get("id"), orgId));
                 };
 
+                Specification<Task> createdBySpec = (root, query, cb) -> cb.equal(root.get("createdBy"),
+                                currentUser.getUsername());
+
                 var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
-                return repository.findAll(baseSpec.and(orgSpec), pageable)
+                return repository.findAll(baseSpec.and(orgSpec.or(createdBySpec)), pageable)
                                 .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 
@@ -255,6 +273,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 .build();
                 var baseSpec = new GenericSpecification<Task>(securedRequest);
                 Specification<Task> assignedToMeSpec = (root, query, cb) -> {
+                        var deletedPredicate = cb.equal(root.get("deleted"), false);
                         var subquery = query.subquery(UUID.class);
                         var taskMember = subquery.from(TaskMember.class);
                         subquery.select(taskMember.get("task").get("id"))
@@ -262,23 +281,11 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                                         cb.equal(taskMember.get("user").get("id"), currentUser.getId()),
                                                         taskMember.get("role").in(TaskMemberRole.ASSIGNEE,
                                                                         TaskMemberRole.LEAD));
-                        return root.get("id").in(subquery);
+                        return cb.and(deletedPredicate, root.get("id").in(subquery));
                 };
 
-                Specification<Task> orgSpec = (root, query, cb) -> {
-                        if (Boolean.TRUE.equals(securityUtils.checkIsSuperAdmin())) {
-                                return cb.conjunction();
-                        }
-                        var projectJoin = root.<Task, Project>join("project",
-                                        JoinType.LEFT);
-                        var orgJoin = projectJoin.<Project, Organization>join(
-                                        "organization", JoinType.LEFT);
-                        return cb.or(
-                                        cb.isNull(root.get("project")),
-                                        cb.equal(orgJoin.get("id"), orgId));
-                };
-
-                var combinedSpec = baseSpec.and(assignedToMeSpec).and(orgSpec);
+                Specification<Task> orgSpec = getOrgSpec(orgId);
+                var combinedSpec = baseSpec.and(orgSpec.or(assignedToMeSpec));
                 var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
                 return repository.findAll(combinedSpec, pageable)
                                 .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
@@ -293,21 +300,21 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 var baseSpec = new GenericSpecification<Task>(searchRequest);
                 var orgSpec = getOrgSpec(orgId);
 
-                Specification<Task> accessSpec;
-                if (isUnitManager(currentUser.getId(), orgId)) {
-                        accessSpec = Specification.where(null);
-                } else {
-                        accessSpec = (root, query, cb) -> {
-                                var subquery = query.subquery(UUID.class);
-                                var taskMember = subquery.from(TaskMember.class);
-                                subquery.select(taskMember.get("task").get("id"))
-                                                .where(cb.equal(taskMember.get("user").get("id"), currentUser.getId()));
-                                return root.get("id").in(subquery);
-                        };
-                }
+                Specification<Task> accessSpec = (root, query, cb) -> {
+                        var deletedPredicate = cb.equal(root.get("deleted"), false);
+                        var subquery = query.subquery(UUID.class);
+                        var taskMember = subquery.from(TaskMember.class);
+                        subquery.select(taskMember.get("task").get("id"))
+                                        .where(cb.equal(taskMember.get("user").get("id"), currentUser.getId()));
+                        return cb.and(deletedPredicate, root.get("id").in(subquery));
+                };
+
+                Specification<Task> combinedSpec = isUnitManager(currentUser.getId(), orgId)
+                                ? baseSpec.and(orgSpec.or(accessSpec))
+                                : baseSpec.and(accessSpec);
 
                 var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
-                return repository.findAll(baseSpec.and(orgSpec).and(accessSpec), pageable)
+                return repository.findAll(combinedSpec, pageable)
                                 .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 
@@ -347,21 +354,21 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                 var orgSpec = getOrgSpec(orgId);
                 Specification<Task> statusSpec = (root, query, cb) -> cb.equal(root.get("status"), status);
 
-                Specification<Task> accessSpec;
-                if (isUnitManager(currentUser.getId(), orgId)) {
-                        accessSpec = Specification.where(null);
-                } else {
-                        accessSpec = (root, query, cb) -> {
-                                var subquery = query.subquery(UUID.class);
-                                var taskMember = subquery.from(TaskMember.class);
-                                subquery.select(taskMember.get("task").get("id"))
-                                                .where(cb.equal(taskMember.get("user").get("id"), currentUser.getId()));
-                                return root.get("id").in(subquery);
-                        };
-                }
+                Specification<Task> accessSpec = (root, query, cb) -> {
+                        var deletedPredicate = cb.equal(root.get("deleted"), false);
+                        var subquery = query.subquery(UUID.class);
+                        var taskMember = subquery.from(TaskMember.class);
+                        subquery.select(taskMember.get("task").get("id"))
+                                        .where(cb.equal(taskMember.get("user").get("id"), currentUser.getId()));
+                        return cb.and(deletedPredicate, root.get("id").in(subquery));
+                };
+
+                Specification<Task> combinedSpec = isUnitManager(currentUser.getId(), orgId)
+                                ? baseSpec.and(statusSpec).and(orgSpec.or(accessSpec))
+                                : baseSpec.and(statusSpec).and(accessSpec);
 
                 var pageable = GenericSpecification.getPageable(searchRequest.getPage(), searchRequest.getSize());
-                return repository.findAll(baseSpec.and(orgSpec).and(statusSpec).and(accessSpec), pageable)
+                return repository.findAll(combinedSpec, pageable)
                                 .map(mapper::entityToDTO);
         }
 

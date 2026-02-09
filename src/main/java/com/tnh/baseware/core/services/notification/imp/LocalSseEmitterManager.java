@@ -1,5 +1,7 @@
 package com.tnh.baseware.core.services.notification.imp;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnh.baseware.core.dtos.notification.NotificationDTO;
 import com.tnh.baseware.core.entities.notification.Notification;
 import com.tnh.baseware.core.mappers.notification.INotificationMapper;
@@ -34,6 +36,7 @@ public class LocalSseEmitterManager {
     ConcurrentHashMap<UUID, CopyOnWriteArrayList<SseEmitter>> emitters = new ConcurrentHashMap<>();
     INotificationRepository notificationRepository;
     INotificationMapper notificationMapper;
+    ObjectMapper objectMapper;
 
     public SseEmitter addEmitter(UUID userId) {
         var emitter = new SseEmitter(EMITTER_TIMEOUT_MS);
@@ -122,12 +125,16 @@ public class LocalSseEmitterManager {
     private boolean sendToEmitter(SseEmitter emitter, Notification notification) {
         try {
             NotificationDTO dto = notificationMapper.entityToDTO(notification);
+            String payload = objectMapper.writeValueAsString(dto);
             String eventId = buildEventId(notification);
             emitter.send(SseEmitter.event()
                     .name("notification")
                     .id(eventId)
-                    .data(dto));
+                    .data(payload));
             return true;
+        } catch (JsonProcessingException ex) {
+            log.error(LogStyleHelper.error("Failed to serialize notification payload"), ex);
+            return false;
         } catch (IOException ex) {
             log.debug(LogStyleHelper.debug("SSE send failed, cleaning up emitter: {}"), ex.getMessage());
             return false;

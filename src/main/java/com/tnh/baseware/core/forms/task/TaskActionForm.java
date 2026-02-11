@@ -8,6 +8,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+import java.util.UUID;
+
 @Getter
 @Setter
 @Builder
@@ -19,4 +22,10 @@ public class TaskActionForm {
     @NotNull
     @Schema(description = "Values are retrieved from 'tasks/enums?name=TaskAction'")
     private TaskAction action;
+
+    @Schema(description = "Required when action is REJECT")
+    private String reason;
+
+    @Schema(description = "Member IDs to notify for reject/resubmit (optional)")
+    private List<UUID> notifyMemberIds;
 }

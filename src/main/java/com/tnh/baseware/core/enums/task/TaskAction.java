@@ -14,6 +14,8 @@ public enum TaskAction implements BaseEnum<String> {
     START("START", "start", "Bắt đầu"),
     COMPLETE("COMPLETE", "complete", "Hoàn thành"),
     APPROVE("APPROVE", "approve", "Duyệt"),
+    REJECT("REJECT", "reject", "Từ chối"),
+    RESUBMIT("RESUBMIT", "resubmit", "Gửi lại"),
     CANCEL("CANCEL", "cancel", "Hủy");
 
     private final String value;

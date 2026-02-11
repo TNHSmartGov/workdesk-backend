@@ -2,6 +2,7 @@ package com.tnh.baseware.core.forms.task;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.tnh.baseware.core.enums.task.MemberAction;
 import com.tnh.baseware.core.enums.task.MemberStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -23,7 +24,7 @@ public class CreateTaskReportForm {
     Integer progress;
 
     @NotNull(message = "{report.status.required}")
-    MemberStatus status;
+    MemberAction action;
 
     List<UUID> fileIds;
 }

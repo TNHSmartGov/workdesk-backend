@@ -13,7 +13,6 @@ import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.GenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.notification.INotificationService;
-import com.tnh.baseware.core.services.notification.imp.RedisNotificationPublisher;
 import com.tnh.baseware.core.services.task.ITaskCommentService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -39,7 +38,6 @@ public class TaskCommentService extends
     ApplicationEventPublisher eventPublisher;
     IUserRepository userRepository;
     INotificationService notificationService;
-    RedisNotificationPublisher redisPublisher;
     ObjectMapper objectMapper;
 
     static Pattern MENTION_PATTERN = Pattern.compile("@([A-Za-z0-9._-]{3,})");
@@ -47,12 +45,11 @@ public class TaskCommentService extends
     public TaskCommentService(ITaskCommentRepository repository, ITaskCommentMapper mapper,
             MessageService messageService, ApplicationEventPublisher eventPublisher,
             IUserRepository userRepository, INotificationService notificationService,
-            RedisNotificationPublisher redisPublisher, ObjectMapper objectMapper) {
+            ObjectMapper objectMapper) {
         super(repository, mapper, messageService, TaskComment.class);
         this.eventPublisher = eventPublisher;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
-        this.redisPublisher = redisPublisher;
         this.objectMapper = objectMapper;
     }
 
@@ -126,10 +123,8 @@ public class TaskCommentService extends
                     .dedupKey("mention_" + comment.getId() + "_" + recipient.getId())
                     .build();
 
-            var noti = notificationService.createNotification(message);
-            if (noti != null) {
-                redisPublisher.publish(noti.getId(), noti.getRecipient().getId());
-            }
+            // NotificationService now handles publishing to Redis after transaction commit
+            notificationService.createNotification(message);
         }
     }
 

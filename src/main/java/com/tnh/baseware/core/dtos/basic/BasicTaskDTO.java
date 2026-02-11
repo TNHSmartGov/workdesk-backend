@@ -3,6 +3,7 @@ package com.tnh.baseware.core.dtos.basic;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -15,4 +16,5 @@ public class BasicTaskDTO {
     UUID id;
     String title;
     String description;
+    Instant dueDate;
 }

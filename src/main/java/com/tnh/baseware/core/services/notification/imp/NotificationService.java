@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -30,6 +32,7 @@ public class NotificationService implements INotificationService {
     INotificationRepository notificationRepository;
     IUserRepository userRepository;
     INotificationMapper notificationMapper;
+    RedisNotificationPublisher redisPublisher;
 
     @Override
     @Transactional
@@ -55,7 +58,36 @@ public class NotificationService implements INotificationService {
             }
 
             Notification notification = builder.build();
-            return notificationRepository.save(notification);
+            var savedNotification = notificationRepository.save(notification);
+
+            log.info(LogStyleHelper.success("💾 Notification saved - ID: {}, Type: {}, Recipient: {}"),
+                    savedNotification.getId(), savedNotification.getType(),
+                    savedNotification.getRecipient().getId());
+
+            // Register synchronization to publish to Redis after transaction commits
+            // Only if transaction synchronization is active (in production this should
+            // always be the case)
+            if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                TransactionSynchronizationManager.registerSynchronization(
+                        new TransactionSynchronization() {
+                            @Override
+                            public void afterCommit() {
+                                log.info(
+                                        LogStyleHelper
+                                                .info("📤 Publishing notification to Redis - ID: {}, Recipient: {}"),
+                                        savedNotification.getId(), savedNotification.getRecipient().getId());
+                                redisPublisher.publish(savedNotification.getId(),
+                                        savedNotification.getRecipient().getId());
+                            }
+                        });
+            } else {
+                // Fallback for tests or non-transactional contexts
+                // In production, this branch should not be reached
+                log.warn(LogStyleHelper.warn("⚠️ No active transaction, publishing notification immediately"));
+                redisPublisher.publish(savedNotification.getId(), savedNotification.getRecipient().getId());
+            }
+
+            return savedNotification;
 
         } catch (DataIntegrityViolationException e) {
             // Idempotency check: Duplicate dedup_key means already processed

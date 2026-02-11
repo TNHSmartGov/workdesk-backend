@@ -8,12 +8,14 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.notification.INotificationService;
 import com.tnh.baseware.core.services.notification.ISseTicketService;
 import com.tnh.baseware.core.services.notification.imp.LocalSseEmitterManager;
+import com.tnh.baseware.core.utils.LogStyleHelper;
 import com.tnh.baseware.core.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.data.web.SortDefault;
@@ -33,6 +35,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.time.Instant;
 import java.util.UUID;
 
+@Slf4j
 @Tag(name = "Notification", description = "Notification SSE APIs")
 @RestController
 @RequiredArgsConstructor
@@ -67,11 +70,16 @@ public class NotificationResource {
     public SseEmitter stream(@RequestParam("ticket") String ticket,
             @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
 
+        log.info(LogStyleHelper.info("📡 SSE stream request - Ticket: {}, Last-Event-ID: {}"),
+                ticket.substring(0, 8) + "...", lastEventId != null ? lastEventId : "none");
+
         var userId = ticketService.validateAndRemoveTicket(ticket);
         if (userId == null) {
+            log.warn(LogStyleHelper.warn("❌ SSE stream rejected - Invalid ticket"));
             throw new BWCValidationException(messageService.getMessage("token.invalid"));
         }
 
+        log.info(LogStyleHelper.success("🔌 SSE stream connecting - User: {}"), userId);
         var emitter = sseEmitterManager.addEmitter(userId);
         sseEmitterManager.replayMissed(userId, lastEventId, emitter);
         return emitter;
@@ -81,8 +89,7 @@ public class NotificationResource {
     @GetMapping
     public ResponseEntity<ApiMessageDTO<PagedModel<NotificationDTO>>> list(
             @RequestParam(value = "unreadOnly", defaultValue = "false") boolean unreadOnly,
-            @SortDefault(sort = "createdDate", direction = org.springframework.data.domain.Sort.Direction.DESC)
-            Pageable pageable,
+            @SortDefault(sort = "createdDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable,
             PagedResourcesAssembler<NotificationDTO> assembler) {
 
         UUID userId = securityUtils.currentUser().getId();
@@ -115,7 +122,8 @@ public class NotificationResource {
 
     @Operation(summary = "Mark a notification as read")
     @PutMapping("/{id}/read")
-    public ResponseEntity<ApiMessageDTO<Integer>> markRead(@org.springframework.web.bind.annotation.PathVariable UUID id) {
+    public ResponseEntity<ApiMessageDTO<Integer>> markRead(
+            @org.springframework.web.bind.annotation.PathVariable UUID id) {
         UUID userId = securityUtils.currentUser().getId();
         int updated = notificationService.markRead(userId, id, Instant.now());
 

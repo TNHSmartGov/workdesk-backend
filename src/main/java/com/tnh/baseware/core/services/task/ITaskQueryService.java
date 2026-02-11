@@ -47,4 +47,6 @@ public interface ITaskQueryService extends ITaskService {
 
     Page<TaskDTO> searchTasksReviewingByMe(SearchRequest searchRequest);
 
+    Page<TaskDTO> searchByMemberStatus(SearchRequest searchRequest);
+
 }

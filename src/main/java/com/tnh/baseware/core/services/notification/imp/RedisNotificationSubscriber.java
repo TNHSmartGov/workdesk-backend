@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -20,12 +18,16 @@ public class RedisNotificationSubscriber {
         try {
             RedisNotificationPublisher.NotificationSignal signal = objectMapper.readValue(message,
                     RedisNotificationPublisher.NotificationSignal.class);
-            log.debug("Received Redis notification signal for recipient: {}", signal.getRecipientId());
+
+            log.info(
+                    LogStyleHelper
+                            .success("📨 Redis notification received - Channel: {}, Recipient: {}, Notification: {}"),
+                    channel, signal.getRecipientId(), signal.getNotificationId());
 
             sseEmitterManager.pushNotification(signal.getRecipientId(), signal.getNotificationId());
 
-        } catch (IOException e) {
-            log.error(LogStyleHelper.error("Failed to parse Redis notification message"), e);
+        } catch (Exception e) {
+            log.error(LogStyleHelper.error("❌ Failed to process Redis notification message: {}"), message, e);
         }
     }
 }

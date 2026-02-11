@@ -13,7 +13,6 @@ import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.notification.INotificationService;
-import com.tnh.baseware.core.services.notification.imp.RedisNotificationPublisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,6 @@ public class TaskActivityEventListener {
     private final ITaskMemberRepository taskMemberRepository;
     private final IUserRepository userRepository;
     private final INotificationService notificationService;
-    private final RedisNotificationPublisher redisPublisher;
     private final ObjectMapper objectMapper;
 
     @Async
@@ -59,7 +57,7 @@ public class TaskActivityEventListener {
     }
 
     private void createAndPublishNotification(TaskActivityEvent event) {
-        if (event == null || event.newValue() == null) {
+        if (event == null) {
             return;
         }
 
@@ -154,15 +152,16 @@ public class TaskActivityEventListener {
 
     private void notifySingleRecipient(TaskActivityEvent event, User actorUser,
             NotificationType type, String username) {
-        if (username == null) {
+        if (username == null || username.isBlank()) {
             return;
         }
         var recipient = userRepository.findByUsername(username).orElse(null);
         if (recipient == null) {
-            log.debug("Skip notification: recipient username not found: {}", username);
+            log.trace("Skip notification: recipient username not found: {}", username);
             return;
         }
         if (actorUser != null && recipient.getId().equals(actorUser.getId())) {
+            log.trace("Skip self-notification for user: {}", username);
             return;
         }
         createAndPublish(event, type, recipient, actorUser);
@@ -193,10 +192,8 @@ public class TaskActivityEventListener {
                 .dedupKey(buildDedupKey(event, recipient.getId(), type))
                 .build();
 
-        var noti = notificationService.createNotification(message);
-        if (noti != null) {
-            redisPublisher.publish(noti.getId(), noti.getRecipient().getId());
-        }
+        // NotificationService now handles publishing to Redis after transaction commit
+        notificationService.createNotification(message);
     }
 
     private String buildContent(TaskActivityEvent event) {

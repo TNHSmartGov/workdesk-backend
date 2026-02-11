@@ -8,7 +8,6 @@ import com.tnh.baseware.core.enums.notification.NotificationType;
 import com.tnh.baseware.core.enums.task.TaskMemberRole;
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
 import com.tnh.baseware.core.services.notification.INotificationService;
-import com.tnh.baseware.core.services.notification.imp.RedisNotificationPublisher;
 import com.tnh.baseware.core.utils.LogStyleHelper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ public class TaskDueNotificationScheduler {
 
     final ITaskMemberRepository taskMemberRepository;
     final INotificationService notificationService;
-    final RedisNotificationPublisher redisPublisher;
     final ObjectMapper objectMapper;
 
     @Value("${baseware.core.system.notification-due-soon-hours:48}")
@@ -73,10 +71,8 @@ public class TaskDueNotificationScheduler {
                     .dedupKey(buildDedupKey(member, type))
                     .build();
 
-            var noti = notificationService.createNotification(message);
-            if (noti != null) {
-                redisPublisher.publish(noti.getId(), noti.getRecipient().getId());
-            }
+            // NotificationService now handles publishing to Redis after transaction commit
+            notificationService.createNotification(message);
         }
     }
 

@@ -1,13 +1,12 @@
 package com.tnh.baseware.core.services.task;
 
-import com.tnh.baseware.core.enums.task.TaskAction;
-
 import java.util.UUID;
 
 import com.tnh.baseware.core.forms.task.CreateTaskReportForm;
+import com.tnh.baseware.core.forms.task.TaskActionForm;
 
 public interface ITaskCommandService extends ITaskService {
-    void performAction(UUID id, TaskAction action);
+    void performAction(UUID id, TaskActionForm form);
 
     void calculateProgressFromRequirements(UUID taskId);
 

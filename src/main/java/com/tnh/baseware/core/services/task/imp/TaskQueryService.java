@@ -586,6 +586,7 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 .task(dto.getTask())
                                 .user(dto.getUser())
                                 .content(dto.getContent())
+                                .type(dto.getType())
                                 .createdDate(dto.getCreatedDate())
                                 .parentId(dto.getParentId())
                                 // .replies(dto.getReplies()) // Recursion not needed for top level or handling

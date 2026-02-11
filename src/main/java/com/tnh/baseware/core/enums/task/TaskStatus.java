@@ -14,6 +14,7 @@ public enum TaskStatus implements BaseEnum<String> {
     TODO("TODO", "todo", "Mới tạo"),
     IN_PROGRESS("IN_PROGRESS", "in_progress", "Đang thực hiện"),
     REVIEW("REVIEW", "review", "Chờ duyệt"),
+    REJECTED("REJECTED", "rejected", "Từ chối"),
     DONE("DONE", "done", "Hoàn thành"),
     CANCELLED("CANCELLED", "cancelled", "Đã hủy");
 

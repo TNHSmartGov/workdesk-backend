@@ -79,7 +79,7 @@ public class TaskResource extends GenericResource<Task, TaskEditorForm, TaskDTO,
         @PostMapping(value = "/{id}/actions")
         public ResponseEntity<ApiMessageDTO<String>> performAction(@PathVariable UUID id,
                         @RequestBody @Valid TaskActionForm form) {
-                taskCommandService.performAction(id, form.getAction());
+                taskCommandService.performAction(id, form);
                 return ResponseEntity.ok(ApiMessageDTO.<String>builder()
                                 .data("Action performed successfully")
                                 .result(true)

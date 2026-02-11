@@ -16,6 +16,7 @@ import com.tnh.baseware.core.exceptions.BWCAccessDeniedException;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.task.CreateTaskReportForm;
+import com.tnh.baseware.core.forms.task.TaskActionForm;
 import com.tnh.baseware.core.forms.task.TaskEditorForm;
 import com.tnh.baseware.core.components.GenericEntityFetcher;
 import com.tnh.baseware.core.mappers.task.ITaskMapper;
@@ -174,9 +175,14 @@ public class TaskCommandService
     @Override
     @Transactional
     @org.springframework.cache.annotation.CacheEvict(value = "task_timeline", key = "#id")
-    public void performAction(UUID id, TaskAction action) {
+    public void performAction(UUID id, TaskActionForm form) {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
+
+        TaskAction action = form.getAction();
+        if (action == TaskAction.REJECT && (form.getReason() == null || form.getReason().isBlank())) {
+            throw new BWCValidationException(MessageConstant.REJECT_REASON_REQUIRED);
+        }
 
         validateAction(task, action, getCurrentUser().getId());
 
@@ -186,6 +192,8 @@ public class TaskCommandService
             case START -> start(task);
             case COMPLETE -> complete(task);
             case APPROVE -> approve(task);
+            case REJECT -> reject(task, form);
+            case RESUBMIT -> resubmit(task, form);
             case CANCEL -> cancel(task);
             default -> throw new BWCValidationException(MessageConstant.UNSUPPORTED_ACTION);
         }
@@ -385,6 +393,24 @@ public class TaskCommandService
         task.setStatus(TaskStatus.DONE);
     }
 
+    private void reject(Task task, TaskActionForm form) {
+        if (task.getStatus() != TaskStatus.REVIEW) {
+            throw new BWCValidationException(MessageConstant.VALIDATE_REJECT_ACTION);
+        }
+        task.setStatus(TaskStatus.REJECTED);
+        addActionComment(task, TaskCommentType.REJECT, form.getReason(), form.getNotifyMemberIds());
+    }
+
+    private void resubmit(Task task, TaskActionForm form) {
+        if (task.getStatus() != TaskStatus.REJECTED) {
+            throw new BWCValidationException(MessageConstant.VALIDATE_RESUBMIT_ACTION);
+        }
+        task.setStatus(TaskStatus.REVIEW);
+        if (form.getReason() != null && !form.getReason().isBlank()) {
+            addActionComment(task, TaskCommentType.RESUBMIT, form.getReason(), form.getNotifyMemberIds());
+        }
+    }
+
     private void cancel(Task task) {
         if (task.getStatus() == TaskStatus.DONE) {
             throw new BWCValidationException(MessageConstant.VALIDATE_CANCEL_ACTION);
@@ -400,6 +426,63 @@ public class TaskCommandService
         });
     }
 
+    private void addActionComment(Task task, TaskCommentType type, String content, List<UUID> notifyMemberIds) {
+        if (content == null || content.isBlank()) {
+            return;
+        }
+        String trimmed = content.trim();
+        TaskComment comment = TaskComment.builder()
+                .task(task)
+                .user(getCurrentUser())
+                .content(trimmed)
+                .type(type)
+                .build();
+        taskCommentRepository.save(comment);
+
+        String targetField = buildCommentTargetField(task, notifyMemberIds);
+        eventPublisher.publishEvent(
+                TaskActivityEventFactory.commentAdded(
+                        task,
+                        getCurrentUser().getUsername(),
+                        trimmed,
+                        targetField));
+    }
+
+    private String buildCommentTargetField(Task task, List<UUID> notifyMemberIds) {
+        List<String> usernames = resolveNotifyUsernames(task, notifyMemberIds);
+        if (usernames.isEmpty()) {
+            return "comment";
+        }
+        return TaskActivityEventFactory.COMMENT_MENTION_TARGET_PREFIX + String.join(",", usernames);
+    }
+
+    private List<String> resolveNotifyUsernames(Task task, List<UUID> notifyMemberIds) {
+        if (notifyMemberIds == null || notifyMemberIds.isEmpty()) {
+            return List.of();
+        }
+        Map<UUID, String> usernamesById = taskMemberRepository.findByTask_Id(task.getId()).stream()
+                .filter(member -> member.getUser() != null
+                        && member.getUser().getId() != null
+                        && member.getUser().getUsername() != null)
+                .collect(Collectors.toMap(
+                        member -> member.getUser().getId(),
+                        member -> member.getUser().getUsername(),
+                        (existing, replacement) -> existing));
+
+        List<String> usernames = new ArrayList<>();
+        for (UUID memberId : notifyMemberIds) {
+            if (memberId == null) {
+                throw new BWCValidationException(MessageConstant.INVALID_NOTIFY_MEMBERS);
+            }
+            String username = usernamesById.get(memberId);
+            if (username == null) {
+                throw new BWCValidationException(MessageConstant.INVALID_NOTIFY_MEMBERS);
+            }
+            usernames.add(username);
+        }
+        return usernames.stream().distinct().toList();
+    }
+
     private void validateAction(Task task, TaskAction action, UUID userId) {
         if (task.getProject() == null) {
             TaskMember member = taskMemberRepository.findByTask_IdAndUser_Id(task.getId(), userId)
@@ -411,8 +494,9 @@ public class TaskCommandService
             }
 
             boolean allowed = switch (action) {
-                case START, COMPLETE, CANCEL -> (role == TaskMemberRole.LEAD || role == TaskMemberRole.ASSIGNEE);
-                case APPROVE -> (role == TaskMemberRole.REVIEWER);
+                case START, COMPLETE, CANCEL, RESUBMIT ->
+                        (role == TaskMemberRole.LEAD || role == TaskMemberRole.ASSIGNEE);
+                case APPROVE, REJECT -> (role == TaskMemberRole.REVIEWER);
             };
 
             if (!allowed) {
@@ -456,9 +540,9 @@ public class TaskCommandService
         boolean isProjectAdminOrTaskLead = isProjectAdmin || isTaskLead;
 
         return switch (action) {
-            case START, COMPLETE -> isProjectAdminOrTaskLead;
+            case START, COMPLETE, RESUBMIT -> isProjectAdminOrTaskLead;
             case CANCEL -> isProjectAdminOrTaskLead || isTaskOwner;
-            case APPROVE -> isProjectAdminOrTaskLead || taskRole == TaskMemberRole.REVIEWER;
+            case APPROVE, REJECT -> isProjectAdminOrTaskLead || taskRole == TaskMemberRole.REVIEWER;
         };
     }
 

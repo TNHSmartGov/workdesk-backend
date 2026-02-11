@@ -7,6 +7,7 @@ import com.tnh.baseware.core.entities.task.TaskActivityLog;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.notification.NotificationType;
 import com.tnh.baseware.core.enums.task.LogActionType;
+import com.tnh.baseware.core.events.factory.TaskActivityEventFactory;
 import com.tnh.baseware.core.events.type.TaskActivityEvent;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskMemberRepository;
@@ -24,6 +25,8 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -77,7 +80,13 @@ public class TaskActivityEventListener {
         }
 
         switch (event.actionType()) {
-            case ADD_COMMENT -> notifyTaskMembers(event, actorUser, NotificationType.TASK_COMMENT);
+            case ADD_COMMENT -> {
+                if (isTargetedComment(event)) {
+                    notifyMentionedRecipients(event, actorUser, NotificationType.TASK_COMMENT);
+                } else {
+                    notifyTaskMembers(event, actorUser, NotificationType.TASK_COMMENT);
+                }
+            }
             case UPDATE_STATUS, CLOSE_TASK -> notifyTaskMembers(event, actorUser, NotificationType.TASK_STATUS_CHANGED);
             case REMOVE_MEMBER -> notifySingleRecipient(event, actorUser,
                     NotificationType.TASK_MEMBER_REMOVED, event.oldValue());
@@ -88,6 +97,44 @@ public class TaskActivityEventListener {
             default -> {
             }
         }
+    }
+
+    private boolean isTargetedComment(TaskActivityEvent event) {
+        return event.targetField() != null
+                && event.targetField().startsWith(TaskActivityEventFactory.COMMENT_MENTION_TARGET_PREFIX);
+    }
+
+    private void notifyMentionedRecipients(TaskActivityEvent event, User actorUser,
+            NotificationType type) {
+        var usernames = extractMentionUsernames(event.targetField());
+        if (usernames.isEmpty()) {
+            return;
+        }
+        for (var username : usernames) {
+            notifySingleRecipient(event, actorUser, type, username);
+        }
+    }
+
+    private Set<String> extractMentionUsernames(String targetField) {
+        if (targetField == null) {
+            return Set.of();
+        }
+        String prefix = TaskActivityEventFactory.COMMENT_MENTION_TARGET_PREFIX;
+        if (!targetField.startsWith(prefix)) {
+            return Set.of();
+        }
+        String raw = targetField.substring(prefix.length()).trim();
+        if (raw.isEmpty()) {
+            return Set.of();
+        }
+        Set<String> usernames = new LinkedHashSet<>();
+        for (String username : raw.split(",")) {
+            String trimmed = username.trim();
+            if (!trimmed.isEmpty()) {
+                usernames.add(trimmed);
+            }
+        }
+        return usernames;
     }
 
     private void notifyTaskMembers(TaskActivityEvent event, User actorUser,

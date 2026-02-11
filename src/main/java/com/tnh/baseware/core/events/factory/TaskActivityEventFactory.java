@@ -12,6 +12,7 @@ import com.tnh.baseware.core.events.type.TaskActivityEvent;
 import java.util.List;
 
 public final class TaskActivityEventFactory {
+        public static final String COMMENT_MENTION_TARGET_PREFIX = "comment:mention:";
 
         private TaskActivityEventFactory() {
         }
@@ -150,9 +151,13 @@ public final class TaskActivityEventFactory {
         }
 
         public static TaskActivityEvent commentAdded(Task task, String actor, String content) {
+                return commentAdded(task, actor, content, "comment");
+        }
+
+        public static TaskActivityEvent commentAdded(Task task, String actor, String content, String targetField) {
                 return new TaskActivityEvent(
                                 task, actor, LogActionType.ADD_COMMENT,
-                                "comment", null, truncate(content, 50));
+                                targetField, null, truncate(content, 50));
         }
 
         private static String truncate(String s, int maxLen) {

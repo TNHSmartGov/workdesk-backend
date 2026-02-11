@@ -12,7 +12,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public enum TaskCommentType implements BaseEnum<String> {
     NORMAL("NORMAL", "normal", "Bình luận thường"),
-    REPORT("REPORT", "report", "Báo cáo tiến độ");
+    REPORT("REPORT", "report", "Báo cáo tiến độ"),
+    REJECT("REJECT", "reject", "Từ chối"),
+    RESUBMIT("RESUBMIT", "resubmit", "Gửi lại");
 
     String value;
     String name;

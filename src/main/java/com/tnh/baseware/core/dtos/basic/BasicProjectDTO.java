@@ -23,4 +23,5 @@ public class BasicProjectDTO implements Identifiable<UUID> {
     String name;
     String code;
     String description;
+
 }

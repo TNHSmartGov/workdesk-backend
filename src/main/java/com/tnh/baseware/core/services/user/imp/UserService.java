@@ -33,7 +33,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -42,7 +41,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.reflect.Member;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,7 +59,6 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     IMenuMapper menuMapper;
     ICategoryMapper categoryMapper;
     IUserOrganizationRepository userOrganizationRepository;
-    ApplicationEventPublisher eventPublisher;
 
     public UserService(IUserRepository repository,
             IUserMapper mapper,
@@ -74,8 +71,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
             SecurityProperties securityProperties,
             ICategoryMapper categoryMapper,
             IUserOrganizationRepository userOrganizationRepository,
-            IMenuMapper menuMapper,
-            ApplicationEventPublisher eventPublisher) {
+            IMenuMapper menuMapper) {
         super(repository, mapper, messageService, User.class);
         this.roleRepository = roleRepository;
         this.organizationRepository = organizationRepository;
@@ -86,7 +82,6 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
         this.menuMapper = menuMapper;
         this.userOrganizationRepository = userOrganizationRepository;
         this.categoryMapper = categoryMapper;
-        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -94,7 +89,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     public UserDTO create(UserEditorForm form) {
         var user = mapper.formToEntity(form, passwordEncoder);
         User savedUser = repository.save(user);
-        eventPublisher.publishEvent(new UserCreatedEvent(savedUser.getId(), savedUser.getUsername()));
+
         return mapper.entityToDTO(savedUser);
     }
 
@@ -138,7 +133,6 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
 
         user.addRole(role);
         User savedUser = repository.save(user);
-        eventPublisher.publishEvent(new UserCreatedEvent(savedUser.getId(), savedUser.getUsername()));
         return mapper.entityToDTO(savedUser);
     }
 

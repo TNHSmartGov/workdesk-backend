@@ -3,7 +3,6 @@ package com.tnh.baseware.core.services.notification.imp;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnh.baseware.core.dtos.notification.NotificationDTO;
-import com.tnh.baseware.core.entities.notification.Notification;
 import com.tnh.baseware.core.mappers.notification.INotificationMapper;
 import com.tnh.baseware.core.repositories.notification.INotificationRepository;
 import com.tnh.baseware.core.utils.LogStyleHelper;
@@ -39,12 +38,27 @@ public class LocalSseEmitterManager {
     ObjectMapper objectMapper;
 
     public SseEmitter addEmitter(UUID userId) {
+        log.info(LogStyleHelper.info("➕ Adding SSE emitter for user: {}"), userId);
+
         var emitter = new SseEmitter(EMITTER_TIMEOUT_MS);
         emitters.computeIfAbsent(userId, key -> new CopyOnWriteArrayList<>()).add(emitter);
+
+        log.debug("📊 Total emitters for user {}: {}", userId, emitters.get(userId).size());
 
         emitter.onCompletion(() -> removeEmitter(userId, emitter));
         emitter.onTimeout(() -> removeEmitter(userId, emitter));
         emitter.onError(ex -> removeEmitter(userId, emitter));
+
+        // Send initial connection event to establish the SSE connection
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("connected")
+                    .data("SSE connection established"));
+            log.info(LogStyleHelper.success("✅ SSE connection established for user: {}"), userId);
+        } catch (IOException e) {
+            log.error(LogStyleHelper.error("❌ Failed to send initial connection event for user: {}"), userId, e);
+            removeEmitter(userId, emitter);
+        }
 
         return emitter;
     }
@@ -57,21 +71,40 @@ public class LocalSseEmitterManager {
         list.remove(emitter);
         if (list.isEmpty()) {
             emitters.remove(userId);
+            log.info(LogStyleHelper.info("🗑️ All emitters removed for user: {}"), userId);
+        } else {
+            log.debug("📊 Emitters remaining for user {}: {}", userId, list.size());
         }
     }
 
-    @Transactional(readOnly = true)
     public void pushNotification(UUID recipientId, UUID notificationId) {
         var list = emitters.get(recipientId);
         if (list == null || list.isEmpty()) {
+            log.debug("⏭️ No active SSE connections for user: {} - Notification: {}", recipientId, notificationId);
             return;
         }
 
-        notificationRepository.findByIdAndRecipientId(notificationId, recipientId)
-                .ifPresent(notification -> broadcast(recipientId, list, notification));
+        log.info(LogStyleHelper.success("📬 Pushing notification to {} SSE connections - User: {}, Notification: {}"),
+                list.size(), recipientId, notificationId);
+
+        // Fetch DTO inside transaction to handle lazy loading
+        NotificationDTO dto = getNotificationDTO(notificationId, recipientId);
+        if (dto != null) {
+            broadcast(recipientId, list, dto);
+            log.debug("✅ Notification broadcast complete");
+        } else {
+            log.warn(LogStyleHelper.warn("⚠️ Notification not found - ID: {}"), notificationId);
+        }
     }
 
     @Transactional(readOnly = true)
+    public NotificationDTO getNotificationDTO(UUID notificationId, UUID recipientId) {
+        return notificationRepository.findByIdAndRecipientId(notificationId, recipientId)
+                .map(notificationMapper::entityToDTO)
+                .orElse(null);
+    }
+
+    @Transactional(readOnly = true) // Transactional required here to fetch list and map entities
     public void replayMissed(UUID recipientId, String lastEventId, SseEmitter emitter) {
         if (lastEventId == null || lastEventId.isBlank()) {
             return;
@@ -82,6 +115,7 @@ public class LocalSseEmitterManager {
             return;
         }
 
+        // Fetch entities inside transaction
         var notifications = notificationRepository.findForResume(
                 recipientId,
                 parsed.timestamp(),
@@ -94,7 +128,11 @@ public class LocalSseEmitterManager {
                     && notification.getId().equals(parsed.notificationId())) {
                 continue;
             }
-            if (!sendToEmitter(emitter, notification)) {
+            // Map to DTO inside transaction
+            NotificationDTO dto = notificationMapper.entityToDTO(notification);
+
+            // Send DTO (safe for network)
+            if (!sendToEmitter(emitter, dto, notification.getCreatedDate(), notification.getId())) {
                 removeEmitter(recipientId, emitter);
                 break;
             }
@@ -107,22 +145,23 @@ public class LocalSseEmitterManager {
             for (var emitter : list) {
                 try {
                     emitter.send(SseEmitter.event().name("ping").data("ping"));
-                } catch (IOException ex) {
+                } catch (Exception ex) {
+                    log.trace("Heartbeat failed for user {}, removing emitter", userId);
                     removeEmitter(userId, emitter);
                 }
             }
         });
     }
 
-    private void broadcast(UUID recipientId, List<SseEmitter> list, Notification notification) {
+    private void broadcast(UUID recipientId, List<SseEmitter> list, NotificationDTO dto) {
         for (var emitter : list) {
-            if (!sendToEmitter(emitter, notification)) {
+            if (!sendToEmitter(emitter, dto, dto.getCreatedDate(), dto.getId())) {
                 removeEmitter(recipientId, emitter);
             }
         }
     }
 
-    private boolean sendToEmitter(SseEmitter emitter, Notification notification) {
+    private boolean sendToEmitter(SseEmitter emitter, NotificationDTO dto, Instant createdDate, UUID id) {
         try {
             NotificationDTO dto = notificationMapper.entityToDTO(notification);
             String payload = objectMapper.writeValueAsString(dto);
@@ -136,16 +175,16 @@ public class LocalSseEmitterManager {
             log.error(LogStyleHelper.error("Failed to serialize notification payload"), ex);
             return false;
         } catch (IOException ex) {
-            log.debug(LogStyleHelper.debug("SSE send failed, cleaning up emitter: {}"), ex.getMessage());
+            log.trace(LogStyleHelper.debug("SSE send failed ({}). Cleaning up emitter."), ex.getMessage());
             return false;
         }
     }
 
-    private String buildEventId(Notification notification) {
-        long timestamp = notification.getCreatedDate() != null
-                ? notification.getCreatedDate().toEpochMilli()
+    private String buildEventId(Instant createdDate, UUID id) {
+        long timestamp = createdDate != null
+                ? createdDate.toEpochMilli()
                 : Instant.now().toEpochMilli();
-        return timestamp + "_" + notification.getId();
+        return timestamp + "_" + id;
     }
 
     private ParsedLastEvent parseLastEventId(String lastEventId) {

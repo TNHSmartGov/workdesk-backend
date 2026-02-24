@@ -15,3 +15,4 @@ baseware:
         - "/webjars/**"
         - "/favicon.ico"
         - "/error"
+        - "/api/v1/storage/view"

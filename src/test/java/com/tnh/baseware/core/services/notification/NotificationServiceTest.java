@@ -8,6 +8,7 @@ import com.tnh.baseware.core.mappers.notification.INotificationMapper;
 import com.tnh.baseware.core.repositories.notification.INotificationRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.notification.imp.NotificationService;
+import com.tnh.baseware.core.services.notification.imp.RedisNotificationPublisher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ public class NotificationServiceTest {
 
     @Mock
     private INotificationMapper notificationMapper;
+
+    @Mock
+    private RedisNotificationPublisher redisNotificationPublisher;
 
     @InjectMocks
     private NotificationService notificationService;

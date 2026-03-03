@@ -554,7 +554,8 @@ public class TaskCommandService
                 .orElseThrow(() -> new BWCNotFoundException(MessageConstant.TASK_NOT_FOUND));
 
         User currentUser = getCurrentUser();
-
+        MemberAction action = form.getAction();
+        MemberStatus status = MemberAction.mappingActionToStatus(action);
         if (form.getContent() != null && !form.getContent().isBlank()) {
             // 1. Create Comment (Type REPORT)
             TaskComment comment = TaskComment.builder()
@@ -599,7 +600,7 @@ public class TaskCommandService
         MemberStatus oldStatus = member.getStatus(); // Capture old status
 
         // STATUS IS MANDATORY (Source of Truth)
-        member.setStatus(form.getStatus());
+        member.setStatus(status);
 
         // PROGRESS LOGIC
         if (form.getProgress() != null) {
@@ -615,9 +616,9 @@ public class TaskCommandService
             // Case B: User did NOT provide progress -> Infer from Status (Smart Default)
             // Fix: Only block if THIS user has assigned requirements
             if (!taskRequirementRepository.existsByTaskIdAndAssigneeId(taskId, currentUser.getId())) {
-                if (form.getStatus() == MemberStatus.COMPLETED) {
+                if (status == MemberStatus.COMPLETED) {
                     member.setPersonalProgress(100);
-                } else if (form.getStatus() == MemberStatus.ASSIGNED) {
+                } else if (status == MemberStatus.ASSIGNED) {
                     member.setPersonalProgress(0);
                 }
                 // If IN_PROGRESS, keep old progress (do nothing)

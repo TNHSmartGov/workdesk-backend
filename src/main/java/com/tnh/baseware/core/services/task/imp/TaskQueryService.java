@@ -26,6 +26,8 @@ import com.tnh.baseware.core.specs.*;
 import com.tnh.baseware.core.utils.SecurityUtils;
 
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import com.tnh.baseware.core.enums.task.MemberStatus;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
@@ -520,57 +522,47 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
 
         @Override
         @Transactional(readOnly = true)
-        public List<TaskDTO> getTasksViewingForUser(UUID userId, Instant from, Instant to) {
-                // hiển thị các task trạng thái chờ duyệt lấy theo ngày tạo
-                var currentUser = getCurrentUser();
-                if (!currentUser.getId().equals(userId)) {
-                        throw new BWCBusinessException("Bạn không có quyền truy cập tài nguyên này");
-                }
+        public Page<TaskDTO> searchTasksReviewingByMe(SearchRequest searchRequest) {
+                User currentUser = getCurrentUser();
+                UUID orgId = securityUtils.currentOrgId();
                 List<FilterRequest> filters = new ArrayList<>();
+                if (searchRequest != null && searchRequest.getFilters() != null) {
+                        filters.addAll(searchRequest.getFilters());
+                }
+                // Bắt buộc lọc theo trạng thái REVIEW
+                // Nếu muốn tìm linh hoạt thì bỏ đoạn này và để Client truyền filter
                 filters.add(FilterRequest.builder()
                                 .key("status")
                                 .operator(Operator.EQUAL)
                                 .fieldType(FieldType.STRING)
                                 .value(TaskStatus.REVIEW.getValue())
                                 .build());
-                filters.add(FilterRequest.builder()
-                                .key("createdDate")
-                                .operator(Operator.GREATER_THAN_OR_EQUAL)
-                                .fieldType(FieldType.DATE)
-                                .value(from.toString())
-                                .build());
-                filters.add(FilterRequest.builder()
-                                .key("createdDate")
-                                .operator(Operator.LESS_THAN_OR_EQUAL)
-                                .fieldType(FieldType.DATE)
-                                .value(to.toString())
-                                .build());
-                List<SortRequest> sorts = new ArrayList<>();
-                sorts.add(SortRequest.builder()
-                                .key("createdDate")
-                                .direction(SortDirection.DESC)
-                                .build());
-
-                SearchRequest searchRequest = SearchRequest.builder()
+                SearchRequest securedRequest = SearchRequest.builder()
                                 .filters(filters)
-                                .sorts(sorts)
+                                .sorts(searchRequest != null ? searchRequest.getSorts() : null)
+                                .page(searchRequest != null ? searchRequest.getPage() : null)
+                                .size(searchRequest != null ? searchRequest.getSize() : null)
                                 .build();
-                var baseSpec = new GenericSpecification<Task>(searchRequest);
 
-                Specification<Task> accessSpec = (root, query, cb) -> {
+                var baseSpec = new GenericSpecification<Task>(securedRequest);
+                // Spec lọc theo Role: OWNER hoặc LEAD
+                Specification<Task> reviewingSpec = (root, query, cb) -> {
                         var subquery = query.subquery(UUID.class);
                         var taskMember = subquery.from(TaskMember.class);
                         subquery.select(taskMember.get("task").get("id"))
                                         .where(
-                                                        cb.equal(taskMember.get("user").get("id"), userId),
-                                                        taskMember.get("role").in(TaskMemberRole.LEAD,
-                                                                        TaskMemberRole.OWNER));
+                                                        cb.equal(taskMember.get("user").get("id"), currentUser.getId()),
+                                                        taskMember.get("role").in(TaskMemberRole.OWNER,
+                                                                        TaskMemberRole.LEAD));
                         return root.get("id").in(subquery);
                 };
+                // Spec lọc theo Organization
+                Specification<Task> orgSpec = getOrgSpec(orgId);
+                var combinedSpec = baseSpec.and(reviewingSpec).and(orgSpec);
+                var pageable = GenericSpecification.getPageable(securedRequest.getPage(), securedRequest.getSize());
 
-                return repository.findAll(baseSpec.and(accessSpec)).stream()
-                                .map(mapper::entityToDTO)
-                                .toList();
+                return repository.findAll(combinedSpec, pageable)
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 
         private TimelineActivityLogDTO toTimelineLogDTO(TaskActivityLogDTO dto) {
@@ -604,5 +596,97 @@ public class TaskQueryService extends GenericService<Task, TaskEditorForm, TaskD
                                 .replyCount(dto.getReplyCount())
                                 .attachmentCount(dto.getAttachmentCount())
                                 .build();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<TaskDTO> searchByMemberStatus(SearchRequest searchRequest) {
+                User currentUser = getCurrentUser();
+                UUID orgId = securityUtils.currentOrgId();
+
+                // Extract và remove filter "members.status" từ searchRequest (nếu có)
+                // vì Task entity không có relationship với TaskMember nên GenericSpecification
+                // không thể xử lý
+                List<FilterRequest> otherFilters = new ArrayList<>();
+                FilterRequest memberStatusFilter = null;
+
+                if (searchRequest != null && searchRequest.getFilters() != null) {
+                        for (FilterRequest filter : searchRequest.getFilters()) {
+                                if (filter.getKey().equals("members.status")) {
+                                        memberStatusFilter = filter;
+                                } else {
+                                        otherFilters.add(filter);
+                                }
+                        }
+                }
+
+                // Tạo SearchRequest mới không có filter "members.status"
+                SearchRequest modifiedRequest = SearchRequest.builder()
+                                .filters(otherFilters)
+                                .sorts(searchRequest != null ? searchRequest.getSorts() : null)
+                                .page(searchRequest != null ? searchRequest.getPage() : null)
+                                .size(searchRequest != null ? searchRequest.getSize() : null)
+                                .build();
+
+                var baseSpec = new GenericSpecification<Task>(modifiedRequest);
+                var orgSpec = getOrgSpec(orgId);
+
+                // Specification để filter tasks mà current user là member
+                // Nếu có memberStatusFilter thì apply vào subquery
+                final FilterRequest finalMemberStatusFilter = memberStatusFilter;
+                Specification<Task> memberSpec = (root, query, cb) -> {
+                        var subquery = query.subquery(UUID.class);
+                        var taskMember = subquery.from(TaskMember.class);
+
+                        var userPredicate = cb.equal(taskMember.get("user").get("id"), currentUser.getId());
+
+                        if (finalMemberStatusFilter != null) {
+                                // Manually build predicate cho status vì Operator.build() không hoạt động đúng
+                                // với subquery
+                                // Key là "members.status" nhưng trong subquery ta chỉ cần "status"
+                                var statusPath = taskMember.<MemberStatus>get("status");
+                                Predicate statusPredicate;
+
+                                switch (finalMemberStatusFilter.getOperator()) {
+                                        case EQUAL:
+                                                var statusValue = MemberStatus.fromValue(
+                                                                finalMemberStatusFilter.getValue().toString());
+                                                statusPredicate = cb.equal(statusPath, statusValue);
+                                                break;
+                                        case NOT_EQUAL:
+                                                var notEqualValue = MemberStatus.fromValue(
+                                                                finalMemberStatusFilter.getValue().toString());
+                                                statusPredicate = cb.notEqual(statusPath, notEqualValue);
+                                                break;
+                                        case IN:
+                                                var inValues = finalMemberStatusFilter.getValues().stream()
+                                                                .map(v -> MemberStatus.fromValue(v.toString()))
+                                                                .toArray(MemberStatus[]::new);
+                                                statusPredicate = statusPath.in((Object[]) inValues);
+                                                break;
+                                        case NOT_IN:
+                                                var notInValue = MemberStatus.fromValue(
+                                                                finalMemberStatusFilter.getValue().toString());
+                                                statusPredicate = cb.not(statusPath.in(notInValue));
+                                                break;
+                                        default:
+                                                // Nếu operator không được hỗ trợ, bỏ qua filter này
+                                                statusPredicate = cb.conjunction();
+                                                break;
+                                }
+
+                                subquery.select(taskMember.get("task").get("id"))
+                                                .where(cb.and(userPredicate, statusPredicate));
+                        } else {
+                                subquery.select(taskMember.get("task").get("id"))
+                                                .where(userPredicate);
+                        }
+
+                        return root.get("id").in(subquery);
+                };
+
+                var pageable = GenericSpecification.getPageable(modifiedRequest.getPage(), modifiedRequest.getSize());
+                return repository.findAll(baseSpec.and(orgSpec).and(memberSpec), pageable)
+                                .map(entity -> mapper.entityToDTO(entity, currentUser, taskMemberRepository));
         }
 }

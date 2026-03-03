@@ -16,6 +16,7 @@ public enum MemberStatus implements BaseEnum<String> {
     COMPLETED("COMPLETED", "completed", "Đã hoàn thành"),
     BLOCKED("BLOCKED", "blocked", "Đang bị chặn");
 
+    
     String value;
     String name;
     String displayName;

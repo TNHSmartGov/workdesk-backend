@@ -2,11 +2,12 @@ package com.tnh.baseware.core.forms.project;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.UUID;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,14 +16,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ProjectMemberEditorForm {
+public class ProjectRoleEditorForm {
 
-    @NotNull(message = "{project_id.not.null}")
-    UUID projectId;
+    @NotBlank(message = "{code.not.blank}")
+    String code;
 
-    @NotNull(message = "{user_id.not.null}")
-    UUID userId;
+    @NotBlank(message = "{name.not.blank}")
+    String name;
 
-    @NotNull(message = "{role_id.not.null}")
-    UUID roleId;
+    String description;
+
+    int order;
+
+    @NotNull(message = "{permissions.not.null}")
+    Set<String> permissions;
 }

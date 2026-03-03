@@ -4,11 +4,11 @@ import com.tnh.baseware.core.constants.FieldChange;
 import com.tnh.baseware.core.constants.MessageConstant;
 import com.tnh.baseware.core.constants.TaskSnapshot;
 import com.tnh.baseware.core.dtos.task.TaskDTO;
-import com.tnh.baseware.core.dtos.task.UserTaskPermissionDTO;
 
 import com.tnh.baseware.core.entities.task.*;
 import com.tnh.baseware.core.entities.user.User;
-import com.tnh.baseware.core.enums.project.ProjectMemberRole;
+import com.tnh.baseware.core.entities.project.ProjectRole;
+import com.tnh.baseware.core.enums.project.ProjectPermission;
 import com.tnh.baseware.core.enums.project.ProjectType;
 import com.tnh.baseware.core.enums.task.*;
 import com.tnh.baseware.core.events.factory.TaskActivityEventFactory;
@@ -495,7 +495,7 @@ public class TaskCommandService
 
             boolean allowed = switch (action) {
                 case START, COMPLETE, CANCEL, RESUBMIT ->
-                        (role == TaskMemberRole.LEAD || role == TaskMemberRole.ASSIGNEE);
+                    (role == TaskMemberRole.LEAD || role == TaskMemberRole.ASSIGNEE);
                 case APPROVE, REJECT -> (role == TaskMemberRole.REVIEWER);
             };
 
@@ -505,36 +505,32 @@ public class TaskCommandService
             return;
         }
 
-        UserTaskPermissionDTO perms = repository.findUserPermissions(task.getId(), userId)
-                .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_IN_PROJECT_TASK));
-
-        ProjectMemberRole projectRole;
+        ProjectRole projectRoleEntity;
         try {
-            projectRole = ProjectMemberRole.fromValue(perms.getProjectRole());
+            projectRoleEntity = repository.findUserProjectRole(task.getId(), userId)
+                    .orElseThrow(() -> new BWCAccessDeniedException(MessageConstant.NOT_IN_PROJECT_TASK));
         } catch (Exception e) {
             throw new BWCAccessDeniedException(MessageConstant.INVALID_PROJECT_ROLE_CONFIG);
         }
 
         TaskMemberRole taskRole = null;
-        if (perms.getTaskRole() != null) {
-            try {
-                taskRole = TaskMemberRole.valueOf(perms.getTaskRole());
-            } catch (IllegalArgumentException ignored) {
-            }
+        var taskMemberOpt = taskMemberRepository.findByTask_IdAndUser_Id(task.getId(), userId);
+        if (taskMemberOpt.isPresent()) {
+            taskRole = taskMemberOpt.get().getRole();
         }
 
-        boolean isAllowed = checkIsAllowed(action, projectRole, taskRole);
+        boolean isAllowed = checkIsAllowed(action, projectRoleEntity, taskRole);
 
         if (!isAllowed) {
             throw new BWCAccessDeniedException(
                     String.format("Your role [P:%s - T:%s] is not allowed to perform action %s",
-                            projectRole, taskRole, action));
+                            projectRoleEntity.getCode(), taskRole, action));
         }
     }
 
-    private static boolean checkIsAllowed(TaskAction action, ProjectMemberRole projectRole, TaskMemberRole taskRole) {
-        boolean isProjectAdmin = projectRole == ProjectMemberRole.OWNER
-                || projectRole == ProjectMemberRole.MANAGER;
+    private static boolean checkIsAllowed(TaskAction action, ProjectRole projectRole, TaskMemberRole taskRole) {
+        boolean isProjectAdmin = projectRole.hasPermission(ProjectPermission.TASK_UPDATE_ANY)
+                || projectRole.hasPermission(ProjectPermission.TASK_DELETE_ANY);
         boolean isTaskLead = taskRole == TaskMemberRole.LEAD;
         boolean isTaskOwner = taskRole == TaskMemberRole.OWNER;
         boolean isProjectAdminOrTaskLead = isProjectAdmin || isTaskLead;

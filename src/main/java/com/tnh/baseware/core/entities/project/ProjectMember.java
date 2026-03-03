@@ -2,7 +2,6 @@ package com.tnh.baseware.core.entities.project;
 
 import com.tnh.baseware.core.entities.audit.Auditable;
 import com.tnh.baseware.core.entities.user.User;
-import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,12 +31,14 @@ public class ProjectMember extends Auditable<String> {
         @JoinColumn(name = "user_id", nullable = false)
         User user;
 
-        @Column(nullable = false)
-        @Enumerated(EnumType.STRING)
-        ProjectMemberRole role;
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
+        @JoinColumn(name = "project_role_id", nullable = false)
+        ProjectRole projectRole;
 
         @Column(nullable = false, updatable = false)
         Instant joinedAt;
+
+        Boolean isOwner;
 
         @PrePersist
         protected void onJoin() {

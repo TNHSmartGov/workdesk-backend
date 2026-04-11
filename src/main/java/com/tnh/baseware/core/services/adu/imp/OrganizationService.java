@@ -286,12 +286,60 @@ public class OrganizationService extends
                                                 messageService.getMessage("user.not.found")));
                 var userOrganizations = userOrganizationRepository
                                 .findByUserIdAndActiveTrue(user);
-                var organizations = userOrganizations.stream()
+                var directOrganizations = userOrganizations.stream()
                                 .map(UserOrganization::getOrganization)
                                 .toList();
 
-                return mapper.mapOrganizationsToTree(organizations);
+                if (directOrganizations.isEmpty()) {
+                        return List.of();
+                }
 
+                // Lấy toàn bộ Organization với cấp cha để xử lý trên bộ nhớ
+                var allOrgs = repository.findAllWithParent();
+                Map<UUID, Organization> orgMap = allOrgs.stream()
+                                .collect(Collectors.toMap(Organization::getId, Function.identity()));
+
+                // Tìm các node gốc (Đơn vị chủ quản - isUnit) cho mỗi phòng ban của người dùng
+                Set<Organization> targetRoots = new HashSet<>();
+                for (Organization userOrg : directOrganizations) {
+                        Organization current = orgMap.get(userOrg.getId());
+                        if (current == null) current = userOrg;
+                        Organization rootOrUnit = current;
+                        
+                        while (current != null) {
+                                if (Boolean.TRUE.equals(current.getIsUnit())) {
+                                        rootOrUnit = current;
+                                        break; 
+                                }
+                                if (current.getParent() == null) {
+                                        rootOrUnit = current;
+                                        break;
+                                }
+                                current = current.getParent() != null ? orgMap.get(current.getParent().getId()) : null;
+                        }
+                        if (rootOrUnit != null) {
+                                targetRoots.add(rootOrUnit);
+                        }
+                }
+
+                // Dùng Queue để duyệt BFS lấy tất cả các node con/cháu từ các node gốc
+                Set<Organization> hierarchicalOrgs = new HashSet<>(targetRoots);
+                Map<UUID, List<Organization>> parentToChildrenMap = allOrgs.stream()
+                                .filter(o -> o.getParent() != null)
+                                .collect(Collectors.groupingBy(o -> o.getParent().getId()));
+
+                Queue<Organization> queue = new LinkedList<>(targetRoots);
+                while (!queue.isEmpty()) {
+                        Organization node = queue.poll();
+                        List<Organization> children = parentToChildrenMap.getOrDefault(node.getId(), List.of());
+                        for (Organization child : children) {
+                                if (hierarchicalOrgs.add(child)) {
+                                        queue.add(child);
+                                }
+                        }
+                }
+
+                return mapper.mapOrganizationsToTree(new ArrayList<>(hierarchicalOrgs));
         }
 
         @Override

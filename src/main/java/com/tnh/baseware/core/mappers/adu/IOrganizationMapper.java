@@ -49,12 +49,16 @@ public interface IOrganizationMapper extends IGenericMapper<Organization, Organi
         if (organizations == null || organizations.isEmpty())
             return List.of();
 
+        java.util.Set<UUID> orgIdsInList = organizations.stream()
+                .map(Organization::getId)
+                .collect(Collectors.toSet());
+
         var parentMap = organizations.stream()
-                .filter(o -> o.getParent() != null)
+                .filter(o -> o.getParent() != null && orgIdsInList.contains(o.getParent().getId()))
                 .collect(Collectors.groupingBy(o -> o.getParent().getId()));
 
         return organizations.stream()
-                .filter(o -> o.getParent() == null)
+                .filter(o -> o.getParent() == null || !orgIdsInList.contains(o.getParent().getId()))
                 .map(o -> buildOrganizationTree(o, parentMap))
                 .toList();
     }

@@ -163,10 +163,9 @@ public class LocalSseEmitterManager {
 
     private boolean sendToEmitter(SseEmitter emitter, NotificationDTO dto, Instant createdDate, UUID id) {
         try {
-            // Serialize DTO to JSON string
+            NotificationDTO dto = notificationMapper.entityToDTO(notification);
             String payload = objectMapper.writeValueAsString(dto);
-            String eventId = buildEventId(createdDate, id);
-
+            String eventId = buildEventId(notification);
             emitter.send(SseEmitter.event()
                     .name("notification")
                     .id(eventId)

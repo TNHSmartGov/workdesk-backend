@@ -1,15 +1,18 @@
 package com.tnh.baseware.core.mappers.project;
 
 import com.tnh.baseware.core.dtos.project.ProjectDTO;
+import com.tnh.baseware.core.dtos.project.ProjectRoleDTO;
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectMember;
+import com.tnh.baseware.core.entities.project.ProjectRole;
 import com.tnh.baseware.core.entities.user.User;
-import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
 import com.tnh.baseware.core.mappers.IGenericMapper;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -35,13 +38,34 @@ public interface IProjectMapper extends IGenericMapper<Project, ProjectEditorFor
         return entityToDTO(entity, null, null);
     }
 
-    default ProjectMemberRole getMemberRole(Project project, @Context User currentUser,
+    default ProjectRoleDTO getMemberRole(Project project, @Context User currentUser,
             @Context IProjectMemberRepository projectMemberRepository) {
         if (currentUser == null || project == null) {
             return null;
         }
         Optional<ProjectMember> member = projectMemberRepository.findByProjectIdAndUserId(project.getId(),
                 currentUser.getId());
-        return member.map(ProjectMember::getRole).orElse(null);
+        return member.map(m -> mapRoleToDTO(m.getProjectRole())).orElse(null);
+    }
+
+    default ProjectRoleDTO mapRoleToDTO(ProjectRole role) {
+        if (role == null) {
+            return null;
+        }
+        Set<String> permissions = Set.of();
+        if (role.getRolePermissions() != null) {
+            permissions = role.getRolePermissions().stream()
+                    .map(rp -> rp.getPermission().getValue())
+                    .collect(Collectors.toSet());
+        }
+        return ProjectRoleDTO.builder()
+                .id(role.getId())
+                .code(role.getCode())
+                .name(role.getName())
+                .description(role.getDescription())
+                .order(role.getOrder())
+                .active(role.isActive())
+                .permissions(permissions)
+                .build();
     }
 }

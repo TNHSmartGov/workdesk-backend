@@ -1,5 +1,7 @@
 package com.tnh.baseware.core.enums.project;
 
+import com.tnh.baseware.core.enums.base.BaseEnum;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
-public enum ProjectPermission {
+public enum ProjectPermission implements BaseEnum<String> {
     PROJECT_VIEW("PROJECT_VIEW", "project_view", "Xem dự án"),
     PROJECT_CREATE("PROJECT_CREATE", "project_create", "Tạo dự án"),
     PROJECT_UPDATE("PROJECT_UPDATE", "project_update", "Cập nhật dự án"),

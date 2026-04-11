@@ -22,7 +22,7 @@ public interface IProjectRepository extends IGenericRepository<Project, UUID> {
       JOIN ProjectMember pm ON pm.project = p
       WHERE p.type = 'PERSONAL'
         AND pm.user.id = :userId
-        AND pm.role = 'OWNER'
+        AND pm.isOwner = true
       """)
   Optional<Project> findPersonalByUser(UUID userId);
 

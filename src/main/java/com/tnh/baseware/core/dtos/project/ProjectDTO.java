@@ -3,7 +3,6 @@ package com.tnh.baseware.core.dtos.project;
 import com.tnh.baseware.core.dtos.basic.BasicOrganizationDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
-import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.hateoas.RepresentationModel;
@@ -27,6 +26,6 @@ public class ProjectDTO extends RepresentationModel<ProjectDTO> implements Ident
     Instant startDate;
     Instant endDate;
     ProjectStatus status;
-    ProjectMemberRole memberRole;
+    ProjectRoleDTO memberRole;
 
 }

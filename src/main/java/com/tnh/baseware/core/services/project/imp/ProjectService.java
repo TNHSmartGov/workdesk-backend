@@ -8,7 +8,7 @@ import com.tnh.baseware.core.entities.task.Task;
 import com.tnh.baseware.core.entities.task.TaskList;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.project.ProjectAction;
-import com.tnh.baseware.core.enums.project.ProjectMemberRole;
+import com.tnh.baseware.core.entities.project.ProjectRole;
 import com.tnh.baseware.core.enums.project.ProjectPermission;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
 import com.tnh.baseware.core.enums.project.ProjectType;
@@ -20,6 +20,7 @@ import com.tnh.baseware.core.mappers.project.IProjectMapper;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
 import com.tnh.baseware.core.repositories.project.IProjectAttachmentRepository;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
+import com.tnh.baseware.core.repositories.project.IProjectRoleRepository;
 import com.tnh.baseware.core.repositories.project.IProjectRepository;
 import com.tnh.baseware.core.repositories.task.ITaskActivityLogRepository;
 import com.tnh.baseware.core.repositories.task.ITaskAttachmentRepository;
@@ -62,6 +63,7 @@ public class ProjectService
     ITaskListRepository taskListRepository;
     ProjectSecurityService projectSecurityService;
     IProjectMemberRepository projectMemberRepository;
+    IProjectRoleRepository projectRoleRepository;
     IUserRepository userRepository;
     IUserOrganizationRepository userOrganizationRepository;
     IOrganizationRepository organizationRepository;
@@ -84,6 +86,7 @@ public class ProjectService
             IUserRepository userRepository,
             IUserOrganizationRepository userOrganizationRepository,
             IProjectMemberRepository projectMemberRepository,
+            IProjectRoleRepository projectRoleRepository,
             ITaskListRepository taskListRepository,
             IOrganizationRepository organizationRepository,
             SecurityUtils securityUtils,
@@ -101,6 +104,7 @@ public class ProjectService
         this.taskListRepository = taskListRepository;
         this.projectSecurityService = projectSecurityService;
         this.projectMemberRepository = projectMemberRepository;
+        this.projectRoleRepository = projectRoleRepository;
         this.userRepository = userRepository;
         this.userOrganizationRepository = userOrganizationRepository;
         this.organizationRepository = organizationRepository;
@@ -198,10 +202,13 @@ public class ProjectService
                             .build());
         }
 
+        ProjectRole ownerRole = projectRoleRepository.findByCode("OWNER")
+                .orElseThrow(() -> new BWCNotFoundException("Default OWNER role not found"));
         var member = ProjectMember.builder()
                 .project(project)
                 .user(currentUser)
-                .role(ProjectMemberRole.OWNER)
+                .projectRole(ownerRole)
+                .isOwner(true)
                 .build();
         projectMemberRepository.save(member);
         return mapper.entityToDTO(repository.save(project), currentUser, projectMemberRepository);
@@ -376,11 +383,13 @@ public class ProjectService
                     }
 
                     try {
+                        ProjectRole ownerRoleForPersonal = projectRoleRepository.findByCode("OWNER")
+                                .orElseThrow(() -> new BWCNotFoundException("Default OWNER role not found"));
                         projectMemberRepository.save(
                                 ProjectMember.builder()
                                         .project(project)
                                         .user(userRepository.getReferenceById(userId))
-                                        .role(ProjectMemberRole.OWNER)
+                                        .projectRole(ownerRoleForPersonal)
                                         .build());
                     } catch (DataIntegrityViolationException ignore) {
                     }

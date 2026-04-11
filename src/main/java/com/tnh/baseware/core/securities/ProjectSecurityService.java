@@ -9,10 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.entities.project.ProjectMember;
+import com.tnh.baseware.core.entities.project.ProjectRole;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.OrganizationRole;
-import com.tnh.baseware.core.enums.project.ProjectMemberRole;
 import com.tnh.baseware.core.enums.project.ProjectPermission;
 import com.tnh.baseware.core.repositories.project.IProjectMemberRepository;
 
@@ -32,23 +32,20 @@ public class ProjectSecurityService {
                 .orElse(null);
 
         if (member == null) {
-            System.out.println("Member not found");
             return false;
         }
         var userOrg = userOrgs.stream()
                 .filter(u -> u.getOrganization().getId().equals(project.getOrganization().getId()))
                 .findFirst().orElse(null);
         if (userOrg == null) {
-            System.out.println("User org not found");
             return false;
         }
         if (userOrg.getOrganizationRole() == OrganizationRole.UNIT_LEADER ||
                 userOrg.getOrganizationRole() == OrganizationRole.DEPUTY) {
-            System.out.println("User is unit leader or deputy");
             return true;
         }
-        ProjectMemberRole role = member.getRole();
-        return role.hasPermission(permission);
+        ProjectRole role = member.getProjectRole();
+        return role != null && role.hasPermission(permission);
     }
 
 }

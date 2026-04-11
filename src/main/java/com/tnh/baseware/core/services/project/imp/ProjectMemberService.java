@@ -69,7 +69,7 @@ public class ProjectMemberService extends
 
         var members = repository.findDistinctByProject_Id(projectId);
         return members.stream()
-                .sorted(Comparator.comparingInt(m -> m.getRole().getOrder()))
+                .sorted(Comparator.comparingInt(m -> m.getProjectRole().getOrder()))
                 .map(mapper::entityToDTO)
                 .toList();
     }

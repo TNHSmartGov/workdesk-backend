@@ -1,6 +1,6 @@
 package com.tnh.baseware.core.dtos.project;
 
-import com.tnh.baseware.core.dtos.adu.OrganizationDTO;
+import com.tnh.baseware.core.dtos.basic.BasicOrganizationDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
 import lombok.*;
@@ -20,9 +20,12 @@ import java.util.UUID;
 public class ProjectDTO extends RepresentationModel<ProjectDTO> implements Identifiable<UUID> {
     UUID id;
     String name;
+    String code;
     String description;
-    OrganizationDTO organization;
+    BasicOrganizationDTO organization;
     Instant startDate;
     Instant endDate;
     ProjectStatus status;
+    ProjectRoleDTO memberRole;
+
 }

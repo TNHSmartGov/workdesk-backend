@@ -1,6 +1,7 @@
 package com.tnh.baseware.core.entities.task;
 
 import com.tnh.baseware.core.entities.audit.Auditable;
+import com.tnh.baseware.core.entities.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "task_requirements")
+@Table
 public class TaskRequirement extends Auditable<String> {
 
     @Id
@@ -27,9 +28,18 @@ public class TaskRequirement extends Auditable<String> {
     String content;
 
     @Column(nullable = false)
+    @Builder.Default
     Boolean isCompleted = false;
 
-    @Column(nullable = false)
-    Integer sortOrder;
-}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignee_id")
+    User assignee;
 
+    @Column(nullable = false)
+    @Builder.Default
+    Integer weight = 1;
+
+    @Column(nullable = false)
+    @Builder.Default
+    Integer sortOrder = 1;
+}

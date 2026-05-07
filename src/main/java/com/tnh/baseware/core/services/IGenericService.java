@@ -57,4 +57,6 @@ public interface IGenericService<E, F, D, I> {
     List<? extends EnumDTO<?>> getEnumValues(String enumName);
 
     User getCurrentUser();
+
+    Boolean isUserSystem();
 }

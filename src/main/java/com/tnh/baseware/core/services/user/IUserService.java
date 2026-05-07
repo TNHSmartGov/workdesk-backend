@@ -60,4 +60,5 @@ public interface IUserService extends IGenericService<User, UserEditorForm, User
     List<UserDTO> findAllByRole(UUID id);
 
     Page<UserDTO> findAllByRole(UUID id, Pageable pageable);
+
 }

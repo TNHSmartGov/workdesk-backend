@@ -56,7 +56,10 @@ public class User extends Auditable<String> implements Serializable {
 
     @Column(unique = false)
     String email;
+
     String avatarUrl;
+
+    Instant birthday;
 
     @Column(unique = false, nullable = true)
     @Builder.Default
@@ -102,11 +105,24 @@ public class User extends Auditable<String> implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<UserOrganization> organizations;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_active_org_id")
+    private Organization lastActiveOrganization;
+
     public Set<GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .map(Role::getAuthorities)
                 .flatMap(Set::stream)
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public void addOrganization(Organization organization) {
+        if (organization != null) {
+            UserOrganization userOrganization = new UserOrganization();
+            userOrganization.setOrganization(organization);
+            userOrganization.setUser(this);
+            organizations.add(userOrganization);
+        }
     }
 
     public void addRole(Role role) {

@@ -44,8 +44,25 @@
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE-ROLLING"/>
         </root>
-    </springProfile>
+        <appender name="SCHEDULE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>logs/schedule.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>logs/schedule.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <maxFileSize>10MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
 
+        <logger name="com.tnh.baseware.core.schedulers" level="DEBUG" additivity="false">
+                <appender-ref ref="SCHEDULE_FILE"/>
+                <appender-ref ref="CONSOLE"/>
+        </logger>
+    </springProfile>
+ 
     <!-- Environment: Production -->
     <springProfile name="prod">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -105,7 +122,7 @@
         <!-- Main application loggers -->
         <logger name="org.springframework" level="WARN"/>
         <logger name="com.tnh.baseware.core" level="INFO"/>
-        <logger name="com.tnh.baseware.core.components" level="INFO" additivity="false">
+        <logger name="com.tnh.baseware.core.schedulers" level="INFO" additivity="false">
                 <appender-ref ref="SCHEDULE_FILE"/>
                 <appender-ref ref="CONSOLE"/>
         </logger>

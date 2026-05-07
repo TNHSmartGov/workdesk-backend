@@ -11,8 +11,7 @@ import com.tnh.baseware.core.services.task.ITaskRequirementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -20,14 +19,16 @@ import java.util.UUID;
 @RestController
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequestMapping("${baseware.core.system.api-prefix}/task-requirements")
-public class TaskRequirementResource extends GenericResource<TaskRequirement, TaskRequirementEditorForm, TaskRequirementDTO, UUID> {
+public class TaskRequirementResource
+        extends GenericResource<TaskRequirement, TaskRequirementEditorForm, TaskRequirementDTO, UUID> {
 
     ITaskRequirementService taskRequirementService;
 
-    public TaskRequirementResource(IGenericService<TaskRequirement, TaskRequirementEditorForm, TaskRequirementDTO, UUID> service,
-                                   MessageService messageService,
-                                   SystemProperties systemProperties,
-                                   ITaskRequirementService taskRequirementService) {
+    public TaskRequirementResource(
+            IGenericService<TaskRequirement, TaskRequirementEditorForm, TaskRequirementDTO, UUID> service,
+            MessageService messageService,
+            SystemProperties systemProperties,
+            ITaskRequirementService taskRequirementService) {
         super(service, messageService, systemProperties.getApiPrefix() + "/task-requirements");
         this.taskRequirementService = taskRequirementService;
     }

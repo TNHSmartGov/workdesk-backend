@@ -1,10 +1,12 @@
 package com.tnh.baseware.core.services.user.imp;
 
-import com.tnh.baseware.core.components.GenericEntityFetcher;
+import com.tnh.baseware.core.dtos.user.MenuDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.Menu;
 import com.tnh.baseware.core.entities.user.User;
+import com.tnh.baseware.core.entities.user.UserOrganization;
+import com.tnh.baseware.core.events.type.UserCreatedEvent;
 import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.user.ChangePasswordForm;
@@ -12,12 +14,14 @@ import com.tnh.baseware.core.forms.user.RegisterForm;
 import com.tnh.baseware.core.forms.user.ResetPasswordForm;
 import com.tnh.baseware.core.forms.user.UserEditorForm;
 import com.tnh.baseware.core.forms.user.UserProfileForm;
+import com.tnh.baseware.core.mappers.audit.ICategoryMapper;
 import com.tnh.baseware.core.mappers.user.IMenuMapper;
 import com.tnh.baseware.core.mappers.user.IUserMapper;
 import com.tnh.baseware.core.properties.SecurityProperties;
 import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
 import com.tnh.baseware.core.repositories.user.IMenuRepository;
 import com.tnh.baseware.core.repositories.user.IRoleRepository;
+import com.tnh.baseware.core.repositories.user.IUserOrganizationRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.securities.JwtTokenService;
 import com.tnh.baseware.core.services.GenericService;
@@ -31,6 +35,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +57,8 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     JwtTokenService jwtTokenService;
     SecurityProperties securityProperties;
     IMenuMapper menuMapper;
-    GenericEntityFetcher fetcher;
+    ICategoryMapper categoryMapper;
+    IUserOrganizationRepository userOrganizationRepository;
 
     public UserService(IUserRepository repository,
             IUserMapper mapper,
@@ -63,7 +69,9 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
             PasswordEncoder passwordEncoder,
             JwtTokenService jwtTokenService,
             SecurityProperties securityProperties,
-            IMenuMapper menuMapper, GenericEntityFetcher fetcher) {
+            ICategoryMapper categoryMapper,
+            IUserOrganizationRepository userOrganizationRepository,
+            IMenuMapper menuMapper) {
         super(repository, mapper, messageService, User.class);
         this.roleRepository = roleRepository;
         this.organizationRepository = organizationRepository;
@@ -72,14 +80,17 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
         this.jwtTokenService = jwtTokenService;
         this.securityProperties = securityProperties;
         this.menuMapper = menuMapper;
-        this.fetcher = fetcher;
+        this.userOrganizationRepository = userOrganizationRepository;
+        this.categoryMapper = categoryMapper;
     }
 
     @Override
     @Transactional
     public UserDTO create(UserEditorForm form) {
         var user = mapper.formToEntity(form, passwordEncoder);
-        return mapper.entityToDTO(repository.save(user));
+        User savedUser = repository.save(user);
+
+        return mapper.entityToDTO(savedUser);
     }
 
     @Override
@@ -121,7 +132,8 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
         }
 
         user.addRole(role);
-        return mapper.entityToDTO(repository.save(user));
+        User savedUser = repository.save(user);
+        return mapper.entityToDTO(savedUser);
     }
 
     @Override
@@ -150,7 +162,8 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
             }
             user.setIdn(form.getIdn());
         }
-
+        user.setAddress(form.getAddress());
+        user.setBirthday(form.getBirthday());
         user.setFirstName(form.getFirstName());
         user.setLastName(form.getLastName());
         user.setFullName(form.getFullName());
@@ -239,18 +252,29 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
         var user = repository.findByUsername(username)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", username)));
 
-        List<Menu> menus;
+        Optional<String> orgIdOpt = jwtTokenService.extractOrganizationId(token);
+
+        boolean orgSelectionRequired = orgIdOpt.isEmpty();
+
+        Set<UUID> authorizedIds = new HashSet<>();
+        List<Menu> allMenus = menuRepository.findAll();
+
         if (Boolean.TRUE.equals(user.getSuperAdmin())) {
-            menus = menuRepository.findAll();
+            authorizedIds.addAll(allMenus.stream().map(Menu::getId).collect(Collectors.toSet()));
         } else {
-            menus = user.getRoles().stream()
+            user.getRoles().stream()
                     .flatMap(role -> role.getMenus().stream())
-                    .collect(Collectors.collectingAndThen(
-                            Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(Menu::getId))),
-                            ArrayList::new));
+                    .forEach(menu -> collectMenuHierarchy(authorizedIds, menu));
         }
 
-        if (BasewareUtils.isBlank(menus)) {
+        List<Menu> authorizedMenus = allMenus.stream()
+                .filter(m -> authorizedIds.contains(m.getId()))
+                .filter(m -> Integer.valueOf(1).equals(m.getPublished()))
+                .toList();
+
+        List<MenuDTO> menuTree = menuMapper.mapMenusToTree(authorizedMenus);
+
+        if (BasewareUtils.isBlank(menuTree)) {
             log.debug(LogStyleHelper.debug("User {} has no menus"), username);
             throw new BWCNotFoundException(messageService.getMessage("user.menus.not.found", username));
         }
@@ -271,8 +295,10 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
                 .lockTime(user.getLockTime())
                 .accountExpiryDate(user.getAccountExpiryDate())
                 .failedLoginAttempts(user.getFailedLoginAttempts())
+                .lastActiveOrganization(orgIdOpt.map(UUID::fromString).orElse(null))
+                .orgSelectionRequired(orgSelectionRequired)
                 .superAdmin(user.getSuperAdmin())
-                .menus(menuMapper.entitiesToDTOs(menus))
+                .menus(menuTree)
                 .build();
     }
 
@@ -281,9 +307,17 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     public List<UserDTO> findAllByOrganization(UUID id) {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found", id)));
-        return repository.findAllByEntitiesContaining("organizations", organization)
-                .stream()
-                .map(mapper::entityToDTO)
+        Set<UserOrganization> userOrgs = userOrganizationRepository
+                .findByOrganizationIdAndActiveTrue(organization.getId());
+
+        return userOrgs.stream()
+                .map(uo -> {
+                    UserDTO dto = mapper.entityToDTO(uo.getUser());
+                    dto.setLevel(categoryMapper.entityToDTO(uo.getTitle()));
+                    dto.setOrganizationRole(
+                            uo.getOrganizationRole() != null ? uo.getOrganizationRole().getValue() : null);
+                    return dto;
+                })
                 .toList();
     }
 
@@ -292,7 +326,24 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     public Page<UserDTO> findAllByOrganization(UUID id, Pageable pageable) {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found", id)));
-        return repository.findAllByEntitiesContaining("organizations", organization, pageable).map(mapper::entityToDTO);
+        Page<UserOrganization> userOrgs = userOrganizationRepository
+                .findByOrganizationIdAndActiveTrue(organization.getId(), pageable);
+
+        List<UserDTO> usersDTO = userOrgs.stream()
+                .map(uo -> {
+                    UserDTO dto = mapper.entityToDTO(uo.getUser());
+                    dto.setLevel(categoryMapper.entityToDTO(uo.getTitle()));
+                    dto.setOrganizationRole(
+                            uo.getOrganizationRole() != null ? uo.getOrganizationRole().getValue() : null);
+                    return dto;
+                })
+                .toList();
+
+        return PageableExecutionUtils.getPage(
+                usersDTO,
+                pageable,
+                userOrgs::getTotalElements);
+
     }
 
     @Override
@@ -300,7 +351,7 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
     public List<UserDTO> findAllWithoutOrganization(UUID id) {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("organization.not.found", id)));
-        return repository.findAllByEntitiesNotContaining("organizations", organization)
+        return repository.findAllNotInOrganization(organization.getId())
                 .stream()
                 .map(mapper::entityToDTO)
                 .toList();
@@ -376,6 +427,29 @@ public class UserService extends GenericService<User, UserEditorForm, UserDTO, I
                 !"application/vnd.ms-excel".equals(contentType)) {
             throw new BWCValidationException(messageService.getMessage("file.invalid.type"));
 
+        }
+    }
+
+    private void collectMenuHierarchy(Set<UUID> authorizedIds, Menu menu) {
+        if (menu == null || Integer.valueOf(0).equals(menu.getPublished())) {
+            return;
+        }
+
+        // Check if all ancestors are published
+        List<Menu> hierarchy = new ArrayList<>();
+        Menu current = menu;
+        while (current != null) {
+            if (Integer.valueOf(0).equals(current.getPublished())) {
+                // If any ancestor is unpublished, the whole branch is invalid
+                return;
+            }
+            hierarchy.add(current);
+            current = current.getParent();
+        }
+
+        // If we reached here, the menu and all its ancestors are published
+        for (Menu m : hierarchy) {
+            authorizedIds.add(m.getId());
         }
     }
 

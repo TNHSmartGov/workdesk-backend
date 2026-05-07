@@ -18,11 +18,13 @@ import com.tnh.baseware.core.repositories.user.IUserRepository;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.utils.BasewareUtils;
 import com.tnh.baseware.core.utils.LogStyleHelper;
+import com.tnh.baseware.core.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,8 @@ public class JwtTokenService {
     SecurityProperties securityProperties;
     JwtSecretProvider jwtSecretProvider;
     MessageService messageService;
+    HttpRequestContext httpRequestContext;
+    SecurityUtils securityUtils;
 
     public static void main(String[] args) {
         try {
@@ -55,6 +59,21 @@ public class JwtTokenService {
         } catch (Exception e) {
             log.error(LogStyleHelper.error("Error occurred while generating HS512 Secret Key"), e);
         }
+    }
+
+    public Optional<String> extractOrganizationId(String token) {
+        return extractClaim(token, claims -> {
+            Object oid = claims.getClaim("oid");
+            return oid != null ? oid.toString() : null;
+        });
+    }
+
+    public Optional<String> extractSessionIdFromContext() {
+        return httpRequestContext.currentRequest()
+                .map(req -> req.getHeader(HttpHeaders.AUTHORIZATION))
+                .filter(h -> h.startsWith("Bearer "))
+                .map(h -> h.substring(7))
+                .flatMap(this::extractSessionId);
     }
 
     public Optional<String> extractSessionId(String token) {
@@ -80,18 +99,41 @@ public class JwtTokenService {
     }
 
     public Optional<String> generateToken(CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
-        return generateToken(new HashMap<>(), userDetails, request, sessionId);
+        Map<String, Object> claims = generateClaims(userDetails);
+        return generateToken(claims, userDetails, request, sessionId);
     }
 
-    private Optional<String> generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
-        return buildToken(extraClaims, userDetails, securityProperties.getJwt().getExpiration(), TokenType.ACCESS.getValue(), request, sessionId);
+    private Optional<String> generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails,
+            HttpServletRequest request, UUID sessionId) {
+        return buildToken(extraClaims, userDetails, securityProperties.getJwt().getExpiration(),
+                TokenType.ACCESS.getValue(), request, sessionId);
     }
 
-    public Optional<String> generateRefreshToken(CustomUserDetails userDetails, HttpServletRequest request, UUID sessionId) {
-        return buildToken(new HashMap<>(), userDetails, securityProperties.getJwt().getRefreshExpiration(), TokenType.REFRESH.getValue(), request, sessionId);
+    public Optional<String> generateRefreshToken(CustomUserDetails userDetails, HttpServletRequest request,
+            UUID sessionId) {
+        Map<String, Object> claims = generateClaims(userDetails);
+        return buildToken(claims, userDetails, securityProperties.getJwt().getRefreshExpiration(),
+                TokenType.REFRESH.getValue(), request, sessionId);
     }
 
-    private Optional<String> buildToken(Map<String, Object> extraClaims, CustomUserDetails userDetails, long expiration, String tokenType, HttpServletRequest request, UUID sessionId) {
+    private Map<String, Object> generateClaims(CustomUserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+
+        var organizationId = userDetails.getOrganizationId();
+
+        if (organizationId != null) {
+            claims.put("oid", organizationId.toString());
+        } else if (securityUtils.checkIsSuperAdmin()) {
+            claims.put("oid", "SUPER_ADMIN");
+        } else {
+            claims.put("oid", "NONE");
+            log.info("Generating non-organization token for non-admin user: {}", userDetails.getUsername());
+        }
+        return claims;
+    }
+
+    private Optional<String> buildToken(Map<String, Object> extraClaims, CustomUserDetails userDetails, long expiration,
+            String tokenType, HttpServletRequest request, UUID sessionId) {
         try {
             var header = new JWSHeader(JWSAlgorithm.HS512);
             var ip = request.getRemoteAddr();
@@ -147,7 +189,8 @@ public class JwtTokenService {
             var jti = claims.getJWTID();
 
             if (!Objects.equals(userDetails.getUsername(), username)) {
-                log.debug(LogStyleHelper.debug("JWT username mismatch: expected '{}', found '{}'"), userDetails.getUsername(), username);
+                log.debug(LogStyleHelper.debug("JWT username mismatch: expected '{}', found '{}'"),
+                        userDetails.getUsername(), username);
                 return false;
             }
 
@@ -189,10 +232,17 @@ public class JwtTokenService {
                 });
     }
 
+    public Optional<String> extractAccessTokenFromContext() {
+        return httpRequestContext.currentRequest()
+                .map(req -> req.getHeader(HttpHeaders.AUTHORIZATION))
+                .filter(h -> h.startsWith("Bearer "))
+                .map(h -> h.substring(7));
+    }
+
     @Transactional
     public void revokeAllValidTokensByUser(UUID userId) {
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
 
         tokenRepository.findAllByUserAndRevokedFalseAndExpiredFalse(user)
                 .forEach(token -> {
@@ -204,8 +254,8 @@ public class JwtTokenService {
 
     @Transactional
     public void revokeAllValidAccessTokensByUser(UUID userId) {
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
 
         tokenRepository.findAllByUserAndRevokedFalseAndExpiredFalse(user)
                 .stream()
@@ -231,8 +281,8 @@ public class JwtTokenService {
 
     @Transactional
     public void revokeAllValidTokensByUserAndDevice(UUID userId, String deviceId) {
-        var user = userRepository.findById(userId).orElseThrow(() ->
-                new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new BWCNotFoundException(messageService.getMessage("user.not.found", userId)));
 
         tokenRepository.findAllByUserAndDeviceId(user, deviceId)
                 .forEach(token -> {

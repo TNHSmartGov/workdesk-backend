@@ -35,7 +35,6 @@ public enum Operator {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public <T> Predicate build(Root<T> root, CriteriaBuilder cb, FilterRequest request, Predicate predicate) {
             var value = request.getFieldType().parse(request.getValue().toString());
-            @SuppressWarnings("rawtypes")
             Expression<Comparable> key = this.getPath(root, request);
             return cb.and(cb.greaterThan(key, (Comparable) value), predicate);
         }
@@ -47,6 +46,24 @@ public enum Operator {
             @SuppressWarnings("rawtypes")
             Expression<Comparable> key = this.getPath(root, request);
             return cb.and(cb.lessThan(key, (Comparable) value), predicate);
+        }
+    },
+    GREATER_THAN_OR_EQUAL {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, FilterRequest request, Predicate predicate) {
+            var value = request.getFieldType().parse(request.getValue().toString());
+            @SuppressWarnings("rawtypes")
+            Expression<Comparable> key = this.getPath(root, request);
+            return cb.and(cb.greaterThanOrEqualTo(key, (Comparable) value), predicate);
+        }
+    },
+    LESS_THAN_OR_EQUAL {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, FilterRequest request, Predicate predicate) {
+            var value = request.getFieldType().parse(request.getValue().toString());
+            @SuppressWarnings("rawtypes")
+            Expression<Comparable> key = this.getPath(root, request);
+            return cb.and(cb.lessThanOrEqualTo(key, (Comparable) value), predicate);
         }
     },
     IN {
@@ -89,6 +106,16 @@ public enum Operator {
 
             log.debug(LogStyleHelper.debug("Can not use between for {} field type."), request.getFieldType());
             return predicate;
+        }
+    },
+    IS_NULL {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, FilterRequest request, Predicate predicate) {
+            return cb.and(cb.isNull(this.getPath(root, request)), predicate);
+        }
+    },
+    IS_NOT_NULL {
+        public <T> Predicate build(Root<T> root, CriteriaBuilder cb, FilterRequest request, Predicate predicate) {
+            return cb.and(cb.isNotNull(this.getPath(root, request)), predicate);
         }
     };
 

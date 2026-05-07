@@ -29,7 +29,6 @@ public class MenuEditorForm {
     @NotBlank(message = "{alias.not.blank}")
     String alias;
 
-    @NotBlank(message = "{note.not.blank}")
     String note;
 
     @NotBlank(message = "{path.not.blank}")

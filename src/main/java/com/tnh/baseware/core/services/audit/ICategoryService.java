@@ -8,4 +8,5 @@ import com.tnh.baseware.core.services.IGenericService;
 import java.util.UUID;
 
 public interface ICategoryService extends IGenericService<Category, CategoryEditorForm, CategoryDTO, UUID> {
+
 }

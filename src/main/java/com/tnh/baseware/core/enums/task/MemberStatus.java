@@ -12,10 +12,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public enum MemberStatus implements BaseEnum<String> {
     ASSIGNED("ASSIGNED", "assigned", "Đã nhận việc"),
-    PROCESSING("PROCESSING", "processing", "Đang thực hiện"),
+    IN_PROGRESS("IN_PROGRESS", "in_progress", "Đang thực hiện"),
     COMPLETED("COMPLETED", "completed", "Đã hoàn thành"),
     BLOCKED("BLOCKED", "blocked", "Đang bị chặn");
 
+    
     String value;
     String name;
     String displayName;

@@ -3,6 +3,7 @@ package com.tnh.baseware.core.services.adu;
 import com.tnh.baseware.core.dtos.adu.OrganizationDTO;
 import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.forms.adu.OrganizationEditorForm;
+import com.tnh.baseware.core.forms.user.AssignUserEditorForm;
 import com.tnh.baseware.core.services.IGenericService;
 
 import org.springframework.data.domain.Page;
@@ -24,9 +25,13 @@ public interface IOrganizationService
 
     void removeOrganizations(UUID id, List<UUID> ids);
 
-    void assignUsers(UUID id, List<UUID> ids);
+    void assignUsers(UUID id, List<AssignUserEditorForm> forms);
 
     void removeUsers(UUID id, List<UUID> ids);
 
-    void changeTitle(UUID orgId, UUID userId, String title);
+    void changeTitle(UUID orgId, UUID userId, String roleValue, UUID titleId);
+
+    boolean isSupervisor(UUID orgId, UUID userId);
+
+    List<OrganizationDTO> findAllOfUser(UUID user);
 }

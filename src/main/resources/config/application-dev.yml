@@ -84,16 +84,29 @@ baseware:
       initialized-enabled: true
       cache-pattern-clear-interval-ms: 7200000 # 2 hours
       token-clear-interval: "0 0 0 * * ?" # 00:00:00
-      check-camera-devices:
-        enabled: false
-        interval: 3000 #  10 minutes
-        timeout: 10000 # 10 seconds
-        threads: 10
+      notification-retention-days: 90
+      notification-retention-cron: "0 0 2 * * ?" # 02:00:00
+      notification-due-soon-hours: 48
+      notification-due-cron: "0 0 8 * * ?" # 08:00:00
+      organization-stats:
+        enabled: true
+        schedules:
+          - name: "midday"
+            cron: "0 0 12 * * MON-FRI"
+            snapshot-type: "MIDDAY"
+          - name: "end-of-day"
+            cron: "0 30 17 * * MON-FRI"
+            snapshot-type: "END_OF_DAY"
       check-payment:
         enabled: true
         cron: "0 0 0 1,15 * ?" # Every month at 00:00:00
         timeout: 10000 # 10 seconds
         threads: 5
+      user-stats:
+        enabled: true
+        schedules:
+          - name: "daily-job"
+            cron: "0 0 1 * * ?" # 01:00 AM daily
     cors:
       allowed-origins: "*"
       allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,HEAD,PATCH,TRACE"

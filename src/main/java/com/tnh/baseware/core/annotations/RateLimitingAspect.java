@@ -1,30 +1,31 @@
 package com.tnh.baseware.core.annotations;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
-
+import com.tnh.baseware.core.exceptions.BWCRateLimitException;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.tnh.baseware.core.exceptions.BWCRateLimitException;
-
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-
-import org.aspectj.lang.reflect.MethodSignature;
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Aspect
 @Component
 @Slf4j
 public class RateLimitingAspect {
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    public RateLimitingAspect(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     @Around("@annotation(com.tnh.baseware.core.annotations.RateLimit)")
     public Object rateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -44,25 +45,22 @@ public class RateLimitingAspect {
         String rateLimitKey = "rate_limit:" + uniqueEndpointIdentifier + ":" + clientIp;
         String lockKey = "lock:" + uniqueEndpointIdentifier + ":" + clientIp;
 
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(lockKey))) {
+        if (Objects.equals(Boolean.TRUE, redisTemplate.hasKey(lockKey))) {
             Long expireTime = redisTemplate.getExpire(lockKey, TimeUnit.SECONDS);
-            throw new BWCRateLimitException("Truy cập quá nhanh, vui lòng thử lại sau "
-                    + (expireTime != null ? expireTime : lockInSeconds) + " giây.");
+            throw new BWCRateLimitException("Rate limit has been reached. Try again in " + expireTime + " seconds.");
         }
         Long currentCount = redisTemplate.opsForValue().increment(rateLimitKey);
         if (currentCount == null) {
             return joinPoint.proceed();
         }
-        // 3. Nếu là lần đầu tiên trong window, set TTL
         if (currentCount == 1) {
             redisTemplate.expire(rateLimitKey, windowInSeconds, TimeUnit.SECONDS);
         }
 
-        // 4. Nếu vượt ngưỡng, khóa client
         if (currentCount > limit) {
             redisTemplate.opsForValue().set(lockKey, "locked", lockInSeconds, TimeUnit.SECONDS);
             redisTemplate.delete(rateLimitKey);
-            throw new BWCRateLimitException("Truy cập quá nhanh, vui lòng thử lại sau " + lockInSeconds + " giây.");
+            throw new BWCRateLimitException("Rate limit has been reached. Try again in " + lockInSeconds + " seconds.");
         }
 
         return joinPoint.proceed();
@@ -72,7 +70,7 @@ public class RateLimitingAspect {
         String remoteAddr = "";
         if (request != null) {
             remoteAddr = request.getHeader("X-FORWARDED-FOR");
-            if (remoteAddr == null || "".equals(remoteAddr)) {
+            if (remoteAddr == null || remoteAddr.isEmpty()) {
                 remoteAddr = request.getRemoteAddr();
             }
         }

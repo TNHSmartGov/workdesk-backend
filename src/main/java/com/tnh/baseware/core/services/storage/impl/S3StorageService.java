@@ -6,17 +6,21 @@ import com.tnh.baseware.core.services.storage.IStorageService;
 import io.minio.*;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service("s3StorageService")
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@Slf4j
 public class S3StorageService implements IStorageService<String> {
 
     String bucketPrefix;
@@ -24,7 +28,8 @@ public class S3StorageService implements IStorageService<String> {
     MinioClient minioClient;
     MessageService messageService;
 
-    public S3StorageService(@Value("${minio.bucket-prefix:workdesk-}") String bucketPrefix, MinioClient minioClient, MessageService messageService) {
+    public S3StorageService(@Value("${minio.bucket-prefix:workdesk-}") String bucketPrefix, MinioClient minioClient,
+            MessageService messageService) {
         this.bucketPrefix = bucketPrefix;
         this.minioClient = minioClient;
         this.messageService = messageService;
@@ -36,7 +41,8 @@ public class S3StorageService implements IStorageService<String> {
             String bucketName = initBucket();
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            String path = LocalDate.now().format(formatter) + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String path = LocalDate.now().format(formatter) + "/" + UUID.randomUUID() + "_"
+                    + file.getOriginalFilename();
 
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -44,10 +50,10 @@ public class S3StorageService implements IStorageService<String> {
                             .object(path)
                             .stream(file.getInputStream(), file.getSize(), -1)
                             .contentType(file.getContentType())
-                            .build()
-            );
+                            .build());
             return path;
         } catch (Exception e) {
+            log.error("Failed to upload file: {}", file.getOriginalFilename(), e);
             throw new BWCGenericRuntimeException(messageService.getMessage("file.upload.error"));
         }
     }
@@ -60,8 +66,7 @@ public class S3StorageService implements IStorageService<String> {
                     GetObjectArgs.builder()
                             .bucket(bucketName)
                             .object(path)
-                            .build()
-            );
+                            .build());
         } catch (Exception e) {
             throw new BWCGenericRuntimeException(messageService.getMessage("file.download.error"));
         }
@@ -75,8 +80,7 @@ public class S3StorageService implements IStorageService<String> {
                     RemoveObjectArgs.builder()
                             .bucket(bucketName)
                             .object(path)
-                            .build()
-            );
+                            .build());
         } catch (Exception e) {
             throw new BWCGenericRuntimeException(messageService.getMessage("file.delete.error"));
         }

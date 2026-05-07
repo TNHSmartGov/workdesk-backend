@@ -1,8 +1,11 @@
 package com.tnh.baseware.core.forms.project;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.tnh.baseware.core.constants.Views;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -19,18 +22,27 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ProjectEditorForm {
-
-    @NotBlank(message = "{name.not.blank}")
+    @JsonView(Views.Common.class)
     String name;
 
+    @JsonView(Views.Common.class)
+    String code;
+
+    @JsonView(Views.Common.class)
     String description;
 
-    @NotNull(message = "{organization_id.not.null}")
-    UUID organizationId;
-
+    @JsonView(Views.Common.class)
     Instant startDate;
+
+    @JsonView(Views.Common.class)
     Instant endDate;
 
-    @NotNull(message = "{status.not.null}")
+    @JsonView(Views.Common.class)
     ProjectStatus status;
+
+    @JsonView(Views.Create.class)
+    boolean createDefaultTaskList;
+
+    @JsonView(Views.Create.class)
+    String defaultTaskListName;
 }

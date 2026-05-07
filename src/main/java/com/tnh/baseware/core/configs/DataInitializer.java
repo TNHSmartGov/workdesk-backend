@@ -1,8 +1,10 @@
 package com.tnh.baseware.core.configs;
 
+import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.entities.user.Role;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.properties.InitProperties;
+import com.tnh.baseware.core.repositories.adu.IOrganizationRepository;
 import com.tnh.baseware.core.repositories.user.IRoleRepository;
 import com.tnh.baseware.core.repositories.user.IUserRepository;
 import lombok.AccessLevel;
@@ -33,11 +35,13 @@ public class DataInitializer implements CommandLineRunner {
     IRoleRepository roleRepository;
     InitProperties initProperties;
     PasswordEncoder passwordEncoder;
+    IOrganizationRepository organizationRepository;
 
     @Override
     @Transactional
     public void run(String... args) {
         initRoles();
+        initOrganization();
         initUsers();
     }
 
@@ -62,19 +66,42 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
+    void initOrganization() {
+        log.info("Initializing organization...");
+        var existingOrganizations = organizationRepository.findAll()
+                .stream()
+                .map(Organization::getCode)
+                .collect(Collectors.toSet());
+
+        var organizationsToSave = initProperties.getOrganizations()
+                .stream()
+                .filter(o -> !existingOrganizations.contains(o.getCode()))
+                .map(o -> Organization.builder()
+                        .name(o.getName())
+                        .code(o.getCode())
+                        .description(o.getDescription())
+                        .isSystem(o.isSystem())
+                        .build())
+                .toList();
+
+        if (!organizationsToSave.isEmpty()) {
+            organizationRepository.saveAllAndFlush(organizationsToSave);
+        }
+    }
+
     void initUsers() {
         log.info("Initializing users...");
         var existingUsernames = userRepository.findAll()
                 .stream()
                 .map(User::getUsername)
                 .collect(Collectors.toSet());
-
         var usersToSave = initProperties.getUsers()
                 .stream()
                 .filter(u -> !existingUsernames.contains(u.getUsername()))
                 .map(u -> {
                     List<Role> roles = roleRepository.findAllByField("name", u.getRole());
-                    if (roles.isEmpty()) return null;
+                    if (roles.isEmpty())
+                        return null;
                     return User.builder()
                             .username(u.getUsername())
                             .password(passwordEncoder.encode(u.getPassword()))
@@ -91,7 +118,7 @@ public class DataInitializer implements CommandLineRunner {
                             .accountExpiryDate(Instant.now().plus(365, ChronoUnit.DAYS))
                             .failedLoginAttempts(0)
                             .roles(Set.of(roles.getFirst()))
-                            .superAdmin(false)
+                            .superAdmin(u.isSuperAdmin())
                             .build();
                 })
                 .filter(Objects::nonNull)

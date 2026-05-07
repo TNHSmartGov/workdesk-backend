@@ -12,15 +12,15 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public enum ProjectStatus implements BaseEnum<String> {
 
-    TODO("TODO", "todo", "Mới tạo"),
-    IN_PROGRESS("IN_PROGRESS", "in_progress", "Đang thực hiện"),
-    REVIEW("REVIEW", "review", "Chờ duyệt"),
-    DONE("DONE", "done", "Hoàn thành"),
-    CANCELLED("CANCELLED", "cancelled", "Đã hủy");
+    DRAFT("DRAFT", "draft", "Mới tạo"),
+    ACTIVE("ACTIVE", "active", "Đang hoạt động"),
+    ON_HOLD("ON_HOLD", "on_hold", "Tạm dừng"),
+    COMPLETED("COMPLETED", "completed", "Hoàn thành"),
+    ARCHIVED("ARCHIVED", "archived", "Đã lưu trữ");
 
-    String value;
-    String name;
-    String displayName;
+    private final String value;
+    private final String name;
+    private final String displayName;
 
     public static ProjectStatus fromValue(String value) {
         for (ProjectStatus status : ProjectStatus.values()) {
@@ -28,6 +28,6 @@ public enum ProjectStatus implements BaseEnum<String> {
                 return status;
             }
         }
-        throw new BWCGenericRuntimeException("Unknown value: " + value);
+        throw new BWCGenericRuntimeException("Unknown ProjectStatus value: " + value);
     }
 }

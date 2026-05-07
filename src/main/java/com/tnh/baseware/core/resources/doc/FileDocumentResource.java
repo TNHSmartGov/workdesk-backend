@@ -1,7 +1,6 @@
 package com.tnh.baseware.core.resources.doc;
 
 import com.tnh.baseware.core.dtos.doc.FileDocumentDTO;
-import com.tnh.baseware.core.dtos.doc.FileResource;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.doc.FileDocument;
 import com.tnh.baseware.core.forms.doc.FileDocumentEditorForm;
@@ -37,9 +36,9 @@ public class FileDocumentResource extends GenericResource<FileDocument, FileDocu
     IFileDocumentService fileDocumentService;
 
     public FileDocumentResource(IGenericService<FileDocument, FileDocumentEditorForm, FileDocumentDTO, UUID> service,
-                                MessageService messageService,
-                                SystemProperties systemProperties,
-                                IFileDocumentService fileDocumentService) {
+            MessageService messageService,
+            SystemProperties systemProperties,
+            IFileDocumentService fileDocumentService) {
         super(service, messageService, systemProperties.getApiPrefix() + "/files");
         this.fileDocumentService = fileDocumentService;
     }
@@ -48,7 +47,7 @@ public class FileDocumentResource extends GenericResource<FileDocument, FileDocu
     @ApiResponse(responseCode = "200", description = "File uploaded", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageDTO.class)))
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiMessageDTO<FileDocumentDTO>> uploadFile(@RequestParam("file") MultipartFile file,
-                                                                     @RequestParam(value = "description", required = false) String description) {
+            @RequestParam(value = "description", required = false) String description) {
         // description is not used in the interface method uploadFile currently
         var fileDTO = fileDocumentService.uploadFile(file);
         return ResponseEntity.ok(ApiMessageDTO.<FileDocumentDTO>builder()

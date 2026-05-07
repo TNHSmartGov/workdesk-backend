@@ -1,18 +1,23 @@
 package com.tnh.baseware.core.resources.project;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.tnh.baseware.core.constants.Views;
 import com.tnh.baseware.core.dtos.project.ProjectDTO;
+import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.project.Project;
+import com.tnh.baseware.core.forms.project.ProjectActionForm;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;
 import com.tnh.baseware.core.properties.SystemProperties;
 import com.tnh.baseware.core.resources.GenericResource;
 import com.tnh.baseware.core.services.IGenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.project.IProjectService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -25,10 +30,17 @@ public class ProjectResource extends GenericResource<Project, ProjectEditorForm,
     IProjectService projectService;
 
     public ProjectResource(IGenericService<Project, ProjectEditorForm, ProjectDTO, UUID> service,
-                           MessageService messageService,
-                           SystemProperties systemProperties,
-                           IProjectService projectService) {
+            MessageService messageService,
+            SystemProperties systemProperties,
+            IProjectService projectService) {
         super(service, messageService, systemProperties.getApiPrefix() + "/projects");
         this.projectService = projectService;
+    }
+
+    @Operation(summary = "Perform an action on project")
+    @PostMapping(value = "/{id}/actions")
+    public void performAction(@PathVariable UUID id,
+            @RequestBody @Valid ProjectActionForm form) {
+        projectService.performAction(id, form.getAction());
     }
 }

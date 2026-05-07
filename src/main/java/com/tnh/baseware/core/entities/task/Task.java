@@ -6,9 +6,13 @@ import com.tnh.baseware.core.enums.task.TaskPriority;
 import com.tnh.baseware.core.enums.task.TaskStatus;
 import com.tnh.baseware.core.enums.task.TaskType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -18,6 +22,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Task extends Auditable<String> {
 
     @Id
@@ -47,11 +52,23 @@ public class Task extends Auditable<String> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
-    private Project project;
+    Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_list_id")
-    private TaskList taskList;
+    TaskList taskList;
 
+    // bổ sung các trường tạo gantt
+    @Builder.Default
+    @Min(0)
+    @Max(100)
+    Integer progress = 0;
+
+    @OneToOne(mappedBy = "task", fetch = FetchType.LAZY)
+    TaskAgileInfo agileInfo;
+
+    // bổ sung phân loại task
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_category_id")
+    TaskCategory taskCategory;
 }
-

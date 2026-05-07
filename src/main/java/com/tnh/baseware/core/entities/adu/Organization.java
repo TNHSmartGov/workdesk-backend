@@ -2,7 +2,6 @@ package com.tnh.baseware.core.entities.adu;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tnh.baseware.core.entities.audit.Auditable;
-import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.enums.OrganizationLevel;
 import jakarta.persistence.*;
@@ -49,6 +48,8 @@ public class Organization extends Auditable<String> implements Serializable {
     Double longitude;
 
     Boolean isSystem;
+    // nếu là đơn vị chủ quản
+    Boolean isUnit;
 
     @Column(nullable = false)
     @Builder.Default

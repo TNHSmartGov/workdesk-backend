@@ -11,9 +11,6 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.user.IUserService;
 import com.tnh.baseware.core.services.user.imp.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -42,7 +39,7 @@ public class AuthenticationResource {
     @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.OBJECT)
     @PostMapping("/register")
     public ResponseEntity<ApiMessageDTO<UserDTO>> registerUser(@Valid @RequestBody RegisterForm form,
-                                                               HttpServletRequest request) {
+            HttpServletRequest request) {
         var userDTO = userService.registerUser(form, request);
         var dto = ApiMessageDTO.<UserDTO>builder()
                 .data(userDTO)
@@ -57,7 +54,7 @@ public class AuthenticationResource {
     @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.OBJECT)
     @PostMapping("/login")
     public ResponseEntity<ApiMessageDTO<AuthenticationDTO>> login(@Valid @RequestBody AuthenticationForm form,
-                                                                  HttpServletRequest request) {
+            HttpServletRequest request) {
         var authenticationDTO = authenticationService.login(form, request);
         var apiMessageDTO = ApiMessageDTO.<AuthenticationDTO>builder()
                 .data(authenticationDTO)

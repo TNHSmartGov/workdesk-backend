@@ -3,6 +3,7 @@ package com.tnh.baseware.core.entities.project;
 import com.tnh.baseware.core.entities.audit.Auditable;
 import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.enums.project.ProjectStatus;
+import com.tnh.baseware.core.enums.project.ProjectType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,27 +16,38 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table
+@Table(uniqueConstraints = {
+                @UniqueConstraint(columnNames = "code")
+})
 public class Project extends Auditable<String> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.UUID)
+        UUID id;
 
-    @Column(nullable = false)
-    private String name;
+        @Column(nullable = false, length = 50)
+        String code;
 
-    @Column(columnDefinition = "text")
-    private String description;
+        @Column(nullable = false)
+        String name;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+        @Column(columnDefinition = "text")
+        String description;
 
-    private Instant startDate;
-    private Instant endDate;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "organization_id")
+        Organization organization;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProjectStatus status;
+        Instant startDate;
+        Instant endDate;
+
+        Instant archivedAt;
+
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = true)
+        ProjectType type;
+
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = false)
+        ProjectStatus status;
 }

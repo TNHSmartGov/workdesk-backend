@@ -23,6 +23,6 @@ public class ProjectMemberEditorForm {
     @NotNull(message = "{user_id.not.null}")
     UUID userId;
 
-    @NotNull(message = "{role.not.null}")
-    String role;
+    @NotNull(message = "{role_id.not.null}")
+    UUID roleId;
 }

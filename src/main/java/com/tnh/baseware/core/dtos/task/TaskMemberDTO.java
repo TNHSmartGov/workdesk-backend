@@ -1,5 +1,7 @@
 package com.tnh.baseware.core.dtos.task;
 
+import com.tnh.baseware.core.dtos.basic.BasicTaskDTO;
+import com.tnh.baseware.core.dtos.basic.BasicUserDTO;
 import com.tnh.baseware.core.entities.audit.Identifiable;
 import com.tnh.baseware.core.enums.task.MemberStatus;
 import lombok.*;
@@ -19,9 +21,12 @@ import java.util.UUID;
 public class TaskMemberDTO extends RepresentationModel<TaskMemberDTO> implements Identifiable<UUID> {
     UUID id;
     UUID taskId;
-    UUID userId;
+    BasicUserDTO user;
     String role;
     MemberStatus status;
     Instant joinedAt;
     Instant completedAt;
+    Integer weight;
+    Integer personalProgress;
+    BasicTaskDTO task;
 }

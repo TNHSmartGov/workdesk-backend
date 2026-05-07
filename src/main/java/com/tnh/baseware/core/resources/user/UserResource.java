@@ -1,25 +1,26 @@
 package com.tnh.baseware.core.resources.user;
 
+import org.springframework.web.multipart.MultipartFile;
 import com.tnh.baseware.core.annotations.ApiOkResponse;
 import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
+import com.tnh.baseware.core.dtos.user.AuthenticationDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.dtos.user.UserTokenDTO;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.enums.ApiResponseType;
-import com.tnh.baseware.core.forms.user.ChangePasswordForm;
-import com.tnh.baseware.core.forms.user.ResetPasswordForm;
-import com.tnh.baseware.core.forms.user.UserEditorForm;
-import com.tnh.baseware.core.forms.user.UserProfileForm;
+import com.tnh.baseware.core.forms.user.*;
 import com.tnh.baseware.core.properties.SystemProperties;
 import com.tnh.baseware.core.resources.GenericResource;
 import com.tnh.baseware.core.services.IGenericService;
 import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.user.IUserService;
+import com.tnh.baseware.core.services.user.IUserProfileService;
+import com.tnh.baseware.core.dtos.user.UserProfileDTO;
+import com.tnh.baseware.core.services.user.imp.AuthenticationService;
+import com.tnh.baseware.core.utils.SecurityUtils;
+
+import org.springframework.http.MediaType;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -32,7 +33,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,22 +44,32 @@ import java.util.UUID;
 public class UserResource extends GenericResource<User, UserEditorForm, UserDTO, UUID> {
 
         IUserService userService;
+        AuthenticationService authenticationService;
+        IUserProfileService userProfileService;
+        SecurityUtils securityUtils;
 
         public UserResource(IGenericService<User, UserEditorForm, UserDTO, UUID> service,
                         MessageService messageService, IUserService userService,
-                        SystemProperties systemProperties) {
+                        AuthenticationService authenticationService,
+                        SystemProperties systemProperties,
+                        SecurityUtils securityUtils,
+                        IUserProfileService userProfileService) {
                 super(service, messageService, systemProperties.getApiPrefix() + "/users");
                 this.userService = userService;
+                this.authenticationService = authenticationService;
+                this.userProfileService = userProfileService;
+                this.securityUtils = securityUtils;
         }
 
         @Operation(summary = "Edit user profile")
-        @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.OBJECT)
+        @ApiOkResponse(value = UserProfileDTO.class, type = ApiResponseType.OBJECT)
         @PutMapping("/{id}/profile")
-        public ResponseEntity<ApiMessageDTO<UserDTO>> editProfile(@PathVariable UUID id,
+        public ResponseEntity<ApiMessageDTO<UserProfileDTO>> editProfile(@PathVariable UUID id,
                         @Valid @RequestBody UserProfileForm form) {
-                var userDTO = userService.editProfile(id, form);
-                return ResponseEntity.ok(ApiMessageDTO.<UserDTO>builder()
-                                .data(userDTO)
+
+                var userProfileDTO = userProfileService.updateProfile(id, form);
+                return ResponseEntity.ok(ApiMessageDTO.<UserProfileDTO>builder()
+                                .data(userProfileDTO)
                                 .result(true)
                                 .message(messageService.getMessage("user.profile.updated"))
                                 .code(HttpStatus.OK.value())
@@ -286,7 +296,7 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
         }
 
         @Operation(summary = "Find all users by role with pagination")
-        @ApiOkResponse(value = UserDTO.class, type =  ApiResponseType.HATEOAS_PAGE)
+        @ApiOkResponse(value = UserDTO.class, type = ApiResponseType.HATEOAS_PAGE)
         @GetMapping("/by-role/{roleId}/pagination")
         public ResponseEntity<ApiMessageDTO<PagedModel<UserDTO>>> findAllByRoleWithPagination(@PathVariable UUID roleId,
                         Pageable pageable,
@@ -299,5 +309,62 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
                                 .message(messageService.getMessage("users.retrieved"))
                                 .code(HttpStatus.OK.value())
                                 .build());
+        }
+
+        @Operation(summary = "Get user extended profile")
+        @ApiOkResponse(value = UserProfileDTO.class, type = ApiResponseType.OBJECT)
+        @GetMapping("/{id}/profile")
+        public ResponseEntity<ApiMessageDTO<UserProfileDTO>> getProfile(@PathVariable UUID id) {
+                UserProfileDTO profile = userProfileService.getProfile(id);
+                return ResponseEntity.ok(ApiMessageDTO.<UserProfileDTO>builder()
+                                .data(profile)
+                                .result(true)
+                                .message(messageService.getMessage("user.retrieved"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @Operation(summary = "Update user avatar")
+        @ApiOkResponse(value = String.class, type = ApiResponseType.OBJECT)
+        @PostMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<ApiMessageDTO<String>> updateAvatar(@PathVariable UUID id,
+                        @RequestParam("file") MultipartFile file) {
+                String url = userProfileService.updateAvatar(id, file);
+                return ResponseEntity.ok(ApiMessageDTO.<String>builder()
+                                .data(url)
+                                .result(true)
+                                .message(messageService.getMessage("user.profile.updated"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @Operation(summary = "Update user cover image")
+        @ApiOkResponse(value = String.class, type = ApiResponseType.OBJECT)
+        @PostMapping(value = "/{id}/cover", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<ApiMessageDTO<String>> updateCover(@PathVariable UUID id,
+                        @RequestParam("file") MultipartFile file) {
+                String url = userProfileService.updateCover(id, file);
+                return ResponseEntity.ok(ApiMessageDTO.<String>builder()
+                                .data(url)
+                                .result(true)
+                                .message(messageService.getMessage("user.profile.updated"))
+                                .code(HttpStatus.OK.value())
+                                .build());
+        }
+
+        @PostMapping("/switch-org")
+        public ResponseEntity<ApiMessageDTO<AuthenticationDTO>> switchOrg(
+                        @Valid @RequestBody SwitchOrgForm request,
+                        HttpServletRequest httpRequest) {
+                AuthenticationDTO dto = authenticationService.switchOrganization(request.getOrganizationId(),
+                                httpRequest);
+
+                return ResponseEntity.ok(
+                                ApiMessageDTO.<AuthenticationDTO>builder()
+                                                .data(dto)
+                                                .result(true)
+                                                .message(messageService.getMessage("organization.switched"))
+                                                .code(HttpStatus.OK.value())
+                                                .build());
         }
 }

@@ -34,4 +34,5 @@ public class OrganizationDTO extends RepresentationModel<OrganizationDTO> implem
 
     OrganizationDTO parent;
     List<OrganizationDTO> children;
+    Boolean isUnit;
 }

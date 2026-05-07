@@ -16,6 +16,7 @@ public class InitProperties {
 
     List<RoleInfo> roles;
     List<UserInfo> users;
+    List<OrganizationInfo> organizations;
 
     @Getter
     @Setter
@@ -40,6 +41,17 @@ public class InitProperties {
         String idn;
         int ial;
         boolean enabled;
+        boolean isSuperAdmin;
         String role;
+    }
+
+    @Getter
+    @Setter
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class OrganizationInfo {
+        String name;
+        String description;
+        String code;
+        boolean isSystem;
     }
 }

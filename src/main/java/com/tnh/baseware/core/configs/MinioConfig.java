@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MinioConfig {
-    @Value("${minio.end-point:}")
+    @Value("${minio.end-point:http://127.0.0.1:9000}")
     private String minioEndpoint;
 
     @Value("${minio.security.access-key:}")
@@ -18,6 +18,7 @@ public class MinioConfig {
 
     @Bean
     public MinioClient minioClient() {
+        System.out.println("Connecting to MinIO at: " + minioEndpoint);
         return MinioClient.builder()
                 .endpoint(minioEndpoint)
                 .credentials(minioAccessKey, minioSecretKey)

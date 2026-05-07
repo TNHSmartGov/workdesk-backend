@@ -1,5 +1,6 @@
 package com.tnh.baseware.core.mappers.user;
 
+import com.tnh.baseware.core.dtos.basic.BasicUserDTO;
 import com.tnh.baseware.core.dtos.user.UserDTO;
 import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.forms.user.UserEditorForm;
@@ -14,6 +15,8 @@ public interface IUserMapper extends IGenericMapper<User, UserEditorForm, UserDT
     @Mapping(target = "password", source = "password", qualifiedByName = "passwordToPassword")
     User formToEntity(UserEditorForm form,
             @Context PasswordEncoder passwordEncoder);
+
+    BasicUserDTO entityToBasicDTO(User entity);
 
     @Mapping(target = "password", ignore = true)
     void updateUserFromForm(UserEditorForm form,

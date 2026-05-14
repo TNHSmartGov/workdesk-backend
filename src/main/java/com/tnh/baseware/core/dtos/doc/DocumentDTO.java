@@ -27,4 +27,5 @@ public class DocumentDTO extends RepresentationModel<DocumentDTO> implements Ide
     String documentType;
     String externalSource;
     String externalId;
+    String documentForm;
 }

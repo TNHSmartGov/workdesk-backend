@@ -41,4 +41,9 @@ public class Category extends Auditable<String> implements Serializable {
     String description;
 
     Boolean isSystem;
+
+    public static String renderName(CategoryCode code, String name) {
+        return code.getValue() + "-" + name;
+    }
+
 }

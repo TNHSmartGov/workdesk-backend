@@ -105,10 +105,6 @@ public class User extends Auditable<String> implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<UserOrganization> organizations;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "last_active_org_id")
-    private Organization lastActiveOrganization;
-
     public Set<GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .map(Role::getAuthorities)

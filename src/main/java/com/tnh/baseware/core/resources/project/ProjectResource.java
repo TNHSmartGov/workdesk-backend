@@ -1,9 +1,6 @@
 package com.tnh.baseware.core.resources.project;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.tnh.baseware.core.constants.Views;
 import com.tnh.baseware.core.dtos.project.ProjectDTO;
-import com.tnh.baseware.core.dtos.user.ApiMessageDTO;
 import com.tnh.baseware.core.entities.project.Project;
 import com.tnh.baseware.core.forms.project.ProjectActionForm;
 import com.tnh.baseware.core.forms.project.ProjectEditorForm;

@@ -39,4 +39,7 @@ public class Document extends Auditable<String> {
         // Integration
         String externalSource; // EOFFICE, iGate,..
         String externalId; // id bên eOffice
+
+        // Hình thức văn bản
+        String documentForm;
 }

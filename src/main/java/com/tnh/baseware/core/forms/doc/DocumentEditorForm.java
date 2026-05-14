@@ -40,4 +40,7 @@ public class DocumentEditorForm {
 
     @Schema(description = "External ID from source system")
     String externalId;
+
+    @Schema(description = "Document form (hình thức văn bản)", example = "Văn bản đi")
+    String documentForm;
 }

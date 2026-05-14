@@ -13,7 +13,8 @@ import lombok.experimental.FieldDefaults;
 public enum ProjectType implements BaseEnum<String> {
 
     PERSONAL("PERSONAL", "personal", "Cá nhân"),
-    NORMAL("NORMAL", "normal", "Bình thường");
+    NORMAL("NORMAL", "normal", "Bình thường"),
+    PUBLIC_INVESTMENT("PUBLIC_INVESTMENT", "public_investment", "Đầu tư công");
 
     private final String value;
     private final String name;

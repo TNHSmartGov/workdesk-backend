@@ -2,9 +2,12 @@ package com.tnh.baseware.core.entities.task;
 
 import com.tnh.baseware.core.entities.audit.Auditable;
 import com.tnh.baseware.core.entities.project.Project;
+import com.tnh.baseware.core.enums.task.TaskListStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,4 +40,14 @@ public class TaskList extends Auditable<String> {
 
     @OneToMany(mappedBy = "taskList", fetch = FetchType.LAZY)
     List<Task> tasks;
+
+    Instant startDate;
+    Instant endDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    TaskListStatus status;
+
+    @Column(columnDefinition = "text")
+    String description;
 }

@@ -352,19 +352,4 @@ public class UserResource extends GenericResource<User, UserEditorForm, UserDTO,
                                 .build());
         }
 
-        @PostMapping("/switch-org")
-        public ResponseEntity<ApiMessageDTO<AuthenticationDTO>> switchOrg(
-                        @Valid @RequestBody SwitchOrgForm request,
-                        HttpServletRequest httpRequest) {
-                AuthenticationDTO dto = authenticationService.switchOrganization(request.getOrganizationId(),
-                                httpRequest);
-
-                return ResponseEntity.ok(
-                                ApiMessageDTO.<AuthenticationDTO>builder()
-                                                .data(dto)
-                                                .result(true)
-                                                .message(messageService.getMessage("organization.switched"))
-                                                .code(HttpStatus.OK.value())
-                                                .build());
-        }
 }

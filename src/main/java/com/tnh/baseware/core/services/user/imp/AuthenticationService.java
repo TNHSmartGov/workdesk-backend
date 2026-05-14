@@ -3,10 +3,8 @@ package com.tnh.baseware.core.services.user.imp;
 import com.tnh.baseware.core.dtos.user.AuthenticationDTO;
 import com.tnh.baseware.core.entities.adu.Organization;
 import com.tnh.baseware.core.entities.user.CustomUserDetails;
-import com.tnh.baseware.core.entities.user.User;
 import com.tnh.baseware.core.entities.user.UserOrganization;
 import com.tnh.baseware.core.exceptions.BWCInvalidTokenException;
-import com.tnh.baseware.core.exceptions.BWCNotFoundException;
 import com.tnh.baseware.core.exceptions.BWCOrgSelectionRequiredException;
 import com.tnh.baseware.core.exceptions.BWCValidationException;
 import com.tnh.baseware.core.forms.user.AuthenticationForm;
@@ -20,7 +18,6 @@ import com.tnh.baseware.core.services.MessageService;
 import com.tnh.baseware.core.services.audit.ITrackActivityService;
 import com.tnh.baseware.core.utils.BasewareUtils;
 import com.tnh.baseware.core.utils.LogStyleHelper;
-import com.tnh.baseware.core.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +50,6 @@ public class AuthenticationService {
         IUserOrganizationRepository userOrganizationRepository;
         IOrganizationRepository organizationRepository;
         IUserRepository userRepository;
-        SecurityUtils securityUtils;
 
         @Transactional
         public AuthenticationDTO login(AuthenticationForm authenticationForm, HttpServletRequest request) {
@@ -68,11 +64,6 @@ public class AuthenticationService {
                 if (userSuper == null || userSuper == false) {
                         UUID orgId = resolveOrganization(userDetails, authenticationForm.getOrganizationId());
 
-                        userDetails.getUser().setLastActiveOrganization(
-                                        organizationRepository.findById(orgId)
-                                                        .orElseThrow(() -> new BWCNotFoundException(messageService
-                                                                        .getMessage("organization.not.found"))));
-
                         if (!securityProperties.getJwt().isAllowMultipleDevices()) {
                                 jwtTokenService.revokeAllValidTokensByUser(userDetails.getUser().getId());
                         }
@@ -86,7 +77,6 @@ public class AuthenticationService {
                         userDetails.setOrganizationId(orgId);
                 } else {
                         Organization organization = organizationRepository.findByIsSystem(true).get();
-                        userDetails.getUser().setLastActiveOrganization(organization);
                         userDetails.setOrganizationId(organization.getId());
                 }
 
@@ -134,8 +124,6 @@ public class AuthenticationService {
                 if (orgId != null && !orgId.equals("NONE") && !orgId.equals("SUPER_ADMIN")) {
                         try {
                                 userDetails.setOrganizationId(UUID.fromString(orgId));
-                                userDetails.getUser().setLastActiveOrganization(
-                                                organizationRepository.findById(UUID.fromString(orgId)).orElse(null));
                         } catch (IllegalArgumentException e) {
                                 log.warn("Invalid Organization ID in refresh token: {}", orgId);
                         }
@@ -178,73 +166,6 @@ public class AuthenticationService {
                                 .build();
         }
 
-        @Transactional
-        public AuthenticationDTO switchOrganization(
-                        UUID newOrgId,
-                        HttpServletRequest request) {
-                CustomUserDetails current = securityUtils.currentUserDetails();
-
-                User user = current.getUser();
-                UUID userId = user.getId();
-                UUID currentOrgId = current.getOrganizationId();
-
-                boolean valid = userOrganizationRepository
-                                .existsByUserIdAndOrganizationIdAndActiveTrue(userId, newOrgId);
-
-                if (!valid) {
-                        throw new AccessDeniedException(
-                                        messageService.getMessage("user.org.selection.invalid"));
-                }
-
-                if (newOrgId.equals(currentOrgId)) {
-                        user.setLastActiveOrganization(
-                                        organizationRepository.findById(currentOrgId)
-                                                        .orElseThrow(() -> new BWCNotFoundException(messageService
-                                                                        .getMessage("organization.not.found"))));
-
-                        return AuthenticationDTO.builder()
-                                        .accessToken(null)
-                                        .refreshToken(null)
-                                        .build();
-                }
-
-                user.setLastActiveOrganization(
-                                organizationRepository.findById(newOrgId).orElseThrow(() -> new BWCNotFoundException(
-                                                messageService.getMessage("organization.not.found"))));
-
-                if (!securityProperties.getJwt().isAllowMultipleDevices()) {
-                        jwtTokenService.revokeAllValidTokensByUser(userId);
-                } else {
-                        String sessionId = jwtTokenService.extractSessionIdFromContext()
-                                        .orElseThrow(() -> new IllegalStateException("Missing session"));
-                        jwtTokenService.revokeAllValidTokensBySessionId(UUID.fromString(sessionId));
-                }
-
-                CustomUserDetails newPrincipal = CustomUserDetails.builder()
-                                .user(user)
-                                .organizationId(newOrgId)
-                                .build();
-
-                UUID newSessionId = UUID.randomUUID();
-
-                String newAccessToken = jwtTokenService
-                                .generateToken(newPrincipal, request, newSessionId)
-                                .orElseThrow(() -> new BWCInvalidTokenException(
-                                                messageService.getMessage("jwt.token.invalid")));
-
-                String newRefreshToken = jwtTokenService
-                                .generateRefreshToken(newPrincipal, request, newSessionId)
-                                .orElseThrow(() -> new BWCInvalidTokenException(
-                                                messageService.getMessage("jwt.token.invalid")));
-
-                userRepository.save(user);
-
-                return AuthenticationDTO.builder()
-                                .accessToken(newAccessToken)
-                                .refreshToken(newRefreshToken)
-                                .build();
-        }
-
         private UUID resolveOrganization(
                         CustomUserDetails userDetails,
                         UUID requestedOrgId) {
@@ -262,12 +183,6 @@ public class AuthenticationService {
                 if (requestedOrgId != null) {
                         validateUserInOrg(userDetails.getUser().getId(), requestedOrgId);
                         return requestedOrgId;
-                }
-
-                if (userDetails.getUser().getLastActiveOrganization() != null) {
-                        UUID lastOrgId = userDetails.getUser().getLastActiveOrganization().getId();
-                        validateUserInOrg(userDetails.getUser().getId(), lastOrgId);
-                        return lastOrgId;
                 }
 
                 throw new BWCOrgSelectionRequiredException(messageService.getMessage("user.org.selection.required"));
